@@ -1,0 +1,658 @@
+---
+import { CATEGORIAS, numeros, paises } from "../lib/mundo";
+
+const n = numeros();
+const lista = paises();
+const fmt = new Intl.NumberFormat("pt-BR");
+---
+
+<section class="mundo escuro" id="mundo" aria-labelledby="mundo-titulo">
+  <div class="wrap mundo__topo">
+    <h2 id="mundo-titulo" class="titulo mundo__titulo">Arena pelo mundo</h2>
+    <div class="mundo__numeros">
+      <p>
+        <strong>{n.alunos} ex-alunos</strong> aprovados em universidades de {n.paisesAprovacao} países.
+      </p>
+      <p>
+        <strong>Competições acadêmicas em {n.paisesCompeticao} países</strong> fora do Brasil, de olimpíadas de física a
+        campeonatos mundiais de debate.
+      </p>
+      <p class="mundo__fonte">
+        Cada ponto é um registro do mapa de conquistas que o colégio publica, com texto, fotos e os nomes dos alunos.
+      </p>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="filtros" role="group" aria-label="Filtrar o mapa por tipo de conquista">
+      <button type="button" class="filtro" aria-pressed="true" data-filtro="15">
+        <span class="filtro__rotulo">Tudo</span>
+        <span class="filtro__n">{fmt.format(n.total)}</span>
+      </button>
+      {
+        CATEGORIAS.map((c) => (
+          <button type="button" class="filtro" aria-pressed="false" data-filtro={c.bit}>
+            <svg class="filtro__marca" viewBox="0 0 20 20" aria-hidden="true">
+              <circle cx="10" cy="10" r="6" fill="none" stroke={`var(--cat-${c.id})`} stroke-width="4" />
+            </svg>
+            <span class="filtro__rotulo">{c.rotulo}</span>
+            <span class="filtro__n">{n.contagem[c.id]}</span>
+          </button>
+        ))
+      }
+      <button type="button" class="sortear" data-sortear>
+        <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M2 2h16v16H2z" fill="none" stroke="currentColor" stroke-width="1.6" /><circle cx="6.5" cy="6.5" r="1.5" fill="currentColor" /><circle cx="13.5" cy="13.5" r="1.5" fill="currentColor" /><circle cx="10" cy="10" r="1.5" fill="currentColor" /></svg>
+        Sortear uma conquista
+      </button>
+    </div>
+  </div>
+
+  <div class="palco" data-palco>
+    <div class="tela" data-tela>
+      <canvas data-canvas aria-hidden="true"></canvas>
+      <svg class="tela__arco" data-arco aria-hidden="true"><path d="" /></svg>
+      <span class="tela__origem" data-origem hidden>Goiânia</span>
+      <div class="tela__dica" data-dica role="presentation" hidden></div>
+    </div>
+    <p class="palco__carregando" data-carregando>Carregando o mapa…</p>
+    <noscript><p class="palco__carregando">O mapa precisa de JavaScript. Os mesmos registros estão no&nbsp;<a href="https://www.colegioarena.com.br/mapadeconquistas/">mapa de conquistas do site atual</a>.</p></noscript>
+  </div>
+  <p class="wrap palco__arraste">Arraste o mapa para os lados para ver todos os continentes.</p>
+
+  <div class="wrap">
+  <div class="mundo__base">
+    <div class="paises">
+      <h3 class="paises__titulo" id="paises-titulo">Países</h3>
+      <ul role="list" class="paises__lista" aria-labelledby="paises-titulo">
+        {
+          lista.map((p) => (
+            <li>
+              <button type="button" data-pais={p.pais}>
+                <span>{p.pais === "Estados Unidos da América" ? "Estados Unidos" : p.pais}</span>
+                <span class="paises__n">{p.ids.length}</span>
+              </button>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <div class="detalhe" data-detalhe aria-live="polite">
+      <div class="detalhe__vazio">
+        <p class="detalhe__chamada">Escolha um ponto no mapa ou um país da lista.</p>
+        <p>
+          Os anéis maiores reúnem mais de um registro no mesmo lugar. O ponto branco é Goiânia, de onde saem todas as
+          linhas.
+        </p>
+      </div>
+    </div>
+  </div>
+  </div>
+</section>
+
+<script>
+  import { iniciarMundo, type ApiMundo } from "../scripts/mundo";
+
+  const secao = document.getElementById("mundo")!;
+  let api: Promise<ApiMundo | null> | null = null;
+  const iniciar = () => (api ??= iniciarMundo(secao));
+  const obs = new IntersectionObserver(
+    (entradas) => {
+      if (entradas.some((e) => e.isIntersecting)) {
+        obs.disconnect();
+        iniciar();
+      }
+    },
+    { rootMargin: "600px 0px" },
+  );
+  obs.observe(secao);
+
+  // a hero pede para abrir um registro: rola até o mapa e abre
+  window.addEventListener("arena:abrir", async (e) => {
+    const id = (e as CustomEvent<{ id: number }>).detail.id;
+    const reduzir = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    secao.querySelector("[data-tela]")!.scrollIntoView({ behavior: reduzir ? "auto" : "smooth", block: "start" });
+    const m = await iniciar();
+    m?.abrir(id);
+  });
+  secao.querySelector("[data-sortear]")!.addEventListener("click", async () => (await iniciar())?.sortear());
+</script>
+
+<style>
+  .mundo {
+    --fundo: var(--grafite-900);
+    background: var(--fundo);
+    color: #e9ecec;
+    padding-block: clamp(4rem, 2rem + 7vw, 8rem) clamp(3.5rem, 2rem + 5vw, 6.5rem);
+    overflow: hidden;
+  }
+
+  .mundo__topo {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 2rem var(--gutter);
+    align-items: end;
+  }
+
+  .mundo__titulo {
+    grid-column: 1 / span 6;
+    font-size: clamp(3rem, 1.6rem + 6vw, 6.5rem);
+    line-height: 0.95;
+    color: var(--branco);
+  }
+
+  .mundo__numeros {
+    grid-column: 8 / span 5;
+    display: grid;
+    gap: 1rem;
+    font-size: var(--t-18);
+    color: #c3cbcd;
+  }
+
+  .mundo__numeros strong {
+    color: var(--branco);
+    font-weight: 650;
+  }
+
+  .mundo__fonte {
+    font-size: var(--t-14);
+    color: #9fabaf;
+    padding-top: 1rem;
+    border-top: 1px solid #34434a;
+  }
+
+  .filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: clamp(2.5rem, 1rem + 4vw, 4rem);
+  }
+
+  .filtro {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    padding: 0.5rem 0.875rem;
+    border: 1px solid #3d4c53;
+    border-radius: var(--r-1);
+    background: transparent;
+    color: #d5dcdd;
+    font-size: var(--t-14);
+    font-weight: 550;
+    cursor: pointer;
+    transition:
+      background-color 160ms var(--ease),
+      border-color 160ms var(--ease),
+      color 160ms var(--ease);
+  }
+
+  .filtro:hover {
+    border-color: #6b7c83;
+    color: var(--branco);
+  }
+
+  .filtro[aria-pressed="true"] {
+    background: var(--branco);
+    border-color: var(--branco);
+    color: var(--grafite-900);
+  }
+
+  .sortear {
+    flex: none;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    margin-left: auto;
+    padding: 0.5rem 1rem;
+    border: 0;
+    border-radius: var(--r-1);
+    background: var(--petroleo);
+    color: var(--grafite-900);
+    font-size: var(--t-14);
+    font-weight: 650;
+    cursor: pointer;
+    transition: background-color 160ms var(--ease);
+  }
+
+  .sortear:hover {
+    background: var(--petroleo-claro);
+  }
+
+  .sortear:active svg {
+    transform: rotate(90deg);
+  }
+
+  .sortear svg {
+    transition: transform 200ms var(--ease);
+  }
+
+  .filtro__marca {
+    width: 16px;
+    height: 16px;
+  }
+
+  .filtro[aria-pressed="true"] .filtro__marca circle {
+    stroke: var(--grafite-900);
+  }
+
+  .filtro__n {
+    font-variant-numeric: tabular-nums;
+    color: #9fabaf;
+    font-weight: 500;
+  }
+
+  .filtro[aria-pressed="true"] .filtro__n {
+    color: var(--tinta-2);
+  }
+
+  .palco {
+    position: relative;
+    margin-top: 2rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+    min-height: 240px;
+  }
+
+  .palco::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tela {
+    position: relative;
+    width: max-content;
+    margin-inline: auto;
+    cursor: crosshair;
+    touch-action: pan-x pan-y;
+  }
+
+  .tela canvas {
+    display: block;
+  }
+
+  .tela__arco {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: visible;
+  }
+
+  .tela__arco path {
+    fill: none;
+    stroke: var(--branco);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+  }
+
+  .tela__origem {
+    position: absolute;
+    transform: translate(calc(-100% - 12px), -50%);
+    font-size: var(--t-12);
+    font-weight: 650;
+    color: var(--branco);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .tela__dica {
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform: translate(-50%, calc(-100% - 14px));
+    background: var(--branco);
+    color: var(--tinta);
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--r-1);
+    font-size: var(--t-14);
+    line-height: 1.35;
+    pointer-events: none;
+    white-space: nowrap;
+    box-shadow: 0 4px 10px rgb(0 0 0 / 0.25);
+  }
+
+  .tela__dica :global(strong) {
+    display: block;
+    font-weight: 650;
+  }
+
+  .tela__dica :global(span) {
+    color: var(--tinta-2);
+  }
+
+  .palco__carregando {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: #9fabaf;
+    font-size: var(--t-14);
+  }
+
+  .palco__arraste {
+    display: none;
+    margin-top: 0.75rem;
+    font-size: var(--t-14);
+    color: #9fabaf;
+  }
+
+  .mundo__base {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 2.5rem var(--gutter);
+    margin-top: clamp(2.5rem, 1rem + 4vw, 4rem);
+    padding-top: 2rem;
+    border-top: 1px solid #34434a;
+  }
+
+  .paises {
+    grid-column: 1 / span 4;
+  }
+
+  .paises__titulo {
+    font-size: var(--t-14);
+    font-weight: 600;
+    color: #9fabaf;
+    margin-bottom: 0.75rem;
+  }
+
+  .paises__lista {
+    columns: 2;
+    column-gap: 1.5rem;
+  }
+
+  .paises__lista li {
+    break-inside: avoid;
+  }
+
+  .paises__lista button {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    min-height: 44px;
+    align-items: center;
+    padding: 0.375rem 0;
+    border: 0;
+    border-bottom: 1px solid #2c393f;
+    background: none;
+    color: #d5dcdd;
+    font-size: var(--t-14);
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .paises__lista button:hover,
+  .paises__lista button[aria-current="true"] {
+    color: var(--branco);
+  }
+
+  .paises__lista button[aria-current="true"] span:first-child {
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+
+  .paises__n {
+    color: #8d9a9f;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .detalhe {
+    grid-column: 6 / span 7;
+    min-height: 320px;
+  }
+
+  .detalhe__vazio {
+    max-width: 30em;
+    color: #9fabaf;
+  }
+
+  .detalhe__chamada {
+    font-size: var(--t-24);
+    font-weight: 650;
+    color: var(--branco);
+    margin-bottom: 0.75rem;
+    line-height: 1.25;
+  }
+
+  @media (max-width: 959px) {
+    .mundo__titulo,
+    .mundo__numeros,
+    .paises,
+    .detalhe {
+      grid-column: 1 / -1;
+    }
+    .palco__arraste {
+      display: block;
+    }
+    .filtros {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      scrollbar-width: none;
+      margin-inline: calc(-1 * var(--gutter));
+      padding-inline: var(--gutter);
+    }
+    .filtro {
+      flex: none;
+    }
+    .detalhe {
+      order: -1;
+      min-height: 0;
+    }
+  }
+</style>
+
+<style is:global>
+  .mundo .cat {
+    display: inline-block;
+    flex: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 3.5px solid var(--cor);
+  }
+  .mundo .cat--aprovacao { --cor: var(--cat-aprovacao); }
+  .mundo .cat--olimpiada { --cor: var(--cat-olimpiada); }
+  .mundo .cat--viagem { --cor: var(--cat-viagem); }
+  .mundo .cat--torneio { --cor: var(--cat-torneio); }
+
+  .grupo__titulo,
+  .registro__titulo {
+    font-size: var(--t-32);
+    font-weight: 750;
+    line-height: 1.15;
+    color: var(--branco);
+    outline: none;
+  }
+
+  .grupo__n {
+    margin-top: 0.25rem;
+    color: #9fabaf;
+  }
+
+  .grupo__lista {
+    margin-top: 1.25rem;
+    border-top: 1px solid #34434a;
+    max-height: 520px;
+    overflow-y: auto;
+  }
+
+  .grupo__lista button {
+    width: 100%;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 0.125rem 0.75rem;
+    padding: 0.75rem 0.25rem;
+    border: 0;
+    border-bottom: 1px solid #2c393f;
+    background: none;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .grupo__lista button:hover .grupo__nome {
+    color: var(--petroleo-claro);
+  }
+
+  .grupo__nome {
+    font-weight: 600;
+    color: var(--branco);
+  }
+
+  .grupo__lugar {
+    grid-column: 2;
+    font-size: var(--t-14);
+    color: #9fabaf;
+  }
+
+  .registro__voltar {
+    border: 0;
+    background: none;
+    color: var(--petroleo-claro);
+    font-weight: 600;
+    padding: 0.5rem 0;
+    margin-bottom: 0.75rem;
+    cursor: pointer;
+    min-height: 44px;
+  }
+
+  .registro__voltar::before {
+    content: "← ";
+  }
+
+  .registro__foto {
+    aspect-ratio: 3 / 2;
+    overflow: hidden;
+    background: var(--grafite-800);
+    border-top-right-radius: 18%;
+  }
+
+  .registro__foto img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .registro__galeria {
+    display: flex;
+    gap: 0.375rem;
+    margin-top: 0.5rem;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .registro__galeria button {
+    padding: 0;
+    border: 2px solid transparent;
+    border-radius: 2px;
+    background: none;
+    cursor: pointer;
+    flex: none;
+  }
+
+  .registro__galeria button[aria-pressed="true"] {
+    border-color: var(--branco);
+  }
+
+  .registro__galeria img {
+    width: 64px;
+    height: 44px;
+    object-fit: cover;
+  }
+
+  .registro__cat {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    font-size: var(--t-14);
+    color: #c3cbcd;
+  }
+
+  .registro__titulo {
+    margin-top: 0.5rem;
+  }
+
+  .registro__lugar {
+    margin-top: 0.25rem;
+    color: #9fabaf;
+  }
+
+  .registro__texto {
+    margin-top: 1.25rem;
+    display: grid;
+    gap: 0.75rem;
+    color: #d5dcdd;
+    max-width: 40em;
+  }
+
+  .registro__texto ul {
+    margin: 0;
+    padding-left: 1.1rem;
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  .registro__item {
+    padding-left: 1rem;
+    position: relative;
+  }
+
+  .registro__item::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.7em;
+    width: 5px;
+    height: 5px;
+    background: currentColor;
+    border-radius: 50%;
+  }
+
+  .registro__mais {
+    margin-top: 1rem;
+    border: 0;
+    background: none;
+    padding: 0.5rem 0;
+    color: var(--petroleo-claro);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+    cursor: pointer;
+    min-height: 44px;
+  }
+
+  .registro__sub {
+    margin-top: 1.75rem;
+    font-size: var(--t-14);
+    font-weight: 600;
+    color: #9fabaf;
+  }
+
+  .registro__alunos {
+    margin-top: 0.5rem;
+    columns: 2;
+    column-gap: 1.5rem;
+    color: var(--branco);
+    font-weight: 550;
+  }
+
+  .registro__alunos li {
+    padding: 0.25rem 0;
+    break-inside: avoid;
+  }
+
+  .registro__area {
+    color: #9fabaf;
+    font-weight: 500;
+    font-size: var(--t-14);
+    padding-top: 0.75rem !important;
+  }
+</style>

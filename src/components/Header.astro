@@ -1,0 +1,260 @@
+---
+import { acessos } from "../data/site";
+
+const links = [
+  { rotulo: "Etapas de ensino", href: "#etapas" },
+  { rotulo: "Arena pelo mundo", href: "#mundo" },
+  { rotulo: "Proposta", href: "#proposta" },
+  { rotulo: "Notícias", href: "#noticias" },
+  { rotulo: "Unidades", href: "#visita" },
+];
+---
+
+<header class="topo" data-topo>
+  <div class="wrap topo__barra">
+    <a class="topo__marca" href="/" aria-label="Colégio Arena, página inicial">
+      <img src="/brand/arena.svg" alt="Colégio Arena" width="120" height="43" />
+    </a>
+
+    <nav class="topo__nav" aria-label="Principal">
+      <ul role="list">
+        {links.map((l) => <li><a href={l.href}>{l.rotulo}</a></li>)}
+      </ul>
+    </nav>
+
+    <div class="topo__acoes">
+      <details class="acesso">
+        <summary>Área do aluno</summary>
+        <ul role="list" class="acesso__lista">
+          {acessos.map((a) => <li><a href={a.href} rel="noopener">{a.rotulo}</a></li>)}
+        </ul>
+      </details>
+      <a class="botao topo__cta" href="#visita">Agendar visita</a>
+      <button class="topo__menu" type="button" aria-expanded="false" aria-controls="menu-movel" data-menu>
+        <span class="sr-only">Abrir menu</span>
+        <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18M3 12h18M3 17h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="movel" id="menu-movel" hidden>
+    <nav class="wrap" aria-label="Menu">
+      <ul role="list">
+        {links.map((l) => <li><a href={l.href}>{l.rotulo}</a></li>)}
+      </ul>
+      <p class="movel__rotulo">Área do aluno</p>
+      <ul role="list" class="movel__acessos">
+        {acessos.map((a) => <li><a href={a.href} rel="noopener">{a.rotulo}</a></li>)}
+      </ul>
+      <a class="botao" href="#visita">Agendar visita</a>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const botao = document.querySelector<HTMLButtonElement>("[data-menu]");
+  const painel = document.getElementById("menu-movel");
+  if (botao && painel) {
+    const fechar = () => {
+      botao.setAttribute("aria-expanded", "false");
+      botao.querySelector(".sr-only")!.textContent = "Abrir menu";
+      painel.hidden = true;
+    };
+    botao.addEventListener("click", () => {
+      const aberto = botao.getAttribute("aria-expanded") === "true";
+      if (aberto) return fechar();
+      botao.setAttribute("aria-expanded", "true");
+      botao.querySelector(".sr-only")!.textContent = "Fechar menu";
+      painel.hidden = false;
+    });
+    painel.addEventListener("click", (e) => {
+      if ((e.target as HTMLElement).closest("a")) fechar();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !painel.hidden) {
+        fechar();
+        botao.focus();
+      }
+    });
+  }
+
+  document.addEventListener("click", (e) => {
+    document.querySelectorAll<HTMLDetailsElement>("details.acesso[open]").forEach((d) => {
+      if (!d.contains(e.target as Node)) d.open = false;
+    });
+  });
+</script>
+
+<style>
+  .topo {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--papel);
+    border-bottom: 1px solid var(--filete);
+  }
+
+  .topo__barra {
+    height: var(--header-h);
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .topo__marca img {
+    width: 112px;
+    height: auto;
+  }
+
+  .topo__nav {
+    margin-left: auto;
+  }
+
+  .topo__nav ul {
+    display: flex;
+    gap: 1.75rem;
+  }
+
+  .topo__nav a,
+  .acesso summary {
+    font-size: var(--t-14);
+    font-weight: 550;
+    text-decoration: none;
+    color: var(--tinta);
+    padding-block: 0.75rem;
+  }
+
+  .topo__nav a:hover,
+  .acesso summary:hover {
+    color: var(--petroleo-700);
+  }
+
+  .topo__acoes {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+  }
+
+  .acesso {
+    position: relative;
+  }
+
+  .acesso summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .acesso summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .acesso summary::after {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: translateY(-2px) rotate(45deg);
+  }
+
+  .acesso__lista {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 0.5rem);
+    min-width: 220px;
+    background: var(--branco);
+    border: 1px solid var(--filete);
+    border-radius: var(--r-2);
+    box-shadow: 0 8px 14px rgb(31 42 47 / 0.08);
+    padding: 0.375rem;
+  }
+
+  .acesso__lista a {
+    display: block;
+    padding: 0.625rem 0.75rem;
+    border-radius: var(--r-1);
+    text-decoration: none;
+    font-size: var(--t-14);
+  }
+
+  .acesso__lista a:hover {
+    background: var(--areia-50);
+  }
+
+  .topo__cta {
+    min-height: 42px;
+    padding: 0.5rem 1rem;
+    font-size: var(--t-14);
+  }
+
+  .topo__menu {
+    display: none;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    background: transparent;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: var(--r-1);
+  }
+
+  .movel {
+    border-top: 1px solid var(--filete);
+    background: var(--papel);
+    padding-block: 1rem 1.5rem;
+  }
+
+  .movel ul a {
+    display: block;
+    padding: 0.75rem 0;
+    font-size: var(--t-20);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .movel__rotulo {
+    margin-top: 1rem;
+    font-size: var(--t-14);
+    color: var(--tinta-2);
+  }
+
+  .movel__acessos a {
+    font-size: var(--t-16) !important;
+    font-weight: 500 !important;
+    padding: 0.5rem 0 !important;
+  }
+
+  .movel .botao {
+    margin-top: 1rem;
+    width: 100%;
+  }
+
+  @media (max-width: 1080px) {
+    .topo__nav {
+      display: none;
+    }
+    .topo__acoes {
+      margin-left: auto;
+    }
+    .topo__menu {
+      display: inline-flex;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .acesso,
+    .topo__cta {
+      display: none;
+    }
+  }
+
+  @media (min-width: 1081px) {
+    .movel {
+      display: none;
+    }
+  }
+</style>

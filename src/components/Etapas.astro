@@ -1,0 +1,364 @@
+---
+import { etapas } from "../data/site";
+
+// Faixas de idade habituais de cada etapa no sistema brasileiro.
+const faixas = [
+  { id: "infantil", de: 2, ate: 5, curto: "Infantil" },
+  { id: "fundamental-1", de: 6, ate: 10, curto: "Fund. I" },
+  { id: "fundamental-2", de: 11, ate: 14, curto: "Fund. II" },
+  { id: "medio", de: 15, ate: 17, curto: "Médio" },
+  { id: "vestibulares", de: 18, ate: 18, curto: "Pré" },
+];
+---
+
+<section class="etapas" id="etapas" aria-labelledby="etapas-titulo">
+  <div class="wrap etapas__grid">
+    <div class="etapas__lado">
+      <h2 id="etapas-titulo" class="titulo h2">Em que etapa está seu filho?</h2>
+      <p class="etapas__nota">São três unidades: Educação Infantil e Fundamental no Setor Bueno, Ensino Médio também no Bueno e o pré-vestibular no Jardim América.</p>
+      <div class="idade">
+        <label for="idade" class="idade__rotulo">Arraste até a idade do seu filho ou filha</label>
+        <output class="idade__saida" for="idade" data-saida><strong>8 anos</strong> Ensino Fundamental I</output>
+        <div class="idade__trilho">
+          <div class="idade__faixas" aria-hidden="true">
+            {faixas.map((f) => <span style={`flex:${f.ate - f.de + 1}`} data-faixa={f.id}>{f.curto}</span>)}
+          </div>
+          <input type="range" id="idade" min="2" max="18" step="1" value="8" data-idade aria-valuetext="8 anos, Ensino Fundamental I" />
+        </div>
+        <p class="idade__nota">A série exata depende do mês de nascimento.</p>
+      </div>
+
+      <div class="etapas__previa" aria-hidden="true">
+        {
+          etapas.map((e, i) =>
+            e.foto ? (
+              <img
+                data-previa={e.id}
+                class:list={[{ ativa: i === 0 }]}
+                src={`${e.foto}-800.webp`}
+                alt=""
+                width="800"
+                height="533"
+                loading="lazy"
+              />
+            ) : null,
+          )
+        }
+      </div>
+    </div>
+
+    <ol class="etapas__lista" role="list">
+      {
+        etapas.map((e) => (
+          <li>
+            <a class="etapa" href={e.href} data-etapa={e.id} rel={e.href.startsWith("http") ? "noopener" : undefined}>
+              <span class="etapa__nome">{e.nome}</span>
+              <span class="etapa__serie">{e.serie}</span>
+              <span class="etapa__texto">{e.texto}</span>
+              <span class="etapa__unidade">{e.unidade}</span>
+              <svg class="etapa__seta" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
+                <path d="M5 15 15 5M7 5h8v8" fill="none" stroke="currentColor" stroke-width="1.75" />
+              </svg>
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<script define:vars={{ faixas, nomes: Object.fromEntries(etapas.map((e) => [e.id, e.nome])) }}>
+  const entrada = document.querySelector("[data-idade]");
+  const saida = document.querySelector("[data-saida]");
+  const mostrarIdade = () => {
+    const v = Number(entrada.value);
+    const f = faixas.find((x) => v >= x.de && v <= x.ate);
+    const idade = v === 18 ? "18 anos ou mais" : `${v} anos`;
+    saida.innerHTML = `<strong>${idade}</strong> ${nomes[f.id]}`;
+    entrada.setAttribute("aria-valuetext", `${idade}, ${nomes[f.id]}`);
+    entrada.style.setProperty("--p", `${((v - 2) / 16) * 100}%`);
+    document.querySelectorAll("[data-faixa]").forEach((el) => el.classList.toggle("ativa", el.dataset.faixa === f.id));
+    document.querySelectorAll("[data-etapa]").forEach((el) => {
+      const ativa = el.dataset.etapa === f.id;
+      el.classList.toggle("ativa", ativa);
+      if (ativa) el.setAttribute("aria-current", "true");
+      else el.removeAttribute("aria-current");
+    });
+    document.querySelectorAll("[data-previa]").forEach((p) => p.classList.toggle("ativa", p.dataset.previa === f.id));
+  };
+  entrada.addEventListener("input", mostrarIdade);
+  mostrarIdade();
+</script>
+
+<script>
+  const previas = document.querySelectorAll<HTMLImageElement>("[data-previa]");
+  document.querySelectorAll<HTMLElement>("[data-etapa]").forEach((el) => {
+    const mostrar = () => {
+      const alvo = document.querySelector(`[data-previa="${el.dataset.etapa}"]`);
+      if (!alvo) return;
+      previas.forEach((p) => p.classList.toggle("ativa", p === alvo));
+    };
+    el.addEventListener("pointerenter", mostrar);
+    el.addEventListener("focus", mostrar);
+  });
+</script>
+
+<style>
+  .etapas {
+    padding-block: clamp(3.5rem, 2rem + 6vw, 7rem);
+    border-top: 1px solid var(--filete);
+  }
+
+  .etapas__grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 2.5rem var(--gutter);
+  }
+
+  .etapas__lado {
+    grid-column: 1 / span 5;
+    align-self: start;
+    position: sticky;
+    top: calc(var(--header-h) + 2rem);
+  }
+
+  .etapas__nota {
+    margin-top: 1.25rem;
+    color: var(--tinta-2);
+    max-width: 26em;
+  }
+
+  .idade {
+    margin-top: 2rem;
+    padding: 1.25rem 1.25rem 1rem;
+    background: var(--areia-50);
+    border: 1px solid var(--filete);
+    border-radius: var(--r-2);
+  }
+
+  .idade__rotulo {
+    display: block;
+    font-size: var(--t-14);
+    font-weight: 600;
+    color: var(--tinta-2);
+  }
+
+  .idade__saida {
+    display: block;
+    margin-top: 0.375rem;
+    font-size: var(--t-20);
+    font-weight: 600;
+    color: var(--grafite);
+  }
+
+  .idade__saida :global(strong) {
+    color: var(--petroleo-700);
+    margin-right: 0.25rem;
+  }
+
+  .idade__trilho {
+    position: relative;
+    margin-top: 1rem;
+  }
+
+  .idade__faixas {
+    display: flex;
+    gap: 3px;
+  }
+
+  .idade__faixas span {
+    padding: 0.875rem 0 0.375rem;
+    border-top: 6px solid var(--filete);
+    font-size: var(--t-12);
+    font-weight: 600;
+    color: var(--tinta-2);
+    text-align: center;
+    transition:
+      border-color 180ms var(--ease),
+      color 180ms var(--ease);
+  }
+
+  .idade__faixas span.ativa {
+    border-color: var(--petroleo);
+    color: var(--grafite);
+  }
+
+  .idade input {
+    position: absolute;
+    inset: -14px 0 auto;
+    width: 100%;
+    height: 34px;
+    margin: 0;
+    background: transparent;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: grab;
+  }
+
+  .idade input:active {
+    cursor: grabbing;
+  }
+
+  .idade input::-webkit-slider-runnable-track {
+    height: 34px;
+    background: transparent;
+  }
+
+  .idade input::-moz-range-track {
+    height: 34px;
+    background: transparent;
+  }
+
+  .idade input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 2px solid var(--grafite);
+    background: var(--branco) url("/brand/simbolo.svg") center / 62% no-repeat;
+    transition: transform 160ms var(--ease);
+  }
+
+  .idade input::-moz-range-thumb {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid var(--grafite);
+    background: var(--branco) url("/brand/simbolo.svg") center / 62% no-repeat;
+  }
+
+  .idade input:active::-webkit-slider-thumb {
+    transform: rotate(-12deg);
+  }
+
+  .idade input:focus-visible {
+    outline: none;
+  }
+
+  .idade input:focus-visible::-webkit-slider-thumb {
+    outline: 2px solid var(--petroleo-700);
+    outline-offset: 2px;
+  }
+
+  .idade input:focus-visible::-moz-range-thumb {
+    outline: 2px solid var(--petroleo-700);
+    outline-offset: 2px;
+  }
+
+  .idade__nota {
+    margin-top: 0.25rem;
+    font-size: var(--t-12);
+    color: var(--tinta-2);
+  }
+
+  .etapa.ativa {
+    background: var(--areia-50);
+  }
+
+  .etapa.ativa .etapa__nome {
+    color: var(--petroleo-700);
+  }
+
+  .etapas__previa {
+    position: relative;
+    margin-top: 2.5rem;
+    aspect-ratio: 3 / 2;
+    overflow: hidden;
+    border-bottom-right-radius: 25%;
+    background: var(--areia);
+  }
+
+  .etapas__previa img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 220ms var(--ease);
+  }
+
+  .etapas__previa img.ativa {
+    opacity: 1;
+  }
+
+  .etapas__lista {
+    grid-column: 7 / span 6;
+    border-top: 1px solid var(--tinta);
+  }
+
+  .etapa {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.25rem 1.5rem;
+    padding: 1.5rem 2.5rem 1.5rem 0.75rem;
+    border-bottom: 1px solid var(--filete);
+    text-decoration: none;
+    transition: background-color 160ms var(--ease);
+  }
+
+  .etapa__nome {
+    font-size: var(--t-24);
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--grafite);
+  }
+
+  .etapa__serie {
+    font-size: var(--t-14);
+    color: var(--tinta-2);
+    align-self: center;
+  }
+
+  .etapa__texto {
+    grid-column: 1 / -1;
+    color: var(--tinta-2);
+    max-width: 36em;
+  }
+
+  .etapa__unidade {
+    grid-column: 1 / -1;
+    font-size: var(--t-14);
+    color: var(--petroleo-700);
+    font-weight: 600;
+    margin-top: 0.25rem;
+  }
+
+  .etapa__seta {
+    position: absolute;
+    right: 0.25rem;
+    top: 1.85rem;
+    color: var(--tinta-2);
+    transition:
+      transform 180ms var(--ease),
+      color 180ms var(--ease);
+  }
+
+  .etapa:hover .etapa__nome,
+  .etapa:focus-visible .etapa__nome {
+    color: var(--petroleo-700);
+  }
+
+  .etapa:hover .etapa__seta {
+    color: var(--petroleo-700);
+    transform: translate(2px, -2px);
+  }
+
+  @media (max-width: 959px) {
+    .etapas__lado,
+    .etapas__lista {
+      grid-column: 1 / -1;
+      position: static;
+    }
+    .etapas__previa {
+      display: none;
+    }
+    .etapa {
+      grid-template-columns: 1fr;
+    }
+    .etapa__serie {
+      grid-row: 2;
+    }
+  }
+</style>
