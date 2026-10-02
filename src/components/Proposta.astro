@@ -321,12 +321,28 @@ const pilares = [
     .painel-vivo {
       grid-column: 1 / -1;
     }
-    .painel-vivo {
-      order: -1;
+    /* celular: título, painel animado, citação e pilares, nessa ordem */
+    .prop__grid {
+      gap: 1.75rem;
     }
+    .prop__grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .prop__texto {
+      display: contents;
+    }
+    .prop__texto > *,
+    .painel-vivo {
+      grid-column: 1 / -1;
+    }
+    .prop__texto h2 { order: 0; }
+    .painel-vivo { order: 1; }
+    .prop__citacao { order: 2; margin-top: 0; }
+    .pilares { order: 3; margin-block: 0; }
+    .prop__texto > .link { order: 4; justify-self: start; }
     .painel-vivo__grade,
     .painel-vivo__legenda {
-      max-width: 360px;
+      max-width: 300px;
       margin-left: 0;
     }
   }

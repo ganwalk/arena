@@ -411,6 +411,12 @@ const abas = [
       scrollbar-width: none;
       margin-inline: calc(-1 * var(--gutter));
       padding-inline: var(--gutter);
+      mask-image: linear-gradient(to right, #000 82%, transparent);
+      -webkit-mask-image: linear-gradient(to right, #000 82%, transparent);
+    }
+    .itens:not(.itens--temas) {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0;
     }
     .aba {
       flex: none;
