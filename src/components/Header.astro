@@ -124,9 +124,10 @@ const links = [
     content: "";
     position: absolute;
     z-index: -1;
-    inset: 8px calc(var(--gutter) - 8px) 8px calc(var(--gutter) - 18px);
+    /* 10 px de respiro em volta do CTA (40 px de altura numa pílula de 60); a ponta esquerda, toda redonda, abraça o logo */
+    inset: 6px max(6px, calc(var(--gutter) - 10px)) 6px max(6px, calc(var(--gutter) - 30px));
     background: var(--branco);
-    border-radius: 22px;
+    border-radius: 999px;
     box-shadow: 0 0 0 1px rgb(28 37 41 / 0), 0 6px 14px rgb(28 37 41 / 0);
     transition: box-shadow 240ms var(--ease);
   }
@@ -226,8 +227,9 @@ const links = [
     min-height: 40px;
     padding: 0.5rem 1rem;
     font-size: var(--t-14);
-    /* raio concêntrico ao da pílula: 22 px da pílula - 8 px de respiro = 14 px */
-    border-radius: 14px;
+    /* totalmente arredondado, concêntrico às pontas da pílula */
+    border-radius: 999px;
+    padding-inline: 1.25rem;
   }
 
   .topo__menu {
@@ -283,6 +285,9 @@ const links = [
   }
 
   @media (max-width: 720px) {
+    .topo__barra {
+      padding-inline: 28px 16px;
+    }
     .topo__cta {
       display: none;
     }
