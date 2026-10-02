@@ -61,18 +61,18 @@ const foto = (i: number, d = primeiro) => d.fotos[i % d.fotos.length];
         }
       </ul>
     </div>
-    <p class="hero__legenda">
+    <p class="hero__legenda so-desktop">
       <span data-legenda>{primeiro.legenda}</span>.
       <button type="button" class="hero__ver" data-ver>Ver no mapa</button>
     </p>
 
-    <p class="hero__lead">
+    <p class="hero__lead so-desktop">
       Da Educação Infantil ao pré-vestibular, em três unidades em Goiânia. O Arena usa o material do Sistema Poliedro,
       tem turmas olímpicas desde o Fundamental e é a única escola de Goiás no College Board.
     </p>
     <div class="hero__acoes">
       <a class="botao" href="#visita">Agendar uma visita</a>
-      <a class="hero__link" href="#etapas">Ver as etapas de ensino</a>
+      <a class="hero__link so-desktop" href="#etapas">Ver as etapas de ensino</a>
     </div>
 
   </div>
@@ -530,6 +530,47 @@ const foto = (i: number, d = primeiro) => d.fotos[i % d.fotos.length];
     }
     .hero__destinos li {
       flex: none;
+    }
+  }
+
+  @media (min-width: 1101px) and (max-width: 1320px) {
+    .hero__destinos ul {
+      gap: 0 0.625rem;
+    }
+    .hero__destinos button[data-ir] {
+      font-size: var(--t-12);
+    }
+  }
+
+  /* celular: fotos primeiro, sem moldura, só o título, os destinos e o botão */
+  @media (max-width: 760px) {
+    .hero {
+      clip-path: none;
+      min-height: 0;
+    }
+    .mosaico {
+      order: -1;
+      max-width: none;
+    }
+    .hero__texto {
+      padding-block: 1.5rem 2rem;
+    }
+    .hero__titulo {
+      font-size: clamp(2.25rem, 11vw, 3.25rem);
+    }
+    .hero__destinos {
+      margin-top: 1rem;
+      margin-inline: calc(-1 * var(--gutter));
+      padding-inline: var(--gutter);
+    }
+    .so-desktop {
+      display: none;
+    }
+    .hero__acoes {
+      margin-top: 1.25rem;
+    }
+    .hero__acoes .botao {
+      width: 100%;
     }
   }
 </style>

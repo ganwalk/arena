@@ -1,17 +1,19 @@
 ---
 import { SITE_ATUAL } from "../data/site";
-import Modulo from "./Modulo.astro";
 
-const praticas = [
+const pilares = [
   {
+    id: "escuta",
     titulo: "Pedagogia da Escuta",
     texto: "Na Educação Infantil, o cuidado entra no currículo. O Arena trata a criança como protagonista, capaz de construir sentido sobre o mundo.",
   },
   {
+    id: "socioemocional",
     titulo: "Formação socioemocional",
     texto: "No Fundamental II, o Arena Socioemocional é material próprio, com projetos de vida, de preservação do patrimônio histórico e ações de solidariedade.",
   },
   {
+    id: "esporte",
     titulo: "Esporte como formação",
     texto: "A quadra poliesportiva recebe as aulas de Educação Física, os eventos do colégio e o JOGAR, os Jogos Internos do Arena.",
   },
@@ -20,41 +22,171 @@ const praticas = [
 
 <section class="prop" id="proposta" aria-labelledby="prop-titulo">
   <div class="wrap prop__grid">
-    <div class="prop__cabeca">
+    <div class="prop__texto">
       <h2 id="prop-titulo" class="titulo h2">Ensino forte e humanizado</h2>
-      <div class="prop__modulos" aria-hidden="true">
-        <span data-gira><Modulo forma="quarto" cor="var(--petroleo)" giro={90} /></span>
-        <span data-gira><Modulo forma="anel" cor="var(--grafite)" /></span>
-        <span data-gira><Modulo forma="listras" cor="var(--gelo)" /></span>
-      </div>
+      <figure class="prop__citacao">
+        <blockquote>
+          <p>
+            “Nossa opção é pelo equilíbrio: respeitar os discentes, sem confundir orientação com opressão; exigência com
+            pressão desmedida; autoridade com autoritarismo.”
+          </p>
+        </blockquote>
+        <figcaption>Proposta pedagógica do Colégio Arena</figcaption>
+      </figure>
+
+      <ul role="list" class="pilares" data-pilares>
+        {
+          pilares.map((p) => (
+            <li>
+              <button type="button" class="pilar" data-pilar={p.id} aria-pressed="false">
+                <span class="pilar__titulo">{p.titulo}</span>
+                <span class="pilar__texto">{p.texto}</span>
+                <span class="pilar__barra" aria-hidden="true" />
+              </button>
+            </li>
+          ))
+        }
+      </ul>
+
+      <a class="link" href={`${SITE_ATUAL}/conheca/proposta-pedagogica`}>Ler a proposta pedagógica completa</a>
     </div>
 
-    <figure class="prop__citacao">
-      <blockquote>
-        <p>
-          “Nossa opção é pelo equilíbrio: respeitar os discentes, sem confundir orientação com opressão; exigência com
-          pressão desmedida; autoridade com autoritarismo.”
-        </p>
-      </blockquote>
-      <figcaption>Proposta pedagógica do Colégio Arena</figcaption>
-    </figure>
-
-    <dl class="prop__praticas">
-      {
-        praticas.map((p) => (
-          <div>
-            <dt>{p.titulo}</dt>
-            <dd>{p.texto}</dd>
-          </div>
-        ))
-      }
-    </dl>
-
-    <p class="prop__link">
-      <a class="link" href={`${SITE_ATUAL}/conheca/proposta-pedagogica`}>Ler a proposta pedagógica completa</a>
-    </p>
+    <div class="painel-vivo" aria-hidden="true">
+      <div class="painel-vivo__grade" data-grade>
+        {Array.from({ length: 16 }, () => <span class="celula" />)}
+      </div>
+      <p class="painel-vivo__legenda" data-legenda-painel>Colégio Arena</p>
+    </div>
   </div>
 </section>
+
+<script>
+  // Painel 4 x 4 de módulos da marca que se reorganiza para desenhar cada pilar.
+  type Forma = "" | "cheio" | "quarto" | "triangulo" | "ponto" | "anel" | "listras" | "folha";
+  type Celula = [Forma, number, string, string?]; // forma, giro (0-3), cor, fundo
+
+  const T = "var(--petroleo)";
+  const G = "var(--grafite)";
+  const C = "var(--gelo)";
+  const B = "var(--branco)";
+  const _: Celula = ["", 0, T];
+
+  // quarto: giro indica o canto do centro do círculo (0 sup. esq., 1 sup. dir., 2 inf. dir., 3 inf. esq.)
+  const desenhos: Record<string, { legenda: string; celulas: Celula[] }> = {
+    arena: {
+      legenda: "Colégio Arena",
+      celulas: [
+        ["listras", 0, G], ["triangulo", 0, C], ["cheio", 0, G], ["quarto", 3, G],
+        ["triangulo", 2, T, G], ["anel", 0, T], ["quarto", 2, T], ["cheio", 0, G],
+        ["listras", 0, C], ["triangulo", 1, T], ["cheio", 0, G], ["quarto", 0, T],
+        ["quarto", 1, C], ["quarto", 1, T], ["ponto", 0, G], ["folha", 2, G],
+      ],
+    },
+    escuta: {
+      legenda: "Pedagogia da Escuta",
+      celulas: [
+        ["quarto", 2, T], ["cheio", 0, T], ["cheio", 0, T], ["quarto", 3, T],
+        ["cheio", 0, T], ["ponto", 0, B, T], ["ponto", 0, B, T], ["cheio", 0, T],
+        ["quarto", 1, T], ["cheio", 0, T], ["cheio", 0, T], ["quarto", 0, T],
+        _, ["triangulo", 1, T], ["anel", 0, G], ["listras", 0, C],
+      ],
+    },
+    socioemocional: {
+      legenda: "Formação socioemocional",
+      celulas: [
+        ["quarto", 2, T], ["quarto", 3, T], ["quarto", 2, T], ["quarto", 3, T],
+        ["cheio", 0, T], ["cheio", 0, T], ["cheio", 0, T], ["cheio", 0, T],
+        ["triangulo", 1, T], ["cheio", 0, T], ["cheio", 0, T], ["triangulo", 0, T],
+        ["ponto", 0, G], ["triangulo", 1, T], ["triangulo", 0, T], ["anel", 0, C],
+      ],
+    },
+    esporte: {
+      legenda: "Esporte como formação",
+      celulas: [
+        ["anel", 0, C], ["listras", 0, T], ["listras", 1, T], ["ponto", 0, G],
+        _, ["triangulo", 1, T], ["triangulo", 0, T], _,
+        ["listras", 0, C], ["quarto", 2, G], ["quarto", 3, G], _,
+        _, ["quarto", 1, G], ["quarto", 0, G], ["triangulo", 3, C],
+      ],
+    },
+  };
+
+  const svg = ([forma, giro, cor, fundo]: Celula) => {
+    const g = `transform="rotate(${giro * 90} 50 50)"`;
+    const corpo: Record<Forma, string> = {
+      "": "",
+      cheio: `<rect width="100" height="100" fill="${cor}"/>`,
+      quarto: `<path ${g} d="M0 0H100A100 100 0 0 1 0 100Z" fill="${cor}"/>`,
+      triangulo: `<path ${g} d="M0 0H100L0 100Z" fill="${cor}"/>`,
+      folha: `<path ${g} d="M0 0H100V50A50 50 0 0 1 50 100H0Z" fill="${cor}"/>`,
+      ponto: `<circle cx="50" cy="50" r="20" fill="${cor}"/>`,
+      anel: `<circle cx="50" cy="50" r="27" fill="none" stroke="${cor}" stroke-width="16"/>`,
+      listras: `<g ${g} stroke="${cor}" stroke-width="11" clip-path="inset(0)">${[-60, -20, 20, 60, 100, 140]
+        .map((o) => `<line x1="${o}" y1="100" x2="${o + 100}" y2="0"/>`)
+        .join("")}</g>`,
+    };
+    return `<svg viewBox="0 0 100 100">${fundo ? `<rect width="100" height="100" fill="${fundo}"/>` : ""}${corpo[forma]}</svg>`;
+  };
+
+  const secao = document.getElementById("proposta")!;
+  const celulas = [...secao.querySelectorAll<HTMLElement>(".celula")];
+  const legenda = secao.querySelector<HTMLElement>("[data-legenda-painel]")!;
+  const botoes = [...secao.querySelectorAll<HTMLButtonElement>("[data-pilar]")];
+  const reduzir = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const ordem = ["arena", "escuta", "socioemocional", "esporte"];
+  let atual = "";
+  let indice = 0;
+  let relogio = 0;
+  let manual = false;
+
+  function desenhar(nome: string) {
+    if (nome === atual) return;
+    atual = nome;
+    const d = desenhos[nome];
+    legenda.textContent = d.legenda;
+    botoes.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.pilar === nome)));
+    celulas.forEach((el, i) => {
+      const atraso = reduzir ? 0 : ((i % 4) + Math.floor(i / 4)) * 45;
+      setTimeout(() => {
+        if (reduzir) {
+          el.innerHTML = svg(d.celulas[i]);
+          return;
+        }
+        el.classList.add("sai");
+        setTimeout(() => {
+          el.innerHTML = svg(d.celulas[i]);
+          el.classList.remove("sai");
+        }, 170);
+      }, atraso);
+    });
+  }
+
+  function agendar() {
+    clearTimeout(relogio);
+    if (reduzir || manual) return;
+    secao.style.setProperty("--intervalo", "3800ms");
+    relogio = window.setTimeout(() => {
+      indice = (indice + 1) % ordem.length;
+      desenhar(ordem[indice]);
+      agendar();
+    }, 3800);
+  }
+
+  botoes.forEach((b) => {
+    const ir = () => {
+      manual = true;
+      clearTimeout(relogio);
+      indice = ordem.indexOf(b.dataset.pilar!);
+      desenhar(b.dataset.pilar!);
+    };
+    b.addEventListener("click", ir);
+    b.addEventListener("pointerenter", ir);
+    b.addEventListener("focus", ir);
+  });
+
+  desenhar("arena");
+  new IntersectionObserver(([e]) => (e.isIntersecting ? agendar() : clearTimeout(relogio)), { threshold: 0.4 }).observe(secao);
+</script>
 
 <style>
   .prop {
@@ -64,83 +196,137 @@ const praticas = [
   .prop__grid {
     display: grid;
     grid-template-columns: repeat(12, minmax(0, 1fr));
-    gap: 2.5rem var(--gutter);
+    gap: 3rem var(--gutter);
+    align-items: center;
   }
 
-  .prop__cabeca {
-    grid-column: 1 / span 4;
-  }
-
-  .prop__modulos {
-    display: grid;
-    grid-template-columns: repeat(3, 56px);
-    margin-top: 2rem;
-  }
-
-  .prop__modulos span {
-    cursor: default;
-  }
-
-  .prop__modulos :global(svg) {
-    width: 56px;
-    height: 56px;
+  .prop__texto {
+    grid-column: 1 / span 6;
   }
 
   .prop__citacao {
-    grid-column: 6 / span 7;
+    margin-top: 1.75rem;
   }
 
   .prop__citacao p {
-    font-size: var(--t-32);
-    line-height: 1.3;
+    font-size: var(--t-20);
+    line-height: 1.45;
     font-weight: 500;
     color: var(--grafite);
     text-wrap: pretty;
   }
 
   .prop__citacao figcaption {
-    margin-top: 1rem;
+    margin-top: 0.5rem;
     font-size: var(--t-14);
     color: var(--tinta-2);
   }
 
-  .prop__praticas {
-    grid-column: 6 / span 7;
-    margin: 0;
+  .pilares {
+    margin-block: 2rem 1.5rem;
     border-top: 1px solid var(--tinta);
   }
 
-  .prop__praticas div {
+  .pilar {
+    position: relative;
+    width: 100%;
     display: grid;
-    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
-    gap: 0.5rem 1.5rem;
-    padding-block: 1.25rem;
+    gap: 0.25rem;
+    padding: 1.125rem 0 1.125rem 1.25rem;
+    border: 0;
     border-bottom: 1px solid var(--filete);
+    background: none;
+    text-align: left;
+    cursor: pointer;
   }
 
-  .prop__praticas dt {
+  .pilar__titulo {
+    font-size: var(--t-20);
     font-weight: 700;
     color: var(--grafite);
+    transition: color 160ms var(--ease);
   }
 
-  .prop__praticas dd {
-    margin: 0;
+  .pilar__texto {
     color: var(--tinta-2);
   }
 
-  .prop__link {
-    grid-column: 6 / span 7;
+  /* marcador: um quarto de círculo que aparece no pilar desenhado */
+  .pilar__barra {
+    position: absolute;
+    left: 0;
+    top: 1.35rem;
+    width: 10px;
+    height: 10px;
+    border-bottom-right-radius: 100%;
+    background: var(--petroleo);
+    transform: scale(0);
+    transform-origin: top left;
+    transition: transform 220ms var(--ease);
+  }
+
+  .pilar[aria-pressed="true"] .pilar__titulo {
+    color: var(--petroleo-700);
+  }
+
+  .pilar[aria-pressed="true"] .pilar__barra {
+    transform: scale(1);
+  }
+
+  /* ---------- painel vivo */
+  .painel-vivo {
+    grid-column: 8 / span 5;
+  }
+
+  .painel-vivo__grade {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    aspect-ratio: 1;
+    max-width: 520px;
+    margin-left: auto;
+  }
+
+  .celula {
+    display: block;
+    aspect-ratio: 1;
+    transition:
+      transform 170ms var(--ease),
+      opacity 170ms var(--ease);
+  }
+
+  .celula :global(svg) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    /* sobreposição mínima para não aparecer emenda entre as peças */
+    transform: scale(1.015);
+  }
+
+  .celula.sai {
+    transform: rotate(90deg) scale(0.4);
+    opacity: 0;
+  }
+
+  .painel-vivo__legenda {
+    max-width: 520px;
+    margin: 0.875rem 0 0 auto;
+    font-size: var(--t-14);
+    font-weight: 600;
+    color: var(--tinta-2);
   }
 
   @media (max-width: 959px) {
-    .prop__cabeca,
-    .prop__citacao,
-    .prop__praticas,
-    .prop__link {
+    .prop__texto,
+    .painel-vivo {
       grid-column: 1 / -1;
     }
-    .prop__praticas div {
-      grid-template-columns: 1fr;
+    .painel-vivo {
+      order: -1;
+    }
+    .painel-vivo__grade,
+    .painel-vivo__legenda {
+      max-width: 360px;
+      margin-left: 0;
     }
   }
 </style>

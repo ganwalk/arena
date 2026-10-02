@@ -14,7 +14,22 @@ const conquistas2025 = [
   <div class="wrap olimp__grid">
     <div class="olimp__numero">
       <h2 id="olimp-titulo" class="titulo h2">Turmas olímpicas</h2>
-      <p class="olimp__total"><span>4.922</span> premiações em olimpíadas entre 2023 e 2025</p>
+      <p class="olimp__total">
+        <span class="odometro" data-odometro aria-label="4.922">
+          {
+            [..."4.922"].map((ch, i) =>
+              /\d/.test(ch) ? (
+                <span class="odometro__digito" aria-hidden="true" style={`--alvo:${Number(ch)};--i:${i}`}>
+                  <span class="odometro__fita">{[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => <span>{n}</span>)}</span>
+                </span>
+              ) : (
+                <span class="odometro__ponto" aria-hidden="true">{ch}</span>
+              ),
+            )
+          }
+        </span>
+        premiações em olimpíadas entre 2023 e 2025
+      </p>
       <p class="olimp__texto">
         A partir do Ensino Fundamental, os alunos podem entrar nas turmas olímpicas: aulas extras voltadas às principais
         competições escolares do país e do exterior, em várias áreas do conhecimento.
@@ -34,6 +49,20 @@ const conquistas2025 = [
     </div>
   </div>
 </section>
+
+<script>
+  const odometro = document.querySelector<HTMLElement>("[data-odometro]");
+  if (odometro) {
+    new IntersectionObserver(
+      ([e], obs) => {
+        if (!e.isIntersecting) return;
+        odometro.classList.add("gira");
+        obs.disconnect();
+      },
+      { threshold: 0.6 },
+    ).observe(odometro);
+  }
+</script>
 
 <style>
   .olimp {
@@ -58,13 +87,46 @@ const conquistas2025 = [
     line-height: 1.35;
   }
 
-  .olimp__total span {
-    display: block;
+  .odometro {
+    display: flex;
     font-size: clamp(4.5rem, 2rem + 9vw, 9rem);
     font-weight: 800;
     letter-spacing: -0.03em;
-    line-height: 0.9;
+    line-height: 1;
     color: var(--petroleo-700);
+    margin-bottom: 0.5rem;
+  }
+
+  /* cada dígito é uma fita de 0 a 9 (duas voltas) que rola até o valor quando a seção aparece */
+  .odometro__digito {
+    display: block;
+    height: 1em;
+    overflow: hidden;
+  }
+
+  .odometro__fita {
+    display: flex;
+    flex-direction: column;
+    transform: translateY(0);
+    transition: transform 1.9s cubic-bezier(0.16, 0.9, 0.24, 1);
+    transition-delay: calc(var(--i) * 110ms);
+  }
+
+  .odometro__fita span {
+    display: block;
+    height: 1em;
+    text-align: center;
+  }
+
+  .odometro.gira .odometro__fita {
+    transform: translateY(calc((var(--alvo) + 10) * -1em));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .odometro__fita {
+      transition: none;
+      transform: translateY(calc((var(--alvo) + 10) * -1em));
+    }
   }
 
   .olimp__texto {

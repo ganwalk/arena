@@ -27,17 +27,6 @@ const { title, description } = Astro.props;
     <a class="pular" href="#conteudo">Pular para o conteúdo</a>
     <slot />
     <script>
-      // Progresso da rolagem nos primeiros 220 px: desfaz a moldura da hero e solta o menu.
-      const raiz = document.documentElement;
-      let pedido = 0;
-      const atualizar = () => {
-        pedido = 0;
-        raiz.style.setProperty("--rolagem", String(Math.min(1, Math.max(0, scrollY / 220)).toFixed(3)));
-      };
-      addEventListener("scroll", () => (pedido ||= requestAnimationFrame(atualizar)), { passive: true });
-      atualizar();
-    </script>
-    <script>
       // Módulos decorativos da marca giram 90° quando o cursor ou o dedo passa por eles.
       if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
         document.querySelectorAll<HTMLElement>("[data-gira]:not(.peca)").forEach((el) => {
