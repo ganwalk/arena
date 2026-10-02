@@ -12,7 +12,7 @@ const links = [
 
 <header class="topo" data-topo>
   <svg class="topo__liquido" aria-hidden="true" focusable="false">
-    <rect data-corpo fill="#fff" />
+    <path data-corpo fill="#fff" />
   </svg>
   <div class="wrap topo__barra">
     <a class="topo__marca" href="/" aria-label="Colégio Arena, página inicial">
@@ -61,7 +61,7 @@ const links = [
   const raiz = document.documentElement;
   const topo = document.querySelector<HTMLElement>("[data-topo]")!;
   const svg = topo.querySelector<SVGSVGElement>(".topo__liquido")!;
-  const corpo = svg.querySelector<SVGRectElement>("[data-corpo]")!;
+  const corpo = svg.querySelector<SVGPathElement>("[data-corpo]")!;
   const barra = topo.querySelector<HTMLElement>(".topo__barra")!;
   const reduzirMov = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const DISTANCIA = 220;
@@ -69,32 +69,62 @@ const links = [
   let x = Math.min(1, scrollY / DISTANCIA);
   let v = 0;
   let quadro = 0;
-  let limites = { W: 0, L: 0, R: 0, H: 72 };
+  let limites = { W: 0, L: 0, R: 0, H: 72, m: 16 };
+  const semMoldura = matchMedia("(max-width: 760px)");
 
   const medir = () => {
     const b = barra.getBoundingClientRect();
     const pad = parseFloat(getComputedStyle(barra).paddingLeft);
-    limites = { W: topo.clientWidth, L: b.left + pad - 18, R: b.right - pad + 8, H: b.height };
+    // mesma medida da moldura da hero (Hero.astro: --m = clamp(10px, 1.1vw, 16px))
+    const m = semMoldura.matches ? 0 : Math.min(16, Math.max(10, innerWidth * 0.011));
+    limites = { W: topo.clientWidth, L: b.left + pad - 18, R: b.right - pad + 8, H: b.height, m };
   };
   const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
+  /*
+    Uma única forma branca. Em t = 0 é a faixa do topo, presa à moldura da hero: as bordas ficam na linha da
+    moldura e os cantos de baixo são curvas côncavas com o mesmo raio dos cantos da hero. Ao rolar, as curvas
+    côncavas recolhem como um menisco, as laterais se soltam da borda e os cantos viram os convexos da pílula.
+  */
+  const n = (v: number) => v.toFixed(2);
+  function forma(x1: number, x2: number, topoY: number, baseY: number, f: number, c: number) {
+    if (f > 0.5) {
+      return [
+        `M${n(x1)} ${n(topoY)}H${n(x2)}V${n(baseY + f)}`,
+        `A${n(f)} ${n(f)} 0 0 0 ${n(x2 - f)} ${n(baseY)}`,
+        `H${n(x1 + f)}`,
+        `A${n(f)} ${n(f)} 0 0 0 ${n(x1)} ${n(baseY + f)}Z`,
+      ].join("");
+    }
+    const k = Math.min(c, (baseY - topoY) / 2, (x2 - x1) / 2);
+    return [
+      `M${n(x1 + k)} ${n(topoY)}H${n(x2 - k)}`,
+      `A${n(k)} ${n(k)} 0 0 1 ${n(x2)} ${n(topoY + k)}V${n(baseY - k)}`,
+      `A${n(k)} ${n(k)} 0 0 1 ${n(x2 - k)} ${n(baseY)}H${n(x1 + k)}`,
+      `A${n(k)} ${n(k)} 0 0 1 ${n(x1)} ${n(baseY - k)}V${n(topoY + k)}`,
+      `A${n(k)} ${n(k)} 0 0 1 ${n(x1 + k)} ${n(topoY)}Z`,
+    ].join("");
+  }
+
   function pintar() {
-    const { W, L, R, H } = limites;
-    const r = Math.max(-0.08, Math.min(1.12, x));
+    const { W, L, R, H, m } = limites;
+    const r = Math.max(-0.06, Math.min(1.06, x));
     const t = Math.max(0, Math.min(1, r));
     raiz.style.setProperty("--rolagem", r.toFixed(4));
-    // corpo: da faixa inteira até a pílula; a velocidade deforma a forma de leve
-    const aperto = Math.max(-1, Math.min(1, v * 10));
-    const y = lerp(-40, 8, r);
-    const h = lerp(H + 40, H - 16, r) - aperto * 6;
-    const left = lerp(0, L, t) - aperto * 6;
-    const right = lerp(W, R, t) + aperto * 6;
-    corpo.setAttribute("x", String(left));
-    corpo.setAttribute("y", String(y + aperto * 3));
-    corpo.setAttribute("width", String(Math.max(0, right - left)));
-    corpo.setAttribute("height", String(Math.max(0, h)));
-    corpo.setAttribute("rx", String(lerp(0, 22, t)));
-    svg.style.filter = `drop-shadow(0 0 0.6px rgba(28,37,41,${(0.45 * t).toFixed(3)})) drop-shadow(0 6px 10px rgba(28,37,41,${(0.13 * t).toFixed(3)}))`;
+    const suave = (a: number, b: number) => Math.max(0, Math.min(1, (t - a) / (b - a)));
+    const raioHero = 2.25 * m;
+    // o menisco (côncavo) recolhe na primeira metade; o canto convexo da pílula cresce na segunda
+    const f = raioHero * (1 - suave(0, 0.5)) ** 1.6;
+    const c = 22 * suave(0.4, 1) ** 0.8;
+    const x1 = lerp(m, L, t);
+    const x2 = lerp(W - m, R, t);
+    const topoY = lerp(-40, 8, r);
+    const baseY = lerp(H, H - 8, r);
+    corpo.setAttribute("d", forma(x1, x2, topoY, baseY, f, c));
+    const sombra = suave(0.55, 1);
+    svg.style.filter = sombra
+      ? `drop-shadow(0 0 0.6px rgba(28,37,41,${(0.4 * sombra).toFixed(3)})) drop-shadow(0 6px 10px rgba(28,37,41,${(0.12 * sombra).toFixed(3)}))`
+      : "none";
   }
 
   // mola calibrada para 60 quadros/s (90% do caminho em ~420 ms, balanço de ~1%); em telas mais rápidas, subpassos
@@ -124,7 +154,7 @@ const links = [
   addEventListener("scroll", pedir, { passive: true });
   addEventListener("resize", () => {
     medir();
-    pedir();
+    pintar();
   });
   document.fonts?.ready.then(() => {
     medir();
