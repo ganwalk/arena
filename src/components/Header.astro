@@ -82,52 +82,35 @@ const links = [
   const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
   /*
-    Uma única forma branca. Em t = 0 é a faixa do topo, presa à moldura da hero: as bordas ficam na linha da
-    moldura e os cantos de baixo são curvas côncavas com o mesmo raio dos cantos da hero. Ao rolar, as curvas
-    côncavas recolhem como um menisco, as laterais se soltam da borda e os cantos viram os convexos da pílula.
+    Uma única forma branca. Em repouso é uma faixa de borda a borda (branco sobre o branco da página, sob a
+    moldura da hero). Ao rolar, as laterais recuam, a base sobe e os cantos arredondam até virar a pílula.
   */
   const n = (v: number) => v.toFixed(2);
-  function forma(x1: number, x2: number, topoY: number, baseY: number, f: number, c: number) {
-    if (f > 0.5) {
-      return [
-        `M${n(x1)} ${n(topoY)}H${n(x2)}V${n(baseY + f)}`,
-        `A${n(f)} ${n(f)} 0 0 0 ${n(x2 - f)} ${n(baseY)}`,
-        `H${n(x1 + f)}`,
-        `A${n(f)} ${n(f)} 0 0 0 ${n(x1)} ${n(baseY + f)}Z`,
-      ].join("");
-    }
-    const k = Math.min(c, (baseY - topoY) / 2, (x2 - x1) / 2);
+  const suaviza = (t: number) => t * t * (3 - 2 * t);
+  function forma(x1: number, x2: number, y1: number, y2: number, c: number) {
+    const k = Math.min(c, (y2 - y1) / 2, (x2 - x1) / 2);
     return [
-      `M${n(x1 + k)} ${n(topoY)}H${n(x2 - k)}`,
-      `A${n(k)} ${n(k)} 0 0 1 ${n(x2)} ${n(topoY + k)}V${n(baseY - k)}`,
-      `A${n(k)} ${n(k)} 0 0 1 ${n(x2 - k)} ${n(baseY)}H${n(x1 + k)}`,
-      `A${n(k)} ${n(k)} 0 0 1 ${n(x1)} ${n(baseY - k)}V${n(topoY + k)}`,
-      `A${n(k)} ${n(k)} 0 0 1 ${n(x1 + k)} ${n(topoY)}Z`,
+      `M${n(x1 + k)} ${n(y1)}H${n(x2 - k)}`,
+      `A${n(k)} ${n(k)} 0 0 1 ${n(x2)} ${n(y1 + k)}V${n(y2 - k)}`,
+      `A${n(k)} ${n(k)} 0 0 1 ${n(x2 - k)} ${n(y2)}H${n(x1 + k)}`,
+      `A${n(k)} ${n(k)} 0 0 1 ${n(x1)} ${n(y2 - k)}V${n(y1 + k)}`,
+      `A${n(k)} ${n(k)} 0 0 1 ${n(x1 + k)} ${n(y1)}Z`,
     ].join("");
   }
 
   function pintar() {
-    const { W, L, R, H, m } = limites;
-    const r = Math.max(-0.06, Math.min(1.06, x));
-    const t = Math.max(0, Math.min(1, r));
+    const { W, L, R, H } = limites;
+    const r = Math.max(0, Math.min(1, x));
     raiz.style.setProperty("--rolagem", r.toFixed(4));
-    const suave = (a: number, b: number) => Math.max(0, Math.min(1, (t - a) / (b - a)));
-    const raioHero = 2.25 * m;
-    // o menisco (côncavo) recolhe na primeira metade; o canto convexo da pílula cresce na segunda
-    const f = raioHero * (1 - suave(0, 0.5)) ** 1.6;
-    const c = 22 * suave(0.4, 1) ** 0.8;
-    const x1 = lerp(m, L, t);
-    const x2 = lerp(W - m, R, t);
-    const topoY = lerp(-40, 8, r);
-    const baseY = lerp(H, H - 8, r);
-    corpo.setAttribute("d", forma(x1, x2, topoY, baseY, f, c));
-    const sombra = suave(0.55, 1);
+    const t = suaviza(r);
+    corpo.setAttribute("d", forma(lerp(0, L, t), lerp(W, R, t), lerp(0, 8, t), lerp(H, H - 8, t), lerp(0, 22, t)));
+    const sombra = Math.max(0, (r - 0.5) / 0.5);
     svg.style.filter = sombra
       ? `drop-shadow(0 0 0.6px rgba(28,37,41,${(0.4 * sombra).toFixed(3)})) drop-shadow(0 6px 10px rgba(28,37,41,${(0.12 * sombra).toFixed(3)}))`
       : "none";
   }
 
-  // mola calibrada para 60 quadros/s (90% do caminho em ~420 ms, balanço de ~1%); em telas mais rápidas, subpassos
+  // mola calibrada para 60 quadros/s (sem balanço, acompanha a rolagem com um leve atraso); em telas mais rápidas, subpassos
   let antes = 0;
   function passo(agora: number) {
     quadro = 0;
@@ -138,7 +121,7 @@ const links = [
     } else {
       const passos = antes ? Math.min(4, Math.max(1, Math.round((agora - antes) / 16.7))) : 1;
       for (let i = 0; i < passos; i++) {
-        v = v * 0.83 + (alvo - x) * 0.012;
+        v = v * 0.7 + (alvo - x) * 0.045;
         x += v;
       }
     }
