@@ -1,0 +1,118 @@
+---
+import { acessos, institucional, redes, unidades } from "../data/site";
+---
+
+<footer class="rodape escuro">
+  <div class="wrap rodape__grid">
+    <div class="rodape__marca">
+      <img src="/brand/arena-branco.svg" alt="Colégio Arena" width="140" height="50" loading="lazy" />
+      <p>Educação Infantil, Ensino Fundamental, Ensino Médio e pré-vestibular em Goiânia.</p>
+      <ul role="list" class="rodape__redes">
+        {redes.map((r) => <li><a href={r.href} rel="noopener">{r.rotulo}</a></li>)}
+      </ul>
+    </div>
+
+    <nav aria-labelledby="rod-inst">
+      <h2 id="rod-inst">Institucional</h2>
+      <ul role="list">
+        {institucional.map((l) => <li><a href={l.href}>{l.rotulo}</a></li>)}
+      </ul>
+    </nav>
+
+    <nav aria-labelledby="rod-acesso">
+      <h2 id="rod-acesso">Área do aluno</h2>
+      <ul role="list">
+        {acessos.map((l) => <li><a href={l.href} rel="noopener">{l.rotulo}</a></li>)}
+      </ul>
+    </nav>
+
+    <div>
+      <h2>Telefones</h2>
+      <ul role="list">
+        {
+          unidades.map((u) => (
+            <li>
+              <span class="rodape__unidade">{u.nome}</span>
+              <a href={`tel:+55${u.telefone.replace(/\D/g, "")}`}>{u.telefone}</a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+  <div class="wrap rodape__fim">
+    <p>© 2026 Colégio Arena. Direitos reservados.</p>
+  </div>
+</footer>
+
+<style>
+  .rodape {
+    background: var(--grafite);
+    color: #cfd6d8;
+    padding-block: clamp(3.5rem, 2rem + 4vw, 5rem) 2rem;
+    font-size: var(--t-14);
+  }
+
+  .rodape__grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1.2fr 0.8fr 1fr;
+    gap: 2.5rem var(--gutter);
+  }
+
+  .rodape__marca p {
+    margin-top: 1.25rem;
+    max-width: 22em;
+  }
+
+  .rodape__redes {
+    display: flex;
+    gap: 1.25rem;
+    margin-top: 1.25rem;
+  }
+
+  .rodape h2 {
+    font-size: var(--t-14);
+    font-weight: 650;
+    color: var(--branco);
+    margin-bottom: 0.875rem;
+  }
+
+  .rodape li {
+    padding-block: 0.3rem;
+  }
+
+  .rodape a {
+    text-decoration: none;
+    color: #dfe5e6;
+  }
+
+  .rodape a:hover {
+    color: var(--branco);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  .rodape__unidade {
+    display: block;
+    color: #a9b4b7;
+  }
+
+  .rodape__fim {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #45545b;
+    color: #a9b4b7;
+  }
+
+  @media (max-width: 959px) {
+    .rodape__grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .rodape__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

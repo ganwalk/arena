@@ -1,0 +1,189 @@
+---
+import { etapas } from "../data/site";
+---
+
+<section class="etapas" id="etapas" aria-labelledby="etapas-titulo">
+  <div class="wrap etapas__grid">
+    <div class="etapas__lado">
+      <h2 id="etapas-titulo" class="titulo h2">Em que etapa está seu filho?</h2>
+      <p class="etapas__nota">São três unidades: Educação Infantil e Fundamental no Setor Bueno, Ensino Médio também no Bueno e o pré-vestibular no Jardim América.</p>
+      <div class="etapas__previa" aria-hidden="true">
+        {
+          etapas.map((e, i) =>
+            e.foto ? (
+              <img
+                data-previa={e.id}
+                class:list={[{ ativa: i === 0 }]}
+                src={`${e.foto}-800.webp`}
+                alt=""
+                width="800"
+                height="533"
+                loading="lazy"
+              />
+            ) : null,
+          )
+        }
+      </div>
+    </div>
+
+    <ol class="etapas__lista" role="list">
+      {
+        etapas.map((e) => (
+          <li>
+            <a class="etapa" href={e.href} data-etapa={e.id} rel={e.href.startsWith("http") ? "noopener" : undefined}>
+              <span class="etapa__nome">{e.nome}</span>
+              <span class="etapa__serie">{e.serie}</span>
+              <span class="etapa__texto">{e.texto}</span>
+              <span class="etapa__unidade">{e.unidade}</span>
+              <svg class="etapa__seta" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
+                <path d="M5 15 15 5M7 5h8v8" fill="none" stroke="currentColor" stroke-width="1.75" />
+              </svg>
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<script>
+  const previas = document.querySelectorAll<HTMLImageElement>("[data-previa]");
+  document.querySelectorAll<HTMLElement>("[data-etapa]").forEach((el) => {
+    const mostrar = () => {
+      const alvo = document.querySelector(`[data-previa="${el.dataset.etapa}"]`);
+      if (!alvo) return;
+      previas.forEach((p) => p.classList.toggle("ativa", p === alvo));
+    };
+    el.addEventListener("pointerenter", mostrar);
+    el.addEventListener("focus", mostrar);
+  });
+</script>
+
+<style>
+  .etapas {
+    padding-block: clamp(3.5rem, 2rem + 6vw, 7rem);
+    border-top: 1px solid var(--filete);
+  }
+
+  .etapas__grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 2.5rem var(--gutter);
+  }
+
+  .etapas__lado {
+    grid-column: 1 / span 5;
+    align-self: start;
+    position: sticky;
+    top: calc(var(--header-h) + 2rem);
+  }
+
+  .etapas__nota {
+    margin-top: 1.25rem;
+    color: var(--tinta-2);
+    max-width: 26em;
+  }
+
+  .etapas__previa {
+    position: relative;
+    margin-top: 2.5rem;
+    aspect-ratio: 3 / 2;
+    overflow: hidden;
+    border-bottom-right-radius: 25%;
+    background: var(--areia);
+  }
+
+  .etapas__previa img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 220ms var(--ease);
+  }
+
+  .etapas__previa img.ativa {
+    opacity: 1;
+  }
+
+  .etapas__lista {
+    grid-column: 7 / span 6;
+    border-top: 1px solid var(--tinta);
+  }
+
+  .etapa {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.25rem 1.5rem;
+    padding: 1.5rem 2.5rem 1.5rem 0;
+    border-bottom: 1px solid var(--filete);
+    text-decoration: none;
+    transition: background-color 160ms var(--ease);
+  }
+
+  .etapa__nome {
+    font-size: var(--t-24);
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--grafite);
+  }
+
+  .etapa__serie {
+    font-size: var(--t-14);
+    color: var(--tinta-2);
+    align-self: center;
+  }
+
+  .etapa__texto {
+    grid-column: 1 / -1;
+    color: var(--tinta-2);
+    max-width: 36em;
+  }
+
+  .etapa__unidade {
+    grid-column: 1 / -1;
+    font-size: var(--t-14);
+    color: var(--petroleo-700);
+    font-weight: 600;
+    margin-top: 0.25rem;
+  }
+
+  .etapa__seta {
+    position: absolute;
+    right: 0.25rem;
+    top: 1.85rem;
+    color: var(--tinta-2);
+    transition:
+      transform 180ms var(--ease),
+      color 180ms var(--ease);
+  }
+
+  .etapa:hover .etapa__nome,
+  .etapa:focus-visible .etapa__nome {
+    color: var(--petroleo-700);
+  }
+
+  .etapa:hover .etapa__seta {
+    color: var(--petroleo-700);
+    transform: translate(2px, -2px);
+  }
+
+  @media (max-width: 959px) {
+    .etapas__lado,
+    .etapas__lista {
+      grid-column: 1 / -1;
+      position: static;
+    }
+    .etapas__previa {
+      display: none;
+    }
+    .etapa {
+      grid-template-columns: 1fr;
+    }
+    .etapa__serie {
+      grid-row: 2;
+    }
+  }
+</style>

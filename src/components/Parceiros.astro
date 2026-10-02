@@ -1,0 +1,112 @@
+---
+import { SITE_ATUAL } from "../data/site";
+
+const parceiros = [
+  {
+    nome: "Sistema de Ensino Poliedro",
+    logo: "/img/poliedro2.png",
+    texto: "Material didático da Educação Infantil ao pré-vestibular, com versão digital, o aplicativo P+ e o Portal Edros.",
+    href: `${SITE_ATUAL}/pagina/sistema-de-ensino-poliedro`,
+  },
+  {
+    nome: "Membro do College Board",
+    logo: "/img/collegeboard.png",
+    texto: "Desde novembro de 2019. O Arena foi a 6ª escola do Brasil a entrar no College Board e é a única de Goiás.",
+    href: `${SITE_ATUAL}/pagina/college-board`,
+  },
+  {
+    nome: "SAT Center",
+    logo: "/img/sat.png",
+    texto: "Desde 2018 o Arena aplica o SAT, a prova de admissão das universidades americanas, no calendário oficial do College Board.",
+    href: `${SITE_ATUAL}/pagina/sat-center`,
+  },
+];
+---
+
+<section class="parc" aria-labelledby="parc-titulo">
+  <div class="wrap parc__grid">
+    <h2 id="parc-titulo" class="titulo h2">Poliedro, College Board e SAT</h2>
+    <ul role="list" class="parc__lista">
+      {
+        parceiros.map((p) => (
+          <li class="parc__item">
+            <img src={p.logo} alt="" width="56" height="56" loading="lazy" />
+            <div>
+              <h3>
+                <a href={p.href}>{p.nome}</a>
+              </h3>
+              <p>{p.texto}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .parc {
+    padding-block: clamp(3.5rem, 2rem + 5vw, 6rem);
+    background: var(--areia-50);
+    border-block: 1px solid var(--filete);
+  }
+
+  .parc__grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 2rem var(--gutter);
+  }
+
+  .parc__grid h2 {
+    grid-column: 1 / span 4;
+    max-width: 9em;
+  }
+
+  .parc__lista {
+    grid-column: 6 / span 7;
+  }
+
+  .parc__item {
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    gap: 1.5rem;
+    padding-block: 1.5rem;
+    border-bottom: 1px solid var(--filete);
+  }
+
+  .parc__item:first-child {
+    border-top: 1px solid var(--tinta);
+  }
+
+  .parc__item img {
+    border-radius: 50%;
+  }
+
+  .parc__item h3 {
+    font-size: var(--t-20);
+    font-weight: 700;
+    color: var(--grafite);
+  }
+
+  .parc__item a {
+    text-decoration: none;
+  }
+
+  .parc__item a:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  .parc__item p {
+    margin-top: 0.375rem;
+    color: var(--tinta-2);
+    max-width: 36em;
+  }
+
+  @media (max-width: 959px) {
+    .parc__grid h2,
+    .parc__lista {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

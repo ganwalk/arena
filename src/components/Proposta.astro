@@ -1,0 +1,142 @@
+---
+import { SITE_ATUAL } from "../data/site";
+import Modulo from "./Modulo.astro";
+
+const praticas = [
+  {
+    titulo: "Pedagogia da Escuta",
+    texto: "Na Educação Infantil, o cuidado entra no currículo. O Arena trata a criança como protagonista, capaz de construir sentido sobre o mundo.",
+  },
+  {
+    titulo: "Formação socioemocional",
+    texto: "No Fundamental II, o Arena Socioemocional é material próprio, com projetos de vida, de preservação do patrimônio histórico e ações de solidariedade.",
+  },
+  {
+    titulo: "Esporte como formação",
+    texto: "A quadra poliesportiva recebe as aulas de Educação Física, os eventos do colégio e o JOGAR, os Jogos Internos do Arena.",
+  },
+];
+---
+
+<section class="prop" id="proposta" aria-labelledby="prop-titulo">
+  <div class="wrap prop__grid">
+    <div class="prop__cabeca">
+      <h2 id="prop-titulo" class="titulo h2">Ensino forte e humanizado</h2>
+      <div class="prop__modulos" aria-hidden="true">
+        <Modulo forma="quarto" cor="var(--petroleo)" giro={90} />
+        <Modulo forma="anel" cor="var(--grafite)" />
+        <Modulo forma="listras" cor="var(--areia)" />
+      </div>
+    </div>
+
+    <figure class="prop__citacao">
+      <blockquote>
+        <p>
+          “Nossa opção é pelo equilíbrio: respeitar os discentes, sem confundir orientação com opressão; exigência com
+          pressão desmedida; autoridade com autoritarismo.”
+        </p>
+      </blockquote>
+      <figcaption>Proposta pedagógica do Colégio Arena</figcaption>
+    </figure>
+
+    <dl class="prop__praticas">
+      {
+        praticas.map((p) => (
+          <div>
+            <dt>{p.titulo}</dt>
+            <dd>{p.texto}</dd>
+          </div>
+        ))
+      }
+    </dl>
+
+    <p class="prop__link">
+      <a class="link" href={`${SITE_ATUAL}/conheca/proposta-pedagogica`}>Ler a proposta pedagógica completa</a>
+    </p>
+  </div>
+</section>
+
+<style>
+  .prop {
+    padding-block: clamp(4rem, 2rem + 7vw, 8rem);
+  }
+
+  .prop__grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 2.5rem var(--gutter);
+  }
+
+  .prop__cabeca {
+    grid-column: 1 / span 4;
+  }
+
+  .prop__modulos {
+    display: grid;
+    grid-template-columns: repeat(3, 56px);
+    margin-top: 2rem;
+  }
+
+  .prop__modulos :global(svg) {
+    width: 56px;
+    height: 56px;
+  }
+
+  .prop__citacao {
+    grid-column: 6 / span 7;
+  }
+
+  .prop__citacao p {
+    font-size: var(--t-32);
+    line-height: 1.3;
+    font-weight: 500;
+    color: var(--grafite);
+    text-wrap: pretty;
+  }
+
+  .prop__citacao figcaption {
+    margin-top: 1rem;
+    font-size: var(--t-14);
+    color: var(--tinta-2);
+  }
+
+  .prop__praticas {
+    grid-column: 6 / span 7;
+    margin: 0;
+    border-top: 1px solid var(--tinta);
+  }
+
+  .prop__praticas div {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    gap: 0.5rem 1.5rem;
+    padding-block: 1.25rem;
+    border-bottom: 1px solid var(--filete);
+  }
+
+  .prop__praticas dt {
+    font-weight: 700;
+    color: var(--grafite);
+  }
+
+  .prop__praticas dd {
+    margin: 0;
+    color: var(--tinta-2);
+  }
+
+  .prop__link {
+    grid-column: 6 / span 7;
+  }
+
+  @media (max-width: 959px) {
+    .prop__cabeca,
+    .prop__citacao,
+    .prop__praticas,
+    .prop__link {
+      grid-column: 1 / -1;
+    }
+    .prop__praticas div {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

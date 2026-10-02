@@ -1,0 +1,140 @@
+---
+import Modulo from "./Modulo.astro";
+---
+
+<section class="hero" aria-labelledby="hero-titulo">
+  <div class="wrap hero__grid">
+    <div class="hero__texto">
+      <h1 id="hero-titulo" class="titulo hero__titulo">Do Setor Bueno para Harvard, Bocconi e Coimbra.</h1>
+      <p class="lead hero__lead">
+        Da Educação Infantil ao pré-vestibular, em três unidades em Goiânia. O Arena usa o material do Sistema Poliedro,
+        tem turmas olímpicas desde o Fundamental e é a única escola de Goiás no College Board.
+      </p>
+      <div class="hero__acoes">
+        <a class="botao" href="#visita">Agendar uma visita</a>
+        <a class="link" href="#etapas">Ver as etapas de ensino</a>
+      </div>
+    </div>
+
+    <div class="hero__painel" data-painel>
+      <figure class="hero__foto">
+        <img
+          src="/img/hero-1600.webp"
+          srcset="/img/hero-800.webp 800w, /img/hero-1600.webp 1600w"
+          sizes="(min-width: 960px) 45vw, 100vw"
+          width="1600"
+          height="768"
+          alt="Alunos do Fundamental com a camiseta do Arena conversando no pátio"
+          fetchpriority="high"
+        />
+      </figure>
+      <div class="m m--a"><Modulo forma="quarto" cor="var(--petroleo)" fundo="var(--grafite)" giro={90} /></div>
+      <div class="m m--b"><Modulo forma="listras" cor="var(--grafite)" fundo="var(--papel)" /></div>
+      <div class="m m--c"><Modulo forma="anel" cor="var(--areia)" fundo="var(--grafite)" /></div>
+      <div class="m m--d"><Modulo forma="triangulo" cor="var(--petroleo)" fundo="var(--grafite)" giro={270} /></div>
+      <div class="m m--e"><Modulo forma="folha" cor="var(--areia)" fundo="var(--papel)" giro={180} /></div>
+      <div class="m m--f"><Modulo forma="quarto" cor="var(--petroleo)" fundo="var(--papel)" giro={0} /></div>
+      <div class="m m--g"><Modulo forma="folha" cor="var(--grafite)" fundo="var(--petroleo)" giro={90} /></div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Cada módulo gira 90° quando o cursor passa por ele: resposta ao gesto, sem animação contínua.
+  const reduzir = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!reduzir) {
+    document.querySelectorAll<HTMLElement>("[data-painel] .m").forEach((m) => {
+      let giro = 0;
+      m.addEventListener("pointerenter", () => {
+        giro += 90;
+        m.style.setProperty("--extra", `${giro}deg`);
+      });
+    });
+  }
+</script>
+
+<style>
+  .hero {
+    padding-block: clamp(2.5rem, 1rem + 5vw, 5.5rem) clamp(3rem, 1rem + 6vw, 6.5rem);
+  }
+
+  .hero__grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 2rem var(--gutter);
+    align-items: center;
+  }
+
+  .hero__texto {
+    grid-column: 1 / span 6;
+  }
+
+  .hero__titulo {
+    font-size: var(--t-64);
+    max-width: 11em;
+    color: var(--grafite);
+  }
+
+  .hero__lead {
+    margin-top: 1.5rem;
+    max-width: 33em;
+  }
+
+  .hero__acoes {
+    margin-top: 2.25rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.75rem;
+  }
+
+  .hero__painel {
+    grid-column: 7 / span 6;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, auto);
+    aspect-ratio: 1;
+  }
+
+  .hero__foto {
+    grid-column: 1 / span 3;
+    grid-row: 1 / span 3;
+    overflow: hidden;
+    border-top-left-radius: 33.333%;
+    background: var(--grafite);
+  }
+
+  .hero__foto img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 45% 40%;
+  }
+
+  .m {
+    aspect-ratio: 1;
+    --extra: 0deg;
+  }
+
+  .m :global(.modulo__forma) {
+    transform: rotate(calc(var(--giro) + var(--extra)));
+  }
+
+  .m--a { grid-column: 4; grid-row: 1; }
+  .m--b { grid-column: 4; grid-row: 2; }
+  .m--c { grid-column: 4; grid-row: 3; }
+  .m--d { grid-column: 1; grid-row: 4; }
+  .m--e { grid-column: 2; grid-row: 4; }
+  .m--f { grid-column: 3; grid-row: 4; }
+  .m--g { grid-column: 4; grid-row: 4; }
+
+  @media (max-width: 959px) {
+    .hero__texto,
+    .hero__painel {
+      grid-column: 1 / -1;
+    }
+    .hero__painel {
+      max-width: 560px;
+    }
+  }
+</style>

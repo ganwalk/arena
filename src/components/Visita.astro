@@ -1,0 +1,229 @@
+---
+import { etapas, unidades, WHATSAPP, WHATSAPP_ROTULO } from "../data/site";
+import Modulo from "./Modulo.astro";
+---
+
+<section class="visita" id="visita" aria-labelledby="visita-titulo">
+  <div class="wrap visita__grid">
+    <div class="visita__agendar">
+      <h2 id="visita-titulo" class="titulo h2">Agende uma visita</h2>
+      <p class="lead">
+        Escolha a etapa e envie a mensagem pelo WhatsApp da secretaria, {WHATSAPP_ROTULO}. Se preferir, ligue para a
+        unidade.
+      </p>
+
+      <form class="agenda" data-agenda action={`https://wa.me/${WHATSAPP}`} method="get" target="_blank">
+        <fieldset>
+          <legend>Etapa de interesse</legend>
+          <div class="agenda__opcoes">
+            {
+              etapas.filter((e) => e.id !== "online").map((e, i) => (
+                <label>
+                  <input type="radio" name="etapa" value={e.nome} checked={i === 0} />
+                  <span>{e.nome}</span>
+                </label>
+              ))
+            }
+          </div>
+        </fieldset>
+        <input type="hidden" name="text" value="" data-texto />
+        <button class="botao" type="submit">Enviar pelo WhatsApp</button>
+      </form>
+    </div>
+
+    <div class="visita__unidades">
+      <h3 class="visita__sub">Unidades em Goiânia</h3>
+      <ul role="list">
+        {
+          unidades.map((u) => (
+            <li class="unidade">
+              <h4>{u.nome}</h4>
+              <p>{u.endereco}</p>
+              <p>
+                <a href={`tel:+55${u.telefone.replace(/\D/g, "")}`}>{u.telefone}</a>
+                <br />
+                <a href={`mailto:${u.email}`}>{u.email}</a>
+              </p>
+              <a class="link" href={u.mapa} rel="noopener">Ver no mapa</a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <div class="visita__modulos" aria-hidden="true">
+      <Modulo forma="folha" cor="var(--grafite)" giro={270} />
+      <Modulo forma="quarto" cor="var(--petroleo)" giro={180} />
+    </div>
+  </div>
+</section>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>("[data-agenda]");
+  form?.addEventListener("submit", () => {
+    const etapa = (form.querySelector("input[name=etapa]:checked") as HTMLInputElement | null)?.value ?? "";
+    form.querySelector<HTMLInputElement>("[data-texto]")!.value =
+      `Olá! Quero agendar uma visita ao Colégio Arena. Etapa de interesse: ${etapa}.`;
+    form.querySelectorAll<HTMLInputElement>("input[name=etapa]").forEach((i) => (i.disabled = true));
+    setTimeout(() => form.querySelectorAll<HTMLInputElement>("input[name=etapa]").forEach((i) => (i.disabled = false)));
+  });
+</script>
+
+<style>
+  .visita {
+    position: relative;
+    padding-block: clamp(4rem, 2rem + 7vw, 8rem);
+    background: var(--areia);
+    overflow: hidden;
+  }
+
+  .visita__grid {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 3rem var(--gutter);
+  }
+
+  .visita__agendar {
+    grid-column: 1 / span 6;
+  }
+
+  .visita .lead {
+    margin-top: 1.25rem;
+    color: #3f4e55;
+  }
+
+  .agenda {
+    margin-top: 2rem;
+  }
+
+  .agenda fieldset {
+    border: 0;
+    margin: 0;
+    padding: 0;
+  }
+
+  .agenda legend {
+    font-weight: 650;
+    margin-bottom: 0.75rem;
+    color: var(--grafite);
+  }
+
+  .agenda__opcoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .agenda label {
+    position: relative;
+    cursor: pointer;
+  }
+
+  .agenda input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+    cursor: pointer;
+  }
+
+  .agenda label span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0.5rem 0.875rem;
+    border: 1px solid #a9a397;
+    border-radius: var(--r-1);
+    background: var(--papel);
+    font-size: var(--t-14);
+    font-weight: 550;
+    transition:
+      background-color 160ms var(--ease),
+      border-color 160ms var(--ease),
+      color 160ms var(--ease);
+  }
+
+  .agenda label:hover span {
+    border-color: var(--grafite);
+  }
+
+  .agenda input:checked + span {
+    background: var(--grafite);
+    border-color: var(--grafite);
+    color: var(--branco);
+  }
+
+  .agenda input:focus-visible + span {
+    outline: 2px solid var(--petroleo-700);
+    outline-offset: 2px;
+  }
+
+  .agenda .botao {
+    margin-top: 1.5rem;
+  }
+
+  .visita__unidades {
+    grid-column: 8 / span 5;
+  }
+
+  .visita__sub {
+    font-size: var(--t-14);
+    font-weight: 600;
+    color: #3f4e55;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--grafite);
+  }
+
+  .unidade {
+    padding-block: 1.25rem;
+    border-bottom: 1px solid #c9c2b5;
+  }
+
+  .unidade h4 {
+    font-size: var(--t-18);
+    font-weight: 700;
+    color: var(--grafite);
+  }
+
+  .unidade p {
+    margin-top: 0.25rem;
+    color: #3f4e55;
+  }
+
+  .unidade p a {
+    text-decoration: none;
+  }
+
+  .unidade p a:hover {
+    text-decoration: underline;
+  }
+
+  .unidade .link {
+    display: inline-block;
+    margin-top: 0.5rem;
+    font-size: var(--t-14);
+  }
+
+  .visita__modulos {
+    position: absolute;
+    right: 0;
+    bottom: calc(-1 * clamp(4rem, 2rem + 7vw, 8rem));
+    display: flex;
+    pointer-events: none;
+  }
+
+  .visita__modulos :global(svg) {
+    width: clamp(48px, 6vw, 88px);
+    height: clamp(48px, 6vw, 88px);
+  }
+
+  @media (max-width: 959px) {
+    .visita__agendar,
+    .visita__unidades {
+      grid-column: 1 / -1;
+    }
+    .visita__modulos {
+      display: none;
+    }
+  }
+</style>

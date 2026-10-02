@@ -1,0 +1,53 @@
+---
+// Um módulo do painel geométrico da marca, desenhado em SVG (100 x 100).
+type Forma = "quarto" | "triangulo" | "listras" | "anel" | "folha" | "ponto" | "cheio";
+interface Props {
+  forma: Forma;
+  cor: string;
+  fundo?: string;
+  giro?: 0 | 90 | 180 | 270;
+  class?: string;
+}
+const { forma, cor, fundo = "transparent", giro = 0, class: classe } = Astro.props;
+const id = `l${Math.random().toString(36).slice(2, 8)}`;
+---
+
+<svg class:list={["modulo", classe]} viewBox="0 0 100 100" aria-hidden="true" focusable="false" style={`--giro:${giro}deg`}>
+  <rect width="100" height="100" fill={fundo} />
+  <g class="modulo__forma">
+    {forma === "quarto" && <path d="M0 100V0a100 100 0 0 1 100 100Z" fill={cor} />}
+    {forma === "triangulo" && <path d="M0 0h100L0 100Z" fill={cor} />}
+    {forma === "folha" && <path d="M0 0h50a50 50 0 0 1 50 50v50H0Z" fill={cor} />}
+    {forma === "ponto" && <circle cx="50" cy="50" r="22" fill={cor} />}
+    {forma === "cheio" && <rect width="100" height="100" fill={cor} />}
+    {forma === "anel" && (
+      <>
+        <circle cx="50" cy="50" r="34" fill={cor} />
+        <circle cx="50" cy="50" r="17" fill={fundo === "transparent" ? "var(--papel)" : fundo} />
+      </>
+    )}
+    {forma === "listras" && (
+      <>
+        <defs>
+          <clipPath id={id}><rect width="100" height="100" /></clipPath>
+        </defs>
+        <g clip-path={`url(#${id})`} stroke={cor} stroke-width="9">
+          {[-80, -50, -20, 10, 40, 70, 100, 130, 160].map((o) => <line x1={o} y1="100" x2={o + 100} y2="0" />)}
+        </g>
+      </>
+    )}
+  </g>
+</svg>
+
+<style>
+  .modulo {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .modulo__forma {
+    transform-origin: 50px 50px;
+    transform: rotate(var(--giro));
+    transition: transform 280ms var(--ease);
+  }
+</style>

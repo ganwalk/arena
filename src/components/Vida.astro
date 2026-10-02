@@ -1,0 +1,124 @@
+---
+import { SITE_ATUAL } from "../data/site";
+---
+
+<section class="vida" aria-labelledby="vida-titulo">
+  <div class="wrap">
+    <h2 id="vida-titulo" class="titulo h2 vida__titulo">AgroLab, eletivas e Escola de Pais</h2>
+
+    <article class="vida__agro">
+      <figure>
+        <img src="/img/agrolab-800.webp" srcset="/img/agrolab-800.webp 800w, /img/agrolab-1600.webp 1200w" sizes="(min-width: 960px) 55vw, 100vw" width="1200" height="801" alt="Alunos em campo durante a primeira visita ao AgroLab" loading="lazy" />
+      </figure>
+      <div>
+        <h3>AgroLab</h3>
+        <p>
+          Uma mini fazenda modelo com manejo de água, monitoramento por drones, análise de solo em campo e
+          aproveitamento de resíduos. Na primeira visita, alunos do 7º e do 9º ano coletaram amostras de solo e tiveram
+          a primeira aula com drones.
+        </p>
+        <a class="link" href={`${SITE_ATUAL}/noticia/319/arena-lanca-agrolab-laboratorio-de-vivencia-do-agronegocio`}>Ler sobre o AgroLab</a>
+      </div>
+    </article>
+
+    <div class="vida__dupla">
+      <article>
+        <img src="/img/escola-de-politica-800.webp" width="800" height="534" alt="Professor Fred Galves fala aos alunos no auditório do Arena" loading="lazy" />
+        <h3>Escola de Política</h3>
+        <p>
+          Disciplina eletiva. No primeiro encontro, o professor Fred Galves, da Faculdade de Ciências Sociais da UFG,
+          conversou com os alunos sobre como os jovens formam valores políticos.
+        </p>
+      </article>
+      <article>
+        <img src="/img/escola-de-pais-800.webp" width="800" height="533" alt="Pais e responsáveis assistem a uma palestra da Escola de Pais" loading="lazy" />
+        <h3>Escola de Pais</h3>
+        <p>
+          Encontros com especialistas para pais e responsáveis sobre autoridade, frustração, bullying, uso de tecnologia,
+          escolha de carreira e outros temas da adolescência.
+        </p>
+        <a class="link" href={`${SITE_ATUAL}/pais/escola-de-pais`}>Conhecer a Escola de Pais</a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<style>
+  .vida {
+    padding-block: clamp(4rem, 2rem + 7vw, 8rem);
+    background: var(--areia-50);
+    border-top: 1px solid var(--filete);
+  }
+
+  .vida__titulo {
+    max-width: 14em;
+  }
+
+  .vida__agro {
+    margin-top: clamp(2rem, 1rem + 3vw, 3.5rem);
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 2rem var(--gutter);
+    align-items: end;
+  }
+
+  .vida__agro figure {
+    grid-column: 1 / span 7;
+    overflow: hidden;
+    border-bottom-right-radius: 20%;
+  }
+
+  .vida__agro img {
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+  }
+
+  .vida__agro > div {
+    grid-column: 9 / span 4;
+  }
+
+  .vida h3 {
+    font-size: var(--t-24);
+    font-weight: 750;
+    color: var(--grafite);
+  }
+
+  .vida p {
+    margin-block: 0.75rem 1rem;
+    color: var(--tinta-2);
+  }
+
+  .vida__dupla {
+    margin-top: clamp(3rem, 1rem + 5vw, 5rem);
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 2.5rem var(--gutter);
+  }
+
+  .vida__dupla article:first-child {
+    grid-column: 2 / span 5;
+  }
+
+  .vida__dupla article:last-child {
+    grid-column: 8 / span 5;
+    margin-top: clamp(0rem, -2rem + 8vw, 6rem);
+  }
+
+  .vida__dupla img {
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    margin-bottom: 1.25rem;
+  }
+
+  @media (max-width: 959px) {
+    .vida__agro figure,
+    .vida__agro > div,
+    .vida__dupla article:first-child,
+    .vida__dupla article:last-child {
+      grid-column: 1 / -1;
+      margin-top: 0;
+    }
+  }
+</style>
