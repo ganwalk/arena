@@ -39,10 +39,15 @@ const primeiro = temas[0];
       }
     </h1>
 
-    <p class="hero__legenda so-desktop" aria-live="polite">
-      <span data-legenda>{primeiro.legenda}</span>
-      <a class="hero__ver" data-ver href={primeiro.link.href}>{primeiro.link.rotulo}</a>
-    </p>
+    <div class="hero__legendas so-desktop">
+      {
+        temas.map((t, i) => (
+          <p class="hero__legenda" data-legenda={i} aria-hidden={i === 0 ? "false" : "true"}>
+            {t.legenda} <a class="hero__ver" href={t.link.href} tabindex={i === 0 ? 0 : -1}>{t.link.rotulo}</a>
+          </p>
+        ))
+      }
+    </div>
 
     <div class="hero__acoes">
       <a class="botao" href="#visita">Agendar uma visita</a>
@@ -111,8 +116,7 @@ const primeiro = temas[0];
   const hero = document.querySelector<HTMLElement>("[data-hero]")!;
   const temas: Tema[] = JSON.parse(hero.querySelector("[data-temas]")!.textContent!);
   const reduzir = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const legenda = hero.querySelector<HTMLElement>("[data-legenda]")!;
-  const ver = hero.querySelector<HTMLAnchorElement>("[data-ver]")!;
+  const legendas = [...hero.querySelectorAll<HTMLElement>("[data-legenda]")];
   const botoes = [...hero.querySelectorAll<HTMLButtonElement>("[data-ir]")];
   const pecas = [...hero.querySelectorAll<HTMLElement>("[data-foto]")];
   const INTERVALO = 5200;
@@ -147,9 +151,10 @@ const primeiro = temas[0];
     atual = (i + temas.length) % temas.length;
     const t = temas[atual];
     botoes.forEach((b, k) => b.setAttribute("aria-pressed", String(k === atual)));
-    legenda.textContent = t.legenda;
-    ver.textContent = t.link.rotulo;
-    ver.href = t.link.href;
+    legendas.forEach((l, k) => {
+      l.setAttribute("aria-hidden", String(k !== atual));
+      l.querySelector("a")!.tabIndex = k === atual ? 0 : -1;
+    });
     pecas.forEach((p, k) => {
       const atraso = reduzir ? 0 : k * 70;
       if (p.dataset.foto === "grande") trocar(p, `${t.grande.src}-1600.webp`, atraso, t.grande.foco, t.grande.alt);
@@ -164,27 +169,13 @@ const primeiro = temas[0];
     hero.style.setProperty("--intervalo", `${INTERVALO}ms`);
     hero.classList.remove("contando");
     void hero.offsetWidth;
-    if (parado || dentro) return;
+    if (parado) return;
     hero.classList.add("contando");
     relogio = window.setTimeout(() => ir(atual + 1), manual ? INTERVALO * 1.6 : INTERVALO);
   }
 
-  // a troca automática para com o cursor ou o foco na hero, e de vez quando a pessoa escolhe uma palavra
-  let dentro = false;
-  const segurar = (v: boolean) => {
-    dentro = v;
-    reiniciar();
-  };
-  hero.addEventListener("pointerenter", (e) => e.pointerType === "mouse" && segurar(true));
-  hero.addEventListener("pointerleave", (e) => e.pointerType === "mouse" && segurar(false));
-  hero.addEventListener("focusin", () => segurar(true));
-  hero.addEventListener("focusout", (e) => !hero.contains(e.relatedTarget as Node) && segurar(false));
-  botoes.forEach((b) =>
-    b.addEventListener("click", () => {
-      parado = true;
-      ir(Number(b.dataset.ir), true);
-    }),
-  );
+  // a troca é automática; escolher uma palavra só recomeça a contagem a partir dela
+  botoes.forEach((b) => b.addEventListener("click", () => ir(Number(b.dataset.ir), true)));
 
   // os módulos de cor giram quando o cursor passa; as fotos ficam paradas
   if (!reduzir) {
@@ -262,13 +253,33 @@ const primeiro = temas[0];
   }
 
 
-  .hero__legenda {
+  /* as três legendas ficam empilhadas na mesma célula: a altura é sempre a da maior, sem salto de layout */
+  .hero__legendas {
+    display: grid;
     margin-top: 1.5rem;
     max-width: 30em;
+  }
+
+  .hero__legenda {
+    grid-area: 1 / 1;
+    opacity: 0;
+    transform: translateY(6px);
+    transition:
+      opacity 300ms var(--ease),
+      transform 300ms var(--ease);
+    pointer-events: none;
+  }
+
+  .hero__legenda[aria-hidden="false"] {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+
+  .hero__legenda {
     font-size: var(--t-18);
     color: #c6d0d2;
     line-height: 1.5;
-    min-height: 3em;
   }
 
   .hero__ver {
