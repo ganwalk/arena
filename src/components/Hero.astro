@@ -345,12 +345,17 @@ const primeiro = temas[0];
 
 
   /* ---------- mosaico */
+  /* o mosaico termina onde a moldura termina: nenhuma forma passa por baixo da borda branca */
   .mosaico {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     grid-template-rows: repeat(4, 1fr);
-    height: var(--altura);
-    width: var(--altura);
+    height: calc(var(--altura) - var(--m));
+    width: calc(var(--altura) - var(--m));
+    margin: 0 var(--m) var(--m) 0;
+    align-self: start;
+    border-radius: 0 calc(2.25 * var(--m)) calc(2.25 * var(--m)) 0;
+    overflow: hidden;
   }
 
   .peca {

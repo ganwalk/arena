@@ -145,11 +145,11 @@ export const redes = [
 /** Vídeo institucional da hero. Quando existir, coloque o arquivo em public/video/ e informe o caminho aqui. */
 export const HERO_VIDEO: { src: string; poster: string } | null = null;
 
-/** Os três temas do slogan. Cada um troca as fotos do mosaico da hero (a grande segue a ordem do carrossel original) e a legenda. */
+/** Os três temas do slogan. Cada um troca as fotos do mosaico da hero (a grande é a foto que melhor representa cada palavra) e a legenda. */
 export const temas = [
   {
     id: "forte",
-    grande: { src: "/img/infantil", foco: "26% 45%", alt: "Menina da Educação Infantil sorrindo no parque do Arena" },
+    grande: { src: "/img/medio", foco: "50% 35%", alt: "Vestibulandos do Arena sujos de lama comemorando a aprovação no trote" },
     palavra: "forte",
     legenda: "4.922 premiações em olimpíadas entre 2023 e 2025 e ex-alunos aprovados em universidades de 11 países.",
     link: { rotulo: "Ver as turmas olímpicas", href: "#olimpicas" },
@@ -164,12 +164,12 @@ export const temas = [
   },
   {
     id: "inovadora",
-    grande: { src: "/img/medio", foco: "50% 35%", alt: "Vestibulandos do Arena sujos de lama comemorando no trote" },
+    grande: { src: "/img/agrolab", foco: "45% 40%", alt: "Alunos em campo com o professor na primeira visita ao AgroLab" },
     palavra: "inovadora",
     legenda: "O AgroLab é uma mini fazenda modelo com drones e análise de solo, e o Ensino Médio tem laboratórios de ciências.",
     link: { rotulo: "Conhecer o AgroLab", href: "#vida" },
     fotos: [
-      "/img/agrolab-800.webp",
+      "/mapa/t/galeria_19_1777388973_0.webp",
       "/img/aulas-praticas-800.webp",
       "/mapa/t/galeria_19_1777388973_5.webp",
       "/mapa/t/galeria_42_1777489759_8.webp",
@@ -179,7 +179,7 @@ export const temas = [
   },
   {
     id: "humanizada",
-    grande: { src: "/img/hero", foco: "48% 35%", alt: "Alunos do Fundamental com a camiseta do Arena conversando no pátio" },
+    grande: { src: "/img/infantil", foco: "26% 45%", alt: "Menina da Educação Infantil sorrindo no parque do Arena" },
     palavra: "humanizada",
     legenda: "Pedagogia da Escuta desde a Educação Infantil e uma Escola de Pais para as famílias.",
     link: { rotulo: "Ler a proposta pedagógica", href: "#proposta" },
