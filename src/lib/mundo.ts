@@ -89,6 +89,25 @@ export function numeros() {
   };
 }
 
+const CONTINENTE: Record<string, string> = {
+  "Estados Unidos da América": "América", Brasil: "América", Canadá: "América", México: "América", Argentina: "América", Panamá: "América",
+  China: "Ásia e Oriente Médio", Japão: "Ásia e Oriente Médio", Azerbaijão: "Ásia e Oriente Médio", Bahrein: "Ásia e Oriente Médio",
+  "Emirados Árabes Unidos": "Ásia e Oriente Médio", Geórgia: "Ásia e Oriente Médio", Vietnã: "Ásia e Oriente Médio",
+  Quênia: "África e Oceania", Austrália: "África e Oceania",
+};
+export const ORDEM_CONTINENTES = ["América", "Europa", "Ásia e Oriente Médio", "África e Oceania"];
+
+/** Países agrupados por continente; país sem entrada explícita é europeu. */
+export function continentes() {
+  const grupos = ORDEM_CONTINENTES.map((nome) => ({ nome, paises: [] as ReturnType<typeof paises>, total: 0 }));
+  for (const p of paises()) {
+    const g = grupos.find((x) => x.nome === (CONTINENTE[p.pais] ?? "Europa"))!;
+    g.paises.push(p);
+    g.total += p.ids.length;
+  }
+  return grupos;
+}
+
 /** Países com registros, do maior para o menor. */
 export function paises() {
   const m = new Map<string, { pais: string; iso: string; ids: number[] }>();

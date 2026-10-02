@@ -63,7 +63,6 @@ const lugar = (r: Registro) => [r.cidade, pais(r.pais)].filter(Boolean).join(", 
 
 export interface ApiMundo {
   abrir(id: number): void;
-  sortear(): void;
 }
 
 export async function iniciarMundo(secao: HTMLElement): Promise<ApiMundo | null> {
@@ -296,6 +295,7 @@ export async function iniciarMundo(secao: HTMLElement): Promise<ApiMundo | null>
     return `
       <article class="registro">
         ${voltar ? `<button type="button" class="registro__voltar" data-voltar>Voltar para ${esc(voltar.titulo)}</button>` : ""}
+        <div class="registro__midia">
         ${
           principal
             ? `<figure class="registro__foto"><img data-foto src="/mapa/${principal}" alt="Foto do registro ${esc(r.nome)}" width="1280" height="853" decoding="async"></figure>`
@@ -312,12 +312,15 @@ export async function iniciarMundo(secao: HTMLElement): Promise<ApiMundo | null>
                 .join("")}</ul>`
             : ""
         }
+        </div>
+        <div class="registro__corpo">
         <p class="registro__cat"><span class="cat cat--${r.cat}" aria-hidden="true"></span>${ROTULO[r.cat]}</p>
         <h3 class="registro__titulo" tabindex="-1">${esc(r.nome)}</h3>
         <p class="registro__lugar">${esc(lugar(r))}</p>
         <div class="registro__texto" data-texto>${texto(curto ? blocos.slice(0, 3) : blocos)}</div>
         ${curto ? `<button type="button" class="registro__mais" data-mais>Ler o texto completo</button>` : ""}
         ${alunos}
+        </div>
       </article>`;
   }
 
@@ -342,9 +345,6 @@ export async function iniciarMundo(secao: HTMLElement): Promise<ApiMundo | null>
     );
   }
 
-  let filtroAtual = 15;
-  filtros.forEach((b) => b.addEventListener("click", () => (filtroAtual = Number(b.dataset.filtro))));
-
   /** Seleciona o ponto do registro e abre o registro no painel. */
   function abrir(id: number) {
     const r = porId.get(id);
@@ -360,19 +360,5 @@ export async function iniciarMundo(secao: HTMLElement): Promise<ApiMundo | null>
     ligarRegistro(r);
   }
 
-  /** Abre um registro ao acaso entre os que passam no filtro atual. */
-  function sortear() {
-    const candidatos = dados.registros.filter((r) => BIT[r.cat] & filtroAtual && r.id !== (atualId ?? -1));
-    const r = candidatos[Math.floor(Math.random() * candidatos.length)];
-    atualId = r.id;
-    abrir(r.id);
-    tela.scrollIntoView({ behavior: reduzir ? "auto" : "smooth", block: "center" });
-    // no celular, o mapa rola até o ponto sorteado
-    const p = pontos.find((x) => x.ids.includes(r.id))!;
-    const c = mapa.centroCss(p.c, p.r);
-    palco.scrollTo({ left: c.x - palco.clientWidth / 2, behavior: reduzir ? "auto" : "smooth" });
-  }
-  let atualId: number | null = null;
-
-  return { abrir, sortear };
+  return { abrir };
 }

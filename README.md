@@ -21,7 +21,7 @@ npm run check    # tipos e diagnósticos do Astro
 
 Seguindo o [no-red-flags](https://github.com/armandoauvp/no-red-flags):
 
-- **Cor:** grafite da marca (`#2E3B42`) como base escura, petróleo (`#209BA0`, e `#0B7377` para texto e botões, por contraste) como única cor de ação, areia do painel (`#E3DDD2`) como superfície de apoio.
+- **Cor:** grafite da marca (`#2E3B42`) como base escura, petróleo (`#209BA0`, e `#0B7377` para texto e botões, por contraste) como única cor de ação, neutros frios (`#EEF3F3` e `#D9E3E4`) como superfície de apoio. Sem bege, por decisão de projeto.
 - **Tipo:** Schibsted Grotesk, a fonte que o site atual já usa. Títulos em peso 800, sem itálico; o itálico da campanha da marca aparece só no destino da hero ("para Yale.").
 - **Estrutura:** o módulo quadrado do painel geométrico da marca (quarto de círculo, triângulo, listras, anel). Grid de 12 colunas e filetes finos, sem cartões decorativos.
 
@@ -52,7 +52,6 @@ Cada célula de terra (4° × 4°) é um módulo do painel. A costa é arredonda
 - WebGL2 com instâncias (uma chamada de desenho para a terra, outra para os pontos). Sem WebGL2, o mesmo desenho sai estático em Canvas 2D.
 - Os dados (`/mundo.json`, cerca de 160 KB) só são baixados quando a seção se aproxima da tela.
 - A lista de países dá acesso por teclado a todos os registros.
-- "Sortear uma conquista" abre um registro ao acaso entre os do filtro atual.
 
 ## Dados
 

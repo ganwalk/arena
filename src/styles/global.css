@@ -3,7 +3,7 @@
 
 /*
   Direção
-  Cor: grafite da marca como base escura, petróleo como única cor de ação, areia do painel como superfície de apoio.
+  Cor: grafite da marca como base escura, petróleo como única cor de ação, neutros frios (gelo e névoa) como superfície de apoio. Nada de bege.
   Tipo: Schibsted Grotesk, a fonte que o site atual já usa; títulos em peso 800, itálico só no destino da hero.
   Estrutura: o módulo quadrado do painel geométrico. Grid de 12 colunas, filetes finos, sem cartões decorativos.
 */
@@ -15,18 +15,19 @@
   --petroleo: #209ba0;
   --petroleo-700: #0b7377;
   --petroleo-claro: #5fc9cd;
-  --areia: #e3ddd2;
-  --areia-50: #f3f0ea;
-  --papel: #fbfaf8;
+  /* neutros frios, puxados para o grafite e o petróleo da marca (sem bege) */
+  --gelo: #d9e3e4;
+  --nevoa: #eef3f3;
+  --papel: #ffffff;
   --tinta: #1f2a2f;
   --tinta-2: #4d5d64;
-  --filete: #d6d2ca;
+  --filete: #d5dde0;
   --branco: #ffffff;
 
   /* categorias do mapa (sempre acompanhadas de rótulo) */
   --cat-aprovacao: #4cc3c8;
   --cat-olimpiada: #f0b54b;
-  --cat-viagem: #e3ddd2;
+  --cat-viagem: #e8eef0;
   --cat-torneio: #ef7a68;
 
   --fonte: "Schibsted Grotesk Variable", "Schibsted Grotesk", system-ui, sans-serif;
