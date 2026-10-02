@@ -102,11 +102,12 @@ const pilares = [
     },
     esporte: {
       legenda: "Esporte como formação",
+      // troféu: alças (anéis), bojo arredondado, haste afunilando e base larga
       celulas: [
-        ["anel", 0, C], ["listras", 0, T], ["listras", 1, T], ["ponto", 0, G],
+        ["anel", 0, T], ["cheio", 0, T], ["cheio", 0, T], ["anel", 0, T],
+        _, ["quarto", 1, T], ["quarto", 0, T], _,
         _, ["triangulo", 1, T], ["triangulo", 0, T], _,
-        ["listras", 0, C], ["quarto", 2, G], ["quarto", 3, G], _,
-        _, ["quarto", 1, G], ["quarto", 0, G], ["triangulo", 3, C],
+        ["triangulo", 2, G], ["cheio", 0, G], ["cheio", 0, G], ["triangulo", 3, G],
       ],
     },
   };

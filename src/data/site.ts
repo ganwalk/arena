@@ -145,13 +145,51 @@ export const redes = [
 /** Vídeo institucional da hero. Quando existir, coloque o arquivo em public/video/ e informe o caminho aqui. */
 export const HERO_VIDEO: { src: string; poster: string } | null = null;
 
-/** Destinos que a hero percorre. Cada um aponta para um registro do mapa "Arena pelo mundo". */
-export const destinos = [
-  { nome: "Yale", id: 1, legenda: "YMUN, a simulação da ONU da Universidade Yale" },
-  { nome: "Harvard", id: 7, legenda: "HMUN, a simulação da ONU de Harvard" },
-  { nome: "Londres", id: 17, legenda: "British English Olympics, em Londres" },
-  { nome: "Zurique", id: 162, legenda: "IYPT, o torneio internacional de física" },
-  { nome: "o Texas", id: 19, legenda: "Agro Arena, viagem de estudos sobre agronegócio" },
-  { nome: "Paris", id: 12, legenda: "Arena World Discovery, viagem de estudos pela Europa" },
-  { nome: "Toronto", id: 163, legenda: "Summer Program de imersão acadêmica no Canadá" },
+/** Os três temas do slogan. Cada um troca as fotos do mosaico da hero (a grande segue a ordem do carrossel original) e a legenda. */
+export const temas = [
+  {
+    id: "forte",
+    grande: { src: "/img/infantil", foco: "26% 45%", alt: "Menina da Educação Infantil sorrindo no parque do Arena" },
+    palavra: "forte",
+    legenda: "4.922 premiações em olimpíadas entre 2023 e 2025 e ex-alunos aprovados em universidades de 11 países.",
+    link: { rotulo: "Ver as turmas olímpicas", href: "#olimpicas" },
+    fotos: [
+      "/img/olimpicas-800.webp",
+      "/mapa/t/galeria_42_1777489759_1.webp",
+      "/img/cambridge-800.webp",
+      "/mapa/t/galeria_17_1777382639_4.webp",
+      "/mapa/t/galeria_42_1777489759_6.webp",
+      "/mapa/t/galeria_42_1777489759_2.webp",
+    ],
+  },
+  {
+    id: "inovadora",
+    grande: { src: "/img/medio", foco: "50% 35%", alt: "Vestibulandos do Arena sujos de lama comemorando no trote" },
+    palavra: "inovadora",
+    legenda: "O AgroLab é uma mini fazenda modelo com drones e análise de solo, e o Ensino Médio tem laboratórios de ciências.",
+    link: { rotulo: "Conhecer o AgroLab", href: "#vida" },
+    fotos: [
+      "/img/agrolab-800.webp",
+      "/img/aulas-praticas-800.webp",
+      "/mapa/t/galeria_19_1777388973_5.webp",
+      "/mapa/t/galeria_42_1777489759_8.webp",
+      "/mapa/t/galeria_19_1777388973_7.webp",
+      "/img/escola-de-politica-800.webp",
+    ],
+  },
+  {
+    id: "humanizada",
+    grande: { src: "/img/hero", foco: "48% 35%", alt: "Alunos do Fundamental com a camiseta do Arena conversando no pátio" },
+    palavra: "humanizada",
+    legenda: "Pedagogia da Escuta desde a Educação Infantil e uma Escola de Pais para as famílias.",
+    link: { rotulo: "Ler a proposta pedagógica", href: "#proposta" },
+    fotos: [
+      "/img/fundamental-1-800.webp",
+      "/mapa/t/galeria_70_1777980660_1.webp",
+      "/img/escola-de-pais-800.webp",
+      "/mapa/t/galeria_42_1777489759_3.webp",
+      "/mapa/t/54168260369_b440e46d58_c.webp",
+      "/mapa/t/galeria_42_1777489759_4.webp",
+    ],
+  },
 ];

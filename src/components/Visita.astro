@@ -52,8 +52,8 @@ import Modulo from "./Modulo.astro";
     </div>
 
     <div class="visita__modulos" aria-hidden="true">
-      <span data-gira><Modulo forma="folha" cor="var(--grafite)" giro={270} /></span>
-      <span data-gira><Modulo forma="quarto" cor="var(--petroleo)" giro={180} /></span>
+      <span data-gira><Modulo forma="folha" cor="var(--branco)" giro={270} /></span>
+      <span data-gira><Modulo forma="quarto" cor="var(--branco)" giro={180} /></span>
     </div>
   </div>
 </section>
@@ -70,11 +70,20 @@ import Modulo from "./Modulo.astro";
 </script>
 
 <style>
+  /* fachada da unidade do Fundamental com uma camada grafite por cima; tudo em branco */
   .visita {
     position: relative;
     padding-block: clamp(4rem, 2rem + 7vw, 8rem);
-    background: var(--gelo);
+    background:
+      linear-gradient(rgb(28 37 41 / 0.84), rgb(28 37 41 / 0.84)),
+      url("/mapa/galeria_70_1777980660_2.webp") center 40% / cover no-repeat,
+      var(--grafite-900);
+    color: var(--branco);
     overflow: hidden;
+  }
+
+  .visita :global(.titulo) {
+    color: var(--branco);
   }
 
   .visita__grid {
@@ -90,7 +99,7 @@ import Modulo from "./Modulo.astro";
 
   .visita .lead {
     margin-top: 1.25rem;
-    color: #3f4e55;
+    color: #dbe2e3;
   }
 
   .agenda {
@@ -106,7 +115,7 @@ import Modulo from "./Modulo.astro";
   .agenda legend {
     font-weight: 650;
     margin-bottom: 0.75rem;
-    color: var(--grafite);
+    color: var(--branco);
   }
 
   .agenda__opcoes {
@@ -132,9 +141,10 @@ import Modulo from "./Modulo.astro";
     align-items: center;
     min-height: 44px;
     padding: 0.5rem 0.875rem;
-    border: 1px solid #a7b4b8;
+    border: 1px solid rgb(255 255 255 / 0.45);
     border-radius: var(--r-1);
-    background: var(--papel);
+    background: transparent;
+    color: var(--branco);
     font-size: var(--t-14);
     font-weight: 550;
     transition:
@@ -144,22 +154,28 @@ import Modulo from "./Modulo.astro";
   }
 
   .agenda label:hover span {
-    border-color: var(--grafite);
+    border-color: var(--branco);
   }
 
   .agenda input:checked + span {
-    background: var(--grafite);
-    border-color: var(--grafite);
-    color: var(--branco);
+    background: var(--branco);
+    border-color: var(--branco);
+    color: var(--grafite-900);
   }
 
   .agenda input:focus-visible + span {
-    outline: 2px solid var(--petroleo-700);
+    outline: 2px solid var(--branco);
     outline-offset: 2px;
   }
 
   .agenda .botao {
     margin-top: 1.5rem;
+    background: var(--branco);
+    color: var(--grafite-900);
+  }
+
+  .agenda .botao:hover {
+    background: var(--gelo);
   }
 
   .visita__unidades {
@@ -169,25 +185,29 @@ import Modulo from "./Modulo.astro";
   .visita__sub {
     font-size: var(--t-14);
     font-weight: 600;
-    color: #3f4e55;
+    color: #dbe2e3;
     padding-bottom: 0.75rem;
-    border-bottom: 1px solid var(--grafite);
+    border-bottom: 1px solid var(--branco);
   }
 
   .unidade {
     padding-block: 1.25rem;
-    border-bottom: 1px solid #c2cfd2;
+    border-bottom: 1px solid rgb(255 255 255 / 0.22);
   }
 
   .unidade h4 {
     font-size: var(--t-18);
     font-weight: 700;
-    color: var(--grafite);
+    color: var(--branco);
   }
 
   .unidade p {
     margin-top: 0.25rem;
-    color: #3f4e55;
+    color: #dbe2e3;
+  }
+
+  .unidade a {
+    color: var(--branco);
   }
 
   .unidade p a {

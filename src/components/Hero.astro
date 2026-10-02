@@ -1,69 +1,47 @@
 ---
-import { destinos, HERO_VIDEO } from "../data/site";
-import { registros } from "../lib/mundo";
-
-// Fotos de cada destino, tiradas da base do mapa.
-const lista = destinos.map((d) => {
-  const r = registros.find((x) => x.id === d.id)!;
-  const fotos = [...(r.capa ? [r.capa] : []), ...r.fotos].slice(0, 10);
-  return { nome: d.nome, id: d.id, legenda: d.legenda, fotos };
-});
+import { HERO_VIDEO, temas } from "../data/site";
 
 // Mosaico 4 x 4 no ritmo do painel da marca: fotos recortadas por módulos e módulos de cor.
+// As fotos nunca giram (só os módulos de cor giram), para ficarem sempre na orientação certa.
 type Peca =
-  | { tipo: "foto"; c: number; r: number; tam?: 2; forma: string; giro: number }
+  | { tipo: "foto"; c: number; r: number; tam?: 2; forma: string }
   | { tipo: "cor"; c: number; r: number; forma: string; cor: string; fundo: string; giro: number };
 const pecas: Peca[] = [
-  { tipo: "foto", c: 1, r: 1, forma: "quarto", giro: 0 },
+  { tipo: "foto", c: 1, r: 1, forma: "quarto-sd" },
   { tipo: "cor", c: 2, r: 1, forma: "anel", cor: "var(--gelo)", fundo: "var(--grafite-600)", giro: 0 },
-  { tipo: "foto", c: 3, r: 1, tam: 2, forma: "folha-grande", giro: 0 },
+  { tipo: "foto", c: 3, r: 1, tam: 2, forma: "folha-grande" },
   { tipo: "cor", c: 1, r: 2, forma: "triangulo", cor: "var(--petroleo)", fundo: "transparent", giro: 0 },
-  { tipo: "foto", c: 2, r: 2, forma: "folha", giro: 90 },
-  { tipo: "foto", c: 1, r: 3, forma: "circulo", giro: 0 },
+  { tipo: "foto", c: 2, r: 2, forma: "folha-id" },
+  { tipo: "foto", c: 1, r: 3, forma: "circulo" },
   { tipo: "cor", c: 2, r: 3, forma: "listras", cor: "var(--gelo)", fundo: "transparent", giro: 0 },
-  { tipo: "foto", c: 3, r: 3, forma: "quarto", giro: 270 },
+  { tipo: "foto", c: 3, r: 3, forma: "quarto-se" },
   { tipo: "cor", c: 4, r: 3, forma: "quarto", cor: "var(--petroleo)", fundo: "transparent", giro: 180 },
   { tipo: "cor", c: 1, r: 4, forma: "folha", cor: "var(--gelo)", fundo: "transparent", giro: 180 },
-  { tipo: "foto", c: 2, r: 4, forma: "quarto", giro: 90 },
+  { tipo: "foto", c: 2, r: 4, forma: "quarto-id" },
   { tipo: "cor", c: 3, r: 4, forma: "ponto", cor: "var(--petroleo)", fundo: "var(--grafite-600)", giro: 0 },
-  { tipo: "foto", c: 4, r: 4, forma: "folha", giro: 270 },
+  { tipo: "foto", c: 4, r: 4, forma: "folha-se" },
 ];
 let n = 0;
-const fotosPecas = pecas.map((p) => (p.tipo === "foto" ? n++ : -1));
-const primeiro = lista[0];
-const foto = (i: number, d = primeiro) => d.fotos[i % d.fotos.length];
+const indicePeca = pecas.map((p) => (p.tipo === "foto" && p.tam !== 2 ? n++ : -1));
+const primeiro = temas[0];
 ---
 
 <section class="hero" aria-labelledby="hero-titulo" data-hero>
   <div class="hero__texto">
     <h1 id="hero-titulo" class="titulo hero__titulo">
-      <span class="hero__linha">Do Setor Bueno</span>
-      <span class="hero__linha">para <span class="hero__destino" data-destino aria-live="polite">{primeiro.nome}</span>.</span>
+      Uma escola{" "}
+      {
+        temas.map((t, i) => (
+          <Fragment>
+            <span class="hero__grupo"><button type="button" class="hero__palavra" data-ir={i} aria-pressed={i === 0 ? "true" : "false"}>{t.palavra}<span class="hero__barra" aria-hidden="true" /></button>{i === 0 ? "," : i === 2 ? "." : ""}</span>{i === 1 ? " e " : i === 0 ? " " : ""}
+          </Fragment>
+        ))
+      }
     </h1>
-    <div class="hero__destinos">
-      <button type="button" class="hero__pausa" data-pausa aria-pressed="false">
-        <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
-          <path class="i-pausa" d="M3 2h3v10H3zM8 2h3v10H8z" fill="currentColor" />
-          <path class="i-tocar" d="M3 1.5v11L12 7z" fill="currentColor" />
-        </svg>
-        <span class="sr-only" data-pausa-rotulo>Pausar a troca de destinos</span>
-      </button>
-      <ul role="list">
-        {
-          lista.map((d, i) => (
-            <li>
-              <button type="button" data-ir={i} aria-current={i === 0 ? "true" : "false"}>
-                {d.nome.replace(/^o /, "")}
-                <span class="hero__barra" aria-hidden="true" />
-              </button>
-            </li>
-          ))
-        }
-      </ul>
-    </div>
-    <p class="hero__legenda so-desktop">
-      <span data-legenda>{primeiro.legenda}</span>.
-      <button type="button" class="hero__ver" data-ver>Ver no mapa</button>
+
+    <p class="hero__legenda so-desktop" aria-live="polite">
+      <span data-legenda>{primeiro.legenda}</span>
+      <a class="hero__ver" data-ver href={primeiro.link.href}>{primeiro.link.rotulo}</a>
     </p>
 
     <p class="hero__lead so-desktop">
@@ -74,36 +52,46 @@ const foto = (i: number, d = primeiro) => d.fotos[i % d.fotos.length];
       <a class="botao" href="#visita">Agendar uma visita</a>
       <a class="hero__link so-desktop" href="#etapas">Ver as etapas de ensino</a>
     </div>
-
   </div>
 
-  <div class="mosaico" data-mosaico aria-hidden="true">
+  <div class="mosaico" data-mosaico>
     {
       pecas.map((p, i) =>
         p.tipo === "foto" ? (
-          <button
-            type="button"
-            tabindex="-1"
+          <span
             class:list={["peca", "peca--foto", `forma-${p.forma}`, { "peca--grande": p.tam === 2 }]}
-            style={`grid-column:${p.c} / span ${p.tam ?? 1};grid-row:${p.r} / span ${p.tam ?? 1};--giro:${p.giro}deg`}
-            data-foto={fotosPecas[i]}
+            style={`grid-column:${p.c} / span ${p.tam ?? 1};grid-row:${p.r} / span ${p.tam ?? 1}`}
+            data-foto={p.tam === 2 ? "grande" : indicePeca[i]}
           >
             <span class="peca__forma">
               {p.tam === 2 && HERO_VIDEO ? (
                 <video class="peca__video" src={HERO_VIDEO.src} poster={HERO_VIDEO.poster} autoplay muted loop playsinline />
+              ) : p.tam === 2 ? (
+                <>
+                  <img
+                    class="peca__img ativa"
+                    src={`${primeiro.grande.src}-1600.webp`}
+                    srcset={`${primeiro.grande.src}-800.webp 800w, ${primeiro.grande.src}-1600.webp 1600w`}
+                    sizes="(min-width: 1101px) 30vw, 50vw"
+                    style={`object-position:${primeiro.grande.foco}`}
+                    alt={primeiro.grande.alt}
+                    fetchpriority="high"
+                  />
+                  <img class="peca__img" alt="" decoding="async" />
+                </>
               ) : (
                 <>
-                  <img class="peca__img ativa" src={`/mapa/${p.tam === 2 ? "" : "t/"}${foto(fotosPecas[i])}`} alt="" decoding="async" />
+                  <img class="peca__img ativa" src={primeiro.fotos[indicePeca[i]]} alt="" decoding="async" />
                   <img class="peca__img" alt="" decoding="async" />
                 </>
               )}
             </span>
-          </button>
+          </span>
         ) : (
           <span
             class:list={["peca", "peca--cor", `forma-${p.forma}`]}
             style={`grid-column:${p.c};grid-row:${p.r};--giro:${p.giro}deg;--cor:${p.cor};--fundo:${p.fundo}`}
-            data-gira
+            aria-hidden="true"
           >
             <span class="peca__forma" />
           </span>
@@ -112,71 +100,66 @@ const foto = (i: number, d = primeiro) => d.fotos[i % d.fotos.length];
     }
   </div>
 
-  <script type="application/json" data-destinos set:html={JSON.stringify(lista)} />
+  <script type="application/json" data-temas set:html={JSON.stringify(temas)} />
 </section>
 
 <script>
-  interface Destino {
-    nome: string;
-    id: number;
+  interface Tema {
+    id: string;
+    palavra: string;
     legenda: string;
+    link: { rotulo: string; href: string };
+    grande: { src: string; foco: string; alt: string };
     fotos: string[];
   }
   const hero = document.querySelector<HTMLElement>("[data-hero]")!;
-  const lista: Destino[] = JSON.parse(hero.querySelector("[data-destinos]")!.textContent!);
+  const temas: Tema[] = JSON.parse(hero.querySelector("[data-temas]")!.textContent!);
   const reduzir = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const palavra = hero.querySelector<HTMLElement>("[data-destino]")!;
   const legenda = hero.querySelector<HTMLElement>("[data-legenda]")!;
+  const ver = hero.querySelector<HTMLAnchorElement>("[data-ver]")!;
   const botoes = [...hero.querySelectorAll<HTMLButtonElement>("[data-ir]")];
-  const pausa = hero.querySelector<HTMLButtonElement>("[data-pausa]")!;
   const pecas = [...hero.querySelectorAll<HTMLElement>("[data-foto]")];
   const INTERVALO = 5200;
 
   let atual = 0;
-  let pausado = reduzir;
+  let parado = reduzir;
   let relogio = 0;
 
-  // pré-carrega as fotos do próximo destino para a troca não piscar
-  const carregar = (d: Destino) =>
-    d.fotos.forEach((f) => {
-      new Image().src = `/mapa/t/${f}`;
-    });
+  const carregar = (t: Tema) => {
+    [...t.fotos, `${t.grande.src}-1600.webp`].forEach((f) => (new Image().src = f));
+  };
 
-  function girar(el: HTMLElement, passos = 1) {
-    const g = Number(el.dataset.extra || 0) + 90 * passos;
-    el.dataset.extra = String(g);
-    el.style.setProperty("--extra", `${g}deg`);
+  function trocar(p: HTMLElement, src: string, atraso: number, foco?: string, alt?: string) {
+    const imgs = p.querySelectorAll<HTMLImageElement>(".peca__img");
+    if (imgs.length < 2) return;
+    const [a, b] = imgs[0].classList.contains("ativa") ? [imgs[0], imgs[1]] : [imgs[1], imgs[0]];
+    setTimeout(() => {
+      b.removeAttribute("srcset");
+      b.src = src;
+      b.style.objectPosition = foco ?? "";
+      b.alt = alt ?? "";
+      a.alt = "";
+      const mostrar = () => {
+        b.classList.add("ativa");
+        a.classList.remove("ativa");
+      };
+      b.complete ? mostrar() : b.addEventListener("load", mostrar, { once: true });
+    }, atraso);
   }
 
   function ir(i: number, manual = false) {
-    atual = (i + lista.length) % lista.length;
-    const d = lista[atual];
-    palavra.classList.remove("entra");
-    void palavra.offsetWidth;
-    palavra.textContent = d.nome;
-    palavra.classList.add("entra");
-    legenda.textContent = d.legenda;
-    botoes.forEach((b, k) => b.setAttribute("aria-current", String(k === atual)));
+    atual = (i + temas.length) % temas.length;
+    const t = temas[atual];
+    botoes.forEach((b, k) => b.setAttribute("aria-pressed", String(k === atual)));
+    legenda.textContent = t.legenda;
+    ver.textContent = t.link.rotulo;
+    ver.href = t.link.href;
     pecas.forEach((p, k) => {
-      const n = Number(p.dataset.foto);
-      const imgs = p.querySelectorAll<HTMLImageElement>(".peca__img");
-      if (imgs.length < 2) return;
-      const [a, b] = imgs[0].classList.contains("ativa") ? [imgs[0], imgs[1]] : [imgs[1], imgs[0]];
-      const grande = p.classList.contains("peca--grande");
-      setTimeout(
-        () => {
-          b.src = `/mapa/${grande ? "" : "t/"}${d.fotos[n % d.fotos.length]}`;
-          const trocar = () => {
-            b.classList.add("ativa");
-            a.classList.remove("ativa");
-            if (!reduzir) girar(p);
-          };
-          b.complete ? trocar() : b.addEventListener("load", trocar, { once: true });
-        },
-        reduzir ? 0 : k * 70,
-      );
+      const atraso = reduzir ? 0 : k * 70;
+      if (p.dataset.foto === "grande") trocar(p, `${t.grande.src}-1600.webp`, atraso, t.grande.foco, t.grande.alt);
+      else trocar(p, t.fotos[Number(p.dataset.foto) % t.fotos.length], atraso);
     });
-    carregar(lista[(atual + 1) % lista.length]);
+    carregar(temas[(atual + 1) % temas.length]);
     reiniciar(manual);
   }
 
@@ -185,41 +168,46 @@ const foto = (i: number, d = primeiro) => d.fotos[i % d.fotos.length];
     hero.style.setProperty("--intervalo", `${INTERVALO}ms`);
     hero.classList.remove("contando");
     void hero.offsetWidth;
-    if (pausado) return;
+    if (parado || dentro) return;
     hero.classList.add("contando");
     relogio = window.setTimeout(() => ir(atual + 1), manual ? INTERVALO * 1.6 : INTERVALO);
   }
 
-  function definirPausa(v: boolean) {
-    pausado = v;
-    pausa.setAttribute("aria-pressed", String(v));
-    hero.querySelector("[data-pausa-rotulo]")!.textContent = v ? "Retomar a troca de destinos" : "Pausar a troca de destinos";
-    hero.classList.toggle("pausado", v);
+  // a troca automática para com o cursor ou o foco na hero, e de vez quando a pessoa escolhe uma palavra
+  let dentro = false;
+  const segurar = (v: boolean) => {
+    dentro = v;
     reiniciar();
-  }
+  };
+  hero.addEventListener("pointerenter", (e) => e.pointerType === "mouse" && segurar(true));
+  hero.addEventListener("pointerleave", (e) => e.pointerType === "mouse" && segurar(false));
+  hero.addEventListener("focusin", () => segurar(true));
+  hero.addEventListener("focusout", (e) => !hero.contains(e.relatedTarget as Node) && segurar(false));
+  botoes.forEach((b) =>
+    b.addEventListener("click", () => {
+      parado = true;
+      ir(Number(b.dataset.ir), true);
+    }),
+  );
 
-  botoes.forEach((b) => b.addEventListener("click", () => ir(Number(b.dataset.ir), true)));
-  pausa.addEventListener("click", () => definirPausa(!pausado));
-  if (reduzir) definirPausa(true);
-
-  // abre o registro do destino atual no mapa
-  const abrir = () => window.dispatchEvent(new CustomEvent("arena:abrir", { detail: { id: lista[atual].id } }));
-  hero.querySelector("[data-ver]")!.addEventListener("click", abrir);
-  pecas.forEach((p) => p.addEventListener("click", abrir));
-
-  // os módulos giram quando o cursor passa
+  // os módulos de cor giram quando o cursor passa; as fotos ficam paradas
   if (!reduzir) {
-    hero.querySelectorAll<HTMLElement>(".peca").forEach((p) => p.addEventListener("pointerenter", () => girar(p)));
+    hero.querySelectorAll<HTMLElement>(".peca--cor").forEach((p) => {
+      let g = 0;
+      p.addEventListener("pointerenter", () => {
+        g += 90;
+        p.style.setProperty("--extra", `${g}deg`);
+      });
+    });
   }
 
-  // a troca automática só corre com a hero na tela e a aba visível
   new IntersectionObserver(([e]) => {
-    if (!e.isIntersecting) clearTimeout(relogio), hero.classList.remove("contando");
+    if (!e.isIntersecting) (clearTimeout(relogio), hero.classList.remove("contando"));
     else reiniciar();
   }).observe(hero);
   document.addEventListener("visibilitychange", () => (document.hidden ? clearTimeout(relogio) : reiniciar()));
 
-  carregar(lista[1]);
+  carregar(temas[1]);
   reiniciar();
 </script>
 
@@ -252,33 +240,54 @@ const foto = (i: number, d = primeiro) => d.fotos[i % d.fotos.length];
     line-height: 1.02;
   }
 
-  .hero__linha {
-    display: block;
+  /* cada palavra do slogan é um botão; a ativa ganha o sublinhado petróleo, que se preenche até a próxima troca */
+  .hero__grupo {
     white-space: nowrap;
   }
 
-  .hero__linha + .hero__linha {
-    font-style: italic;
-  }
-
-  .hero__destino {
-    display: inline-block;
-    color: var(--branco);
+  .hero__palavra {
+    position: relative;
+    display: inline;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+    cursor: pointer;
+    white-space: nowrap;
     text-decoration: underline;
-    text-decoration-color: var(--petroleo);
-    text-decoration-thickness: 0.08em;
-    text-underline-offset: 0.12em;
+    text-decoration-color: rgb(255 255 255 / 0.22);
+    text-decoration-thickness: 0.06em;
+    text-underline-offset: 0.14em;
+    transition: text-decoration-color 200ms var(--ease);
   }
 
-  .hero__destino.entra {
-    animation: entra 420ms var(--ease);
+  .hero__palavra:hover {
+    text-decoration-color: rgb(255 255 255 / 0.55);
   }
 
-  @keyframes entra {
-    from {
-      opacity: 0;
-      transform: translateY(0.25em);
-    }
+  .hero__palavra[aria-pressed="true"] {
+    text-decoration-color: transparent;
+  }
+
+  .hero__palavra .hero__barra {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -0.1em;
+    height: 0.07em;
+    background: var(--petroleo);
+    transform-origin: left;
+    transform: scaleX(0);
+  }
+
+  .hero__palavra[aria-pressed="true"] .hero__barra {
+    transform: scaleX(1);
+  }
+
+  .hero.contando .hero__palavra[aria-pressed="true"] .hero__barra {
+    animation: conta var(--intervalo) linear;
   }
 
   .hero__legenda {
@@ -333,86 +342,10 @@ const foto = (i: number, d = primeiro) => d.fotos[i % d.fotos.length];
     text-underline-offset: 0.25em;
   }
 
-  .hero__destinos {
-    margin-top: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  .hero__destinos ul {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0 0.875rem;
-  }
-
-  .hero__destinos button[data-ir] {
-    position: relative;
-    border: 0;
-    background: none;
-    min-height: 44px;
-    padding: 0.5rem 0;
-    color: #a9b6b9;
-    font-size: var(--t-14);
-    font-weight: 550;
-    cursor: pointer;
-  }
-
-  .hero__destinos button[data-ir]:hover,
-  .hero__destinos button[aria-current="true"] {
-    color: var(--branco);
-  }
-
-  .hero__barra {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0.35rem;
-    height: 2px;
-    background: #4a5a61;
-    transform-origin: left;
-    transform: scaleX(0);
-  }
-
-  [aria-current="true"] .hero__barra {
-    transform: scaleX(1);
-    background: var(--petroleo);
-  }
-
-  .hero.contando [aria-current="true"] .hero__barra {
-    animation: conta var(--intervalo) linear;
-  }
-
   @keyframes conta {
     from {
       transform: scaleX(0);
     }
-  }
-
-  .hero__pausa {
-    flex: none;
-    width: 44px;
-    height: 44px;
-    display: grid;
-    place-items: center;
-    border: 1px solid #56666d;
-    border-radius: 50%;
-    background: none;
-    color: var(--branco);
-    cursor: pointer;
-  }
-
-  .hero__pausa:hover {
-    border-color: var(--branco);
-  }
-
-  .hero__pausa .i-tocar,
-  .hero.pausado .i-pausa {
-    display: none;
-  }
-
-  .hero.pausado .i-tocar {
-    display: block;
   }
 
   /* ---------- mosaico */
@@ -500,9 +433,23 @@ const foto = (i: number, d = primeiro) => d.fotos[i % d.fotos.length];
     background: repeating-linear-gradient(-45deg, var(--cor) 0 9%, transparent 9% 20%) !important;
   }
 
-  .peca--foto:hover .peca__img {
-    filter: saturate(1.1);
+  /* fotos: recorte fixo, sem giro, sempre de pé */
+  .peca--foto .peca__forma,
+  .peca--foto .peca__img {
+    transform: none;
   }
+
+  .peca--foto .peca__img {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .forma-quarto-sd .peca__forma { border-top-right-radius: 100%; }
+  .forma-quarto-se .peca__forma { border-top-left-radius: 100%; }
+  .forma-quarto-id .peca__forma { border-bottom-right-radius: 100%; }
+  .forma-folha-id .peca__forma { border-bottom-right-radius: 50%; }
+  .forma-folha-se .peca__forma { border-top-left-radius: 50%; }
 
   @media (max-width: 1100px) {
     .hero__titulo {
@@ -522,27 +469,9 @@ const foto = (i: number, d = primeiro) => d.fotos[i % d.fotos.length];
       max-width: 620px;
       margin-inline: auto;
     }
-    .hero__destinos ul {
-      min-width: 0;
-      flex-wrap: nowrap;
-      overflow-x: auto;
-      scrollbar-width: none;
-    }
-    .hero__destinos li {
-      flex: none;
-    }
   }
 
-  @media (min-width: 1101px) and (max-width: 1320px) {
-    .hero__destinos ul {
-      gap: 0 0.625rem;
-    }
-    .hero__destinos button[data-ir] {
-      font-size: var(--t-12);
-    }
-  }
-
-  /* celular: fotos primeiro, sem moldura, só o título, os destinos e o botão */
+  /* celular: fotos primeiro, sem moldura, só o título e o botão */
   @media (max-width: 760px) {
     .hero {
       clip-path: none;
@@ -557,11 +486,6 @@ const foto = (i: number, d = primeiro) => d.fotos[i % d.fotos.length];
     }
     .hero__titulo {
       font-size: clamp(2.25rem, 11vw, 3.25rem);
-    }
-    .hero__destinos {
-      margin-top: 1rem;
-      margin-inline: calc(-1 * var(--gutter));
-      padding-inline: var(--gutter);
     }
     .so-desktop {
       display: none;
