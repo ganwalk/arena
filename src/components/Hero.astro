@@ -243,8 +243,9 @@ const foto = (i: number, d = primeiro) => d.fotos[i % d.fotos.length];
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: clamp(2.5rem, 1rem + 4vw, 4.5rem) clamp(1.5rem, 1rem + 3vw, 4rem) 2rem
-      max(var(--gutter), calc((100vw - var(--max)) / 2 + var(--gutter)));
+    /* a caixa de texto (até 36rem) fica centrada entre a borda da hero e o mosaico */
+    --pad: clamp(1.5rem, 1rem + 3vw, 4rem);
+    padding: clamp(2.5rem, 1rem + 4vw, 4.5rem) max(var(--pad), calc((100% - 36rem) / 2)) 2rem;
   }
 
   .hero__titulo {
