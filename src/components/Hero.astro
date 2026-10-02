@@ -40,20 +40,6 @@ const foto = (i: number, d = primeiro) => d.fotos[i % d.fotos.length];
       <span class="hero__linha">Do Setor Bueno</span>
       <span class="hero__linha">para <span class="hero__destino" data-destino aria-live="polite">{primeiro.nome}</span>.</span>
     </h1>
-    <p class="hero__legenda">
-      <span data-legenda>{primeiro.legenda}</span>.
-      <button type="button" class="hero__ver" data-ver>Ver no mapa</button>
-    </p>
-
-    <p class="hero__lead">
-      Da Educação Infantil ao pré-vestibular, em três unidades em Goiânia. O Arena usa o material do Sistema Poliedro,
-      tem turmas olímpicas desde o Fundamental e é a única escola de Goiás no College Board.
-    </p>
-    <div class="hero__acoes">
-      <a class="botao" href="#visita">Agendar uma visita</a>
-      <a class="hero__link" href="#etapas">Ver as etapas de ensino</a>
-    </div>
-
     <div class="hero__destinos">
       <button type="button" class="hero__pausa" data-pausa aria-pressed="false">
         <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
@@ -75,6 +61,20 @@ const foto = (i: number, d = primeiro) => d.fotos[i % d.fotos.length];
         }
       </ul>
     </div>
+    <p class="hero__legenda">
+      <span data-legenda>{primeiro.legenda}</span>.
+      <button type="button" class="hero__ver" data-ver>Ver no mapa</button>
+    </p>
+
+    <p class="hero__lead">
+      Da Educação Infantil ao pré-vestibular, em três unidades em Goiânia. O Arena usa o material do Sistema Poliedro,
+      tem turmas olímpicas desde o Fundamental e é a única escola de Goiás no College Board.
+    </p>
+    <div class="hero__acoes">
+      <a class="botao" href="#visita">Agendar uma visita</a>
+      <a class="hero__link" href="#etapas">Ver as etapas de ensino</a>
+    </div>
+
   </div>
 
   <div class="mosaico" data-mosaico aria-hidden="true">
@@ -282,7 +282,7 @@ const foto = (i: number, d = primeiro) => d.fotos[i % d.fotos.length];
   }
 
   .hero__legenda {
-    margin-top: 1rem;
+    margin-top: 0.75rem;
     color: #c6d0d2;
     font-size: var(--t-16);
     line-height: 1.5;
@@ -301,7 +301,9 @@ const foto = (i: number, d = primeiro) => d.fotos[i % d.fotos.length];
   }
 
   .hero__lead {
-    margin-top: 1.75rem;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #45555c;
     max-width: 34em;
     font-size: var(--t-18);
     line-height: 1.55;
@@ -332,8 +334,7 @@ const foto = (i: number, d = primeiro) => d.fotos[i % d.fotos.length];
   }
 
   .hero__destinos {
-    margin-top: auto;
-    padding-top: 2.5rem;
+    margin-top: 1.5rem;
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -342,14 +343,15 @@ const foto = (i: number, d = primeiro) => d.fotos[i % d.fotos.length];
   .hero__destinos ul {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.25rem 1.25rem;
+    gap: 0 0.875rem;
   }
 
   .hero__destinos button[data-ir] {
     position: relative;
     border: 0;
     background: none;
-    padding: 0.75rem 0;
+    min-height: 44px;
+    padding: 0.5rem 0;
     color: #a9b6b9;
     font-size: var(--t-14);
     font-weight: 550;
@@ -519,9 +521,6 @@ const foto = (i: number, d = primeiro) => d.fotos[i % d.fotos.length];
       aspect-ratio: 1;
       max-width: 620px;
       margin-inline: auto;
-    }
-    .hero__destinos {
-      margin-top: 2rem;
     }
     .hero__destinos ul {
       min-width: 0;
