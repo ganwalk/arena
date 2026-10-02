@@ -53,14 +53,20 @@ const conquistas2025 = [
 <script>
   const odometro = document.querySelector<HTMLElement>("[data-odometro]");
   if (odometro) {
-    new IntersectionObserver(
-      ([e], obs) => {
+    // só gira quando o número inteiro está visível, fora da faixa de baixo da tela, por pelo menos 300 ms
+    let espera = 0;
+    const obs = new IntersectionObserver(
+      ([e]) => {
+        clearTimeout(espera);
         if (!e.isIntersecting) return;
-        odometro.classList.add("gira");
-        obs.disconnect();
+        espera = window.setTimeout(() => {
+          odometro.classList.add("gira");
+          obs.disconnect();
+        }, 300);
       },
-      { threshold: 0.6 },
-    ).observe(odometro);
+      { threshold: 1, rootMargin: "-80px 0px -15% 0px" },
+    );
+    obs.observe(odometro);
   }
 </script>
 
@@ -88,20 +94,26 @@ const conquistas2025 = [
   }
 
   .odometro {
+    --linha: 1.15em;
     display: flex;
     font-size: clamp(4.5rem, 2rem + 9vw, 9rem);
     font-weight: 800;
-    letter-spacing: -0.03em;
-    line-height: 1;
+    line-height: var(--linha);
     color: var(--petroleo-700);
     margin-bottom: 0.5rem;
   }
 
   /* cada dígito é uma fita de 0 a 9 (duas voltas) que rola até o valor quando a seção aparece */
+  /* janela com folga vertical; recorta só em cima e embaixo para não cortar a lateral dos algarismos */
   .odometro__digito {
     display: block;
-    height: 1em;
-    overflow: hidden;
+    height: var(--linha);
+    clip-path: inset(0 -0.25em);
+    margin-right: -0.03em;
+  }
+
+  .odometro__ponto {
+    margin-right: -0.03em;
   }
 
   .odometro__fita {
@@ -114,18 +126,18 @@ const conquistas2025 = [
 
   .odometro__fita span {
     display: block;
-    height: 1em;
+    height: var(--linha);
     text-align: center;
   }
 
   .odometro.gira .odometro__fita {
-    transform: translateY(calc((var(--alvo) + 10) * -1em));
+    transform: translateY(calc((var(--alvo) + 10) * -1 * var(--linha)));
   }
 
   @media (prefers-reduced-motion: reduce) {
     .odometro__fita {
       transition: none;
-      transform: translateY(calc((var(--alvo) + 10) * -1em));
+      transform: translateY(calc((var(--alvo) + 10) * -1 * var(--linha)));
     }
   }
 
