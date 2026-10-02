@@ -33,7 +33,7 @@ const primeiro = temas[0];
       {
         temas.map((t, i) => (
           <Fragment>
-            <span class="hero__grupo"><button type="button" class="hero__palavra" data-ir={i} aria-pressed={i === 0 ? "true" : "false"}>{t.palavra}<span class="hero__barra" aria-hidden="true" /></button>{i === 0 ? "," : i === 2 ? "." : ""}</span>{i === 1 ? " e " : i === 0 ? " " : ""}
+            <span class="hero__grupo"><button type="button" class="hero__palavra" data-ir={i} aria-pressed={i === 0 ? "true" : "false"}>{t.palavra}</button>{i === 0 ? "," : i === 2 ? "." : ""}</span>{i === 1 ? " e " : i === 0 ? " " : ""}
           </Fragment>
         ))
       }
@@ -44,10 +44,6 @@ const primeiro = temas[0];
       <a class="hero__ver" data-ver href={primeiro.link.href}>{primeiro.link.rotulo}</a>
     </p>
 
-    <p class="hero__lead so-desktop">
-      Da Educação Infantil ao pré-vestibular, em três unidades em Goiânia. O Arena usa o material do Sistema Poliedro,
-      tem turmas olímpicas desde o Fundamental e é a única escola de Goiás no College Board.
-    </p>
     <div class="hero__acoes">
       <a class="botao" href="#visita">Agendar uma visita</a>
       <a class="hero__link so-desktop" href="#etapas">Ver as etapas de ensino</a>
@@ -240,60 +236,37 @@ const primeiro = temas[0];
     line-height: 1.02;
   }
 
-  /* cada palavra do slogan é um botão; a ativa ganha o sublinhado petróleo, que se preenche até a próxima troca */
   .hero__grupo {
     white-space: nowrap;
   }
 
+  /* cada palavra do slogan é um botão: a ativa em branco, as outras esmaecidas */
   .hero__palavra {
-    position: relative;
     display: inline;
     padding: 0;
     border: 0;
     background: none;
-    color: inherit;
+    color: rgb(255 255 255 / 0.38);
     font: inherit;
     letter-spacing: inherit;
     cursor: pointer;
-    white-space: nowrap;
-    text-decoration: underline;
-    text-decoration-color: rgb(255 255 255 / 0.22);
-    text-decoration-thickness: 0.06em;
-    text-underline-offset: 0.14em;
-    transition: text-decoration-color 200ms var(--ease);
+    transition: color 320ms var(--ease);
   }
 
   .hero__palavra:hover {
-    text-decoration-color: rgb(255 255 255 / 0.55);
+    color: rgb(255 255 255 / 0.7);
   }
 
   .hero__palavra[aria-pressed="true"] {
-    text-decoration-color: transparent;
+    color: var(--branco);
   }
 
-  .hero__palavra .hero__barra {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: -0.1em;
-    height: 0.07em;
-    background: var(--petroleo);
-    transform-origin: left;
-    transform: scaleX(0);
-  }
-
-  .hero__palavra[aria-pressed="true"] .hero__barra {
-    transform: scaleX(1);
-  }
-
-  .hero.contando .hero__palavra[aria-pressed="true"] .hero__barra {
-    animation: conta var(--intervalo) linear;
-  }
 
   .hero__legenda {
-    margin-top: 0.75rem;
+    margin-top: 1.5rem;
+    max-width: 30em;
+    font-size: var(--t-18);
     color: #c6d0d2;
-    font-size: var(--t-16);
     line-height: 1.5;
     min-height: 3em;
   }
@@ -309,15 +282,7 @@ const primeiro = temas[0];
     cursor: pointer;
   }
 
-  .hero__lead {
-    margin-top: 2rem;
-    padding-top: 2rem;
-    border-top: 1px solid #45555c;
-    max-width: 34em;
-    font-size: var(--t-18);
-    line-height: 1.55;
-    color: #dbe2e3;
-  }
+
 
   .hero__acoes {
     margin-top: 2rem;
@@ -342,11 +307,7 @@ const primeiro = temas[0];
     text-underline-offset: 0.25em;
   }
 
-  @keyframes conta {
-    from {
-      transform: scaleX(0);
-    }
-  }
+
 
   /* ---------- mosaico */
   .mosaico {
