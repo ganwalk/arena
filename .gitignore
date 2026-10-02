@@ -3,3 +3,7 @@ dist/
 .astro/
 .vercel/
 .DS_Store
+
+# vídeo: quadros de revisão e trilha regenerável
+video/saida/
+video/trilha.wav

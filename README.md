@@ -79,3 +79,28 @@ Os números da seção (65 ex-alunos, 11 países de aprovação, 21 países de c
 ## Texto
 
 Todo texto novo ou reescrito foi validado com o [no-ai-slop](https://github.com/petergyang/no-ai-slop). Citações da escola (a frase da proposta pedagógica) e os textos da base do mapa ficaram como estão no site atual.
+
+## Vídeo brag
+
+`video/arena-brag.mp4`: 50 s, 1920 × 1080, 30 fps, com trilha. Mesma linguagem da landing (grafite, petróleo, módulos do painel, Schibsted Grotesk 800, itálico só no destino) e só números que a landing já publica.
+
+| Tempo | Cena |
+|---|---|
+| 0–3 s | Os módulos do painel se montam e se abrem para o logotipo |
+| 3–9 s | A hero da landing: forte, inovadora e humanizada, com o mosaico trocando as fotos |
+| 9–15 s | 4.922 premiações em olimpíadas (odômetro) e as medalhas de 2024 |
+| 15–21 s | 1º lugar em 2025: IYPT, debate, robótica e seis áreas em Goiás |
+| 21–31 s | "Do Setor Bueno para Yale.": arcos saindo de Goiânia no mapa de módulos, até todos os 156 registros |
+| 31–37 s | 65 ex-alunos, 21 países, 295 seleções, 6ª escola do Brasil no College Board |
+| 37–44 s | AgroLab e Pedagogia da Escuta |
+| 44–50 s | Slogan, logotipo e "Agende uma visita" |
+
+Cada corte é uma cobertura de módulos da marca. Tudo é função do tempo (`seek(t)` em `video/brag.html`), então o render é quadro a quadro e sempre igual.
+
+```sh
+python3 video/trilha.py            # gera video/trilha.wav (numpy)
+node video/render.mjs              # gera video/arena-brag.mp4 (Playwright + ffmpeg, ~5 min)
+node video/render.mjs --quadros 4,22.5   # só alguns quadros em video/saida/, para revisão
+```
+
+Para a prévia em tempo real, sirva a raiz do repositório (`npx http-server .`) e abra `/video/brag.html`; clique para tocar com a trilha, ou use `?t=12.5` para congelar um quadro. A trilha é sintetizada (120 bpm, Lá menor), sem música de terceiros; vale trocar por uma faixa licenciada se o vídeo for para campanha.

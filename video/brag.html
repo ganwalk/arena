@@ -1,0 +1,786 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Arena: vídeo brag</title>
+<!--
+  Vídeo "brag" do Colégio Arena, 1920 x 1080, 50 s.
+  Tudo é função do tempo: seek(t) desenha o quadro exato, sem transições CSS, para o render quadro a quadro (render.mjs).
+  Abrir no navegador (servido a partir da raiz do repositório) toca a prévia em tempo real com a trilha; ?t=12.5 congela um quadro.
+  Linguagem da landing: grafite, petróleo como única cor de ação, neutros frios, Schibsted Grotesk 800, módulos do painel da marca.
+-->
+<style>
+  @font-face {
+    font-family: "SG";
+    src: url("../node_modules/@fontsource-variable/schibsted-grotesk/files/schibsted-grotesk-latin-wght-normal.woff2") format("woff2-variations");
+    font-weight: 400 900;
+    font-style: normal;
+  }
+  @font-face {
+    font-family: "SG";
+    src: url("../node_modules/@fontsource-variable/schibsted-grotesk/files/schibsted-grotesk-latin-wght-italic.woff2") format("woff2-variations");
+    font-weight: 400 900;
+    font-style: italic;
+  }
+  :root {
+    --grafite: #2e3b42;
+    --grafite-900: #1c2529;
+    --grafite-800: #243035;
+    --grafite-600: #3b4a52;
+    --petroleo: #209ba0;
+    --petroleo-700: #0b7377;
+    --petroleo-claro: #5fc9cd;
+    --gelo: #d9e3e4;
+    --nevoa: #eef3f3;
+    --papel: #ffffff;
+    --tinta: #1f2a2f;
+    --tinta-2: #4d5d64;
+    --filete: #d5dde0;
+    --ouro: #f0b54b;
+    --coral: #ef7a68;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #000; overflow: hidden; }
+  body.previa { display: grid; place-items: center; height: 100vh; }
+  #palco {
+    position: relative; width: 1920px; height: 1080px; overflow: hidden;
+    font-family: "SG", system-ui, sans-serif; color: #fff; background: var(--grafite-900);
+    -webkit-font-smoothing: antialiased; transform-origin: 0 0;
+  }
+  body.previa #palco { transform-origin: center; }
+  .cena { position: absolute; inset: 0; visibility: hidden; overflow: hidden; }
+  .abs { position: absolute; }
+  .t { font-weight: 800; letter-spacing: -0.02em; line-height: 1.04; margin: 0; }
+  .mask { display: block; overflow: hidden; padding: 0.04em 0 0.1em; margin: -0.04em 0 -0.1em; }
+  .mask > span { display: inline-block; }
+  .rotulo { margin: 0; font-size: 32px; font-weight: 700; letter-spacing: 0.01em; color: var(--petroleo-claro); }
+  img { display: block; }
+  .foto { position: absolute; overflow: hidden; }
+  .foto img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  svg.mod { display: block; width: 100%; height: 100%; overflow: visible; }
+  #wipe { position: absolute; inset: 0; pointer-events: none; z-index: 50; }
+  #preto { position: absolute; inset: 0; background: #000; opacity: 0; z-index: 60; }
+
+  /* S2: a hero da landing, moldura branca com o painel grafite */
+  #s2 { background: var(--papel); }
+  #s2 .painel { position: absolute; inset: 24px; border-radius: 40px; background: var(--grafite); overflow: hidden; }
+  #s2 .titulo { position: absolute; left: 110px; top: 236px; font-size: 112px; }
+  #s2 .palavra { transition: none; }
+  #s2 .legenda { width: 760px; font-size: 32px; line-height: 1.4; color: var(--gelo); }
+  #s2 .barra { position: absolute; left: 110px; top: 860px; display: flex; gap: 14px; }
+  #s2 .barra span { width: 120px; height: 6px; border-radius: 3px; background: rgba(217, 227, 228, 0.22); overflow: hidden; }
+  #s2 .barra i { display: block; height: 100%; width: 0; background: var(--petroleo-claro); }
+  .peca { position: absolute; }
+  .peca .forma { position: absolute; inset: 0; overflow: hidden; }
+  .peca .forma img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+  /* S3 */
+  #s3 { background: var(--grafite-900); }
+  .odo { display: flex; font-weight: 800; letter-spacing: -0.02em; line-height: 1.12; color: #fff; }
+  .odo .dig { display: block; height: 1.12em; overflow: hidden; }
+  .odo .fita { display: flex; flex-direction: column; }
+  .medalha { display: flex; align-items: center; gap: 22px; }
+  .medalha b { font-size: 76px; font-weight: 800; letter-spacing: -0.02em; display: block; line-height: 1; }
+  .medalha small { font-size: 28px; color: var(--gelo); display: block; margin-top: 6px; }
+
+  /* S4 */
+  #s4 { background: var(--petroleo-700); }
+  .pill { display: inline-block; border: 3px solid #fff; border-radius: 999px; padding: 14px 34px; font-size: 44px; font-weight: 700; margin: 0 16px 20px 0; }
+
+  /* S6 */
+  #s6 { background: var(--papel); color: var(--tinta); }
+  .stat { position: absolute; width: 840px; height: 400px; }
+  .stat .num { position: absolute; left: 190px; top: 40px; font-size: 200px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; color: var(--petroleo-700); }
+  .stat .txt { position: absolute; left: 196px; top: 270px; width: 600px; font-size: 36px; line-height: 1.3; color: var(--tinta-2); }
+  .stat .ic { position: absolute; left: 0; top: 64px; width: 150px; height: 150px; }
+  .filete { position: absolute; background: var(--filete); }
+
+  /* S7 */
+  .cheia { position: absolute; inset: 0; overflow: hidden; }
+  .cheia img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+  /* S8 */
+  #s8 { background: var(--grafite); }
+  .botao { display: inline-flex; align-items: center; height: 92px; padding: 0 48px; border-radius: 14px; background: var(--petroleo-700); color: #fff; font-size: 40px; font-weight: 700; }
+</style>
+</head>
+<body>
+<div id="palco">
+  <!-- S1: abertura -->
+  <section class="cena" id="s1">
+    <div class="abs" id="s1-mos" style="left:696px;top:276px;width:528px;height:528px"></div>
+    <img class="abs" id="s1-logo" src="../public/brand/arena-branco.svg" alt="" style="left:690px;top:400px;width:540px" />
+    <p class="abs rotulo" id="s1-sub" style="left:0;width:1920px;text-align:center;top:640px;color:var(--gelo);font-weight:600">Colégio Arena · Goiânia</p>
+  </section>
+
+  <!-- S2: forte, inovadora e humanizada -->
+  <section class="cena" id="s2">
+    <div class="painel">
+      <h1 class="t titulo" id="s2-tit">
+        <span class="mask"><span>Uma escola</span></span>
+        <span class="mask"><span><span class="palavra" data-p="0">forte</span>, <span class="palavra" data-p="1">inovadora</span></span></span>
+        <span class="mask"><span>e <span class="palavra" data-p="2">humanizada</span>.</span></span>
+      </h1>
+      <div class="abs" id="s2-legendas" style="left:110px;top:650px;width:760px;height:200px"></div>
+      <div class="barra"><span><i></i></span><span><i></i></span><span><i></i></span></div>
+      <div class="abs" id="s2-mos" style="left:916px;top:76px;width:880px;height:880px"></div>
+    </div>
+  </section>
+
+  <!-- S3: turmas olímpicas -->
+  <section class="cena" id="s3">
+    <p class="abs rotulo" id="s3-rot" style="left:120px;top:120px">Turmas olímpicas</p>
+    <div class="abs odo" id="s3-odo" style="left:104px;top:170px;font-size:330px"></div>
+    <p class="abs" id="s3-cap" style="left:120px;top:570px;width:1040px;font-size:46px;line-height:1.25;color:var(--gelo);margin:0">premiações em olimpíadas entre 2023 e 2025</p>
+    <div class="foto" id="s3-foto" style="left:1180px;top:120px;width:620px;height:620px;border-top-left-radius:620px">
+      <img src="../public/mapa/galeria_42_1777489759_1.webp" alt="" />
+    </div>
+    <p class="abs rotulo" id="s3-ano" style="left:120px;top:792px;color:var(--gelo);font-weight:600">Só em 2024</p>
+    <div class="abs" id="s3-med" style="left:120px;top:850px;display:flex;gap:72px"></div>
+  </section>
+
+  <!-- S4: primeiro lugar -->
+  <section class="cena" id="s4">
+    <p class="abs rotulo" id="s4-rot" style="left:110px;top:110px;color:#fff;opacity:.85">Em 2025</p>
+    <p class="abs t" id="s4-um" style="left:84px;top:150px;font-size:600px;line-height:1">1º</p>
+    <div class="abs" id="s4-frases" style="left:820px;top:130px;width:1000px;height:300px"></div>
+    <div class="foto" id="s4-fotos" style="left:820px;top:450px;width:1000px;height:520px;border-top-left-radius:260px"></div>
+    <div class="abs" id="s4-pills" style="left:820px;top:470px;width:1000px"></div>
+  </section>
+
+  <!-- S5: Arena pelo mundo -->
+  <section class="cena" id="s5">
+    <canvas class="abs" id="s5-mapa" width="1920" height="1080" style="left:0;top:0"></canvas>
+    <h2 class="abs t" id="s5-tit" style="left:110px;top:96px;font-size:104px;white-space:nowrap">
+      <span class="mask"><span>Do Setor Bueno para <em id="s5-dest" style="color:var(--petroleo-claro);font-style:italic"></em></span></span>
+    </h2>
+    <div class="foto" id="s5-card" style="left:70px;top:700px;width:380px;height:250px;border-top-right-radius:125px"></div>
+    <p class="abs" id="s5-leg" style="left:70px;top:966px;width:520px;font-size:24px;font-weight:600;color:var(--gelo);margin:0"></p>
+    <p class="abs" id="s5-tot" style="right:110px;top:984px;font-size:30px;font-weight:700;color:var(--gelo);margin:0;text-align:right"></p>
+  </section>
+
+  <!-- S6: números -->
+  <section class="cena" id="s6">
+    <p class="abs rotulo" id="s6-rot" style="left:120px;top:84px;color:var(--petroleo-700)">O Arena em números</p>
+    <div class="filete" id="s6-h" style="left:120px;top:560px;width:1680px;height:2px"></div>
+    <div class="filete" id="s6-v" style="left:960px;top:170px;width:2px;height:820px"></div>
+    <div id="s6-stats"></div>
+  </section>
+
+  <!-- S7: inovadora e humanizada -->
+  <section class="cena" id="s7a">
+    <div class="cheia"><img id="s7a-img" src="../public/img/agrolab-1600.webp" alt="" style="object-position:45% 40%" /></div>
+    <div class="cheia" style="background:linear-gradient(90deg,rgba(28,37,41,.92) 0%,rgba(28,37,41,.72) 42%,rgba(28,37,41,0) 75%)"></div>
+    <p class="abs rotulo" id="s7a-rot" style="left:120px;top:506px">AgroLab</p>
+    <h2 class="abs t" id="s7a-tit" style="left:120px;top:580px;width:980px;font-size:92px">
+      <span class="mask"><span>Uma mini fazenda</span></span>
+      <span class="mask"><span>modelo, com drones e</span></span>
+      <span class="mask"><span>análise de solo.</span></span>
+    </h2>
+  </section>
+  <section class="cena" id="s7b">
+    <div class="cheia"><img id="s7b-img" src="../public/img/infantil-1600.webp" alt="" style="object-position:26% 45%" /></div>
+    <div class="cheia" style="background:linear-gradient(270deg,rgba(28,37,41,.94) 0%,rgba(28,37,41,.75) 40%,rgba(28,37,41,0) 70%)"></div>
+    <p class="abs rotulo" id="s7b-rot" style="left:1020px;top:406px">Desde a Educação Infantil</p>
+    <h2 class="abs t" id="s7b-tit" style="left:1020px;top:480px;width:820px;font-size:92px">
+      <span class="mask"><span>Pedagogia</span></span>
+      <span class="mask"><span>da Escuta.</span></span>
+    </h2>
+    <p class="abs" id="s7b-sub" style="left:1020px;top:720px;width:760px;font-size:38px;line-height:1.35;color:var(--gelo);margin:0">Inglês no dia a dia e uma Escola de Pais para as famílias.</p>
+  </section>
+
+  <!-- S8: fecho -->
+  <section class="cena" id="s8">
+    <h2 class="abs t" id="s8-tit" style="left:120px;top:250px;font-size:132px">
+      <span class="mask"><span>Uma escola forte,</span></span>
+      <span class="mask"><span>inovadora</span></span>
+      <span class="mask"><span>e humanizada.</span></span>
+    </h2>
+    <div class="abs" id="s8-fim" style="left:0;top:250px;width:1920px;text-align:center">
+      <img id="s8-logo" src="../public/brand/arena-branco.svg" alt="" style="width:560px;margin:0 auto" />
+      <div id="s8-cta" style="margin-top:70px"><span class="botao">Agende uma visita</span></div>
+      <p id="s8-ctt" style="margin:36px 0 0;font-size:36px;font-weight:600;color:var(--gelo)">colegioarena.com.br · (62) 99192-5824</p>
+    </div>
+    <div class="abs" id="s8-faixa" style="left:0;top:960px;width:1920px;height:120px"></div>
+  </section>
+
+  <canvas id="wipe" width="1920" height="1080"></canvas>
+  <div id="preto"></div>
+</div>
+
+<script>
+// ---------- utilidades ----------
+const DUR = 50;
+const cl = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const prog = (t, a, b) => cl((t - a) / (b - a));
+const eo = (x) => 1 - Math.pow(1 - x, 3);
+const eo5 = (x) => 1 - Math.pow(1 - x, 5);
+const eio = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const back = (x) => { const c1 = 1.5, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+const lerp = (a, b, x) => a + (b - a) * x;
+const $ = (s) => document.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const fmt = (n) => Math.round(n).toLocaleString("pt-BR");
+const hash = (a, b) => { const s = Math.sin(a * 127.1 + b * 311.7) * 43758.5453; return s - Math.floor(s); };
+
+const C = {
+  grafite: "#2e3b42", g900: "#1c2529", g800: "#243035", g600: "#3b4a52",
+  pet: "#209ba0", pet7: "#0b7377", petc: "#5fc9cd", gelo: "#d9e3e4", nevoa: "#eef3f3", ouro: "#f0b54b", coral: "#ef7a68",
+};
+
+// módulo do painel da marca (mesmo desenho de src/components/Modulo.astro)
+function modulo(forma, cor, fundo = "transparent") {
+  let f = "";
+  if (forma === "quarto") f = `<path d="M0 100V0a100 100 0 0 1 100 100Z" fill="${cor}"/>`;
+  if (forma === "triangulo") f = `<path d="M0 0h100L0 100Z" fill="${cor}"/>`;
+  if (forma === "folha") f = `<path d="M0 0h50a50 50 0 0 1 50 50v50H0Z" fill="${cor}"/>`;
+  if (forma === "ponto") f = `<circle cx="50" cy="50" r="22" fill="${cor}"/>`;
+  if (forma === "cheio") f = `<rect width="100" height="100" fill="${cor}"/>`;
+  if (forma === "anel") f = `<path fill-rule="evenodd" d="M50 16a34 34 0 1 1 0 68a34 34 0 1 1 0-68ZM50 33a17 17 0 1 0 0 34a17 17 0 1 0 0-34Z" fill="${cor}"/>`;
+  if (forma === "listras") {
+    const id = "l" + Math.random().toString(36).slice(2, 8);
+    f = `<defs><clipPath id="${id}"><rect width="100" height="100"/></clipPath></defs><g clip-path="url(#${id})" stroke="${cor}" stroke-width="9">` +
+      [-80, -50, -20, 10, 40, 70, 100, 130, 160].map((o) => `<line x1="${o}" y1="100" x2="${o + 100}" y2="0"/>`).join("") + "</g>";
+  }
+  return `<svg class="mod" viewBox="0 0 100 100"><rect width="100" height="100" fill="${fundo}"/><g class="g" style="transform-origin:50px 50px">${f}</g></svg>`;
+}
+function giro(el, deg) { el.querySelector(".g").style.transform = `rotate(${deg}deg)`; }
+
+// texto em máscara: cada linha sobe de baixo
+function linhas(el, t, t0, passo = 0.09, dur = 0.55, saida = null) {
+  $$(".mask > span", el).forEach((s, i) => {
+    const a = eo5(prog(t, t0 + i * passo, t0 + i * passo + dur));
+    let y = (1 - a) * 110;
+    if (saida != null) y -= eio(prog(t, saida + i * 0.05, saida + i * 0.05 + 0.4)) * 110;
+    s.style.transform = `translateY(${y}%)`;
+  });
+}
+function surge(el, t, t0, dur = 0.5, dy = 30) {
+  const a = eo(prog(t, t0, t0 + dur));
+  el.style.opacity = a;
+  el.style.transform = `translateY(${(1 - a) * dy}px)`;
+}
+
+// ---------- S1: abertura ----------
+const s1Pecas = [
+  ["quarto", C.pet, "transparent", 90], ["anel", C.gelo, C.g600, 0], ["listras", C.gelo, "transparent", 0], ["folha", C.pet, "transparent", 180],
+  ["triangulo", C.gelo, "transparent", 0], ["cheio", C.g600], ["quarto", C.petc, "transparent", 270], ["ponto", C.pet, C.g600, 0],
+  ["ponto", C.gelo, C.pet7, 0], ["quarto", C.gelo, "transparent", 0], ["cheio", C.pet7], ["triangulo", C.pet, "transparent", 90],
+  ["folha", C.gelo, "transparent", 270], ["listras", C.petc, "transparent", 90], ["anel", C.pet, "transparent", 0], ["quarto", C.pet, "transparent", 180],
+];
+const s1El = s1Pecas.map((p, i) => {
+  const d = document.createElement("div");
+  d.className = "peca";
+  Object.assign(d.style, { left: (i % 4) * 132 + "px", top: Math.floor(i / 4) * 132 + "px", width: "132px", height: "132px" });
+  d.innerHTML = modulo(p[0], p[1], p[2] || "transparent");
+  $("#s1-mos").appendChild(d);
+  return { el: d, c: i % 4, r: Math.floor(i / 4), g: p[3] || 0 };
+});
+function s1(t) {
+  s1El.forEach((p) => {
+    const dist = Math.hypot(p.c - 1.5, p.r - 1.5);
+    const t0 = 0.1 + dist * 0.28 + hash(p.c, p.r) * 0.12;
+    const a = back(prog(t, t0, t0 + 0.5));
+    const abre = eio(prog(t, 1.55, 2.2));
+    const dx = (p.c < 2 ? -1 : 1) * abre * (300 + Math.abs(p.c - 1.5) * 40);
+    p.el.style.transform = `translateX(${dx}px) scale(${cl(a, 0, 1.2)})`;
+    p.el.style.opacity = prog(t, t0, t0 + 0.12);
+    giro(p.el, p.g - 90 * (1 - eo(prog(t, t0, t0 + 0.6))) + 90 * eio(prog(t, 1.55, 2.2)));
+  });
+  const l = eo(prog(t, 1.75, 2.35));
+  $("#s1-logo").style.opacity = l;
+  $("#s1-logo").style.transform = `scale(${lerp(0.86, 1, l)})`;
+  surge($("#s1-sub"), t, 2.05, 0.5, 20);
+}
+
+// ---------- S2: hero ----------
+const temas = [
+  {
+    grande: ["../public/img/medio-1600.webp", "50% 35%"],
+    legenda: "4.922 premiações em olimpíadas entre 2023 e 2025 e ex-alunos aprovados em universidades de 11 países.",
+    fotos: ["../public/img/olimpicas-800.webp", "../public/mapa/t/galeria_42_1777489759_1.webp", "../public/img/cambridge-800.webp", "../public/mapa/t/galeria_17_1777382639_4.webp", "../public/mapa/t/galeria_42_1777489759_6.webp", "../public/mapa/t/galeria_42_1777489759_2.webp"],
+  },
+  {
+    grande: ["../public/img/agrolab-1600.webp", "45% 40%"],
+    legenda: "O AgroLab é uma mini fazenda modelo com drones e análise de solo, e o Ensino Médio tem laboratórios de ciências.",
+    fotos: ["../public/mapa/t/galeria_19_1777388973_0.webp", "../public/img/aulas-praticas-800.webp", "../public/mapa/t/galeria_19_1777388973_5.webp", "../public/mapa/t/galeria_42_1777489759_8.webp", "../public/mapa/t/galeria_19_1777388973_7.webp", "../public/img/escola-de-politica-800.webp"],
+  },
+  {
+    grande: ["../public/img/infantil-1600.webp", "26% 45%"],
+    legenda: "Pedagogia da Escuta desde a Educação Infantil e uma Escola de Pais para as famílias.",
+    fotos: ["../public/img/fundamental-1-800.webp", "../public/mapa/t/galeria_70_1777980660_1.webp", "../public/img/escola-de-pais-800.webp", "../public/mapa/t/galeria_42_1777489759_3.webp", "../public/mapa/t/54168260369_b440e46d58_c.webp", "../public/mapa/t/galeria_42_1777489759_4.webp"],
+  },
+];
+const S2_TROCA = [3.0, 5.0, 7.0];
+const s2Def = [
+  { tipo: "foto", c: 1, r: 1, raio: "0 100% 0 0" },
+  { tipo: "cor", c: 2, r: 1, forma: "anel", cor: C.gelo, fundo: C.g600, g: 0 },
+  { tipo: "foto", c: 3, r: 1, tam: 2, raio: "50% 0 0 0" },
+  { tipo: "cor", c: 1, r: 2, forma: "triangulo", cor: C.pet, fundo: "transparent", g: 0 },
+  { tipo: "foto", c: 2, r: 2, raio: "0 0 50% 0" },
+  { tipo: "foto", c: 1, r: 3, raio: "50%" },
+  { tipo: "cor", c: 2, r: 3, forma: "listras", cor: C.gelo, fundo: "transparent", g: 0 },
+  { tipo: "foto", c: 3, r: 3, raio: "100% 0 0 0" },
+  { tipo: "cor", c: 4, r: 3, forma: "quarto", cor: C.pet, fundo: "transparent", g: 180 },
+  { tipo: "cor", c: 1, r: 4, forma: "folha", cor: C.gelo, fundo: "transparent", g: 180 },
+  { tipo: "foto", c: 2, r: 4, raio: "0 0 100% 0" },
+  { tipo: "cor", c: 3, r: 4, forma: "ponto", cor: C.pet, fundo: C.g600, g: 0 },
+  { tipo: "foto", c: 4, r: 4, raio: "50% 0 0 0" },
+];
+let nFoto = 0;
+const s2El = s2Def.map((p, i) => {
+  const d = document.createElement("div");
+  d.className = "peca";
+  const tam = p.tam || 1;
+  const cel = 220;
+  Object.assign(d.style, { left: (p.c - 1) * cel + "px", top: (p.r - 1) * cel + "px", width: cel * tam + "px", height: cel * tam + "px" });
+  if (p.tipo === "foto") {
+    const idx = tam === 2 ? -1 : nFoto++;
+    const srcs = temas.map((tm) => (idx < 0 ? tm.grande[0] : tm.fotos[idx]));
+    const pos = temas.map((tm) => (idx < 0 ? tm.grande[1] : "50% 50%"));
+    d.innerHTML = `<div class="forma" style="border-radius:${p.raio}">` + srcs.map((s, k) => `<img src="${s}" style="object-position:${pos[k]}" alt="">`).join("") + "</div>";
+  } else {
+    d.innerHTML = modulo(p.forma, p.cor, p.fundo);
+  }
+  $("#s2-mos").appendChild(d);
+  return { ...p, el: d, i };
+});
+$("#s2-legendas").innerHTML = temas.map((tm) => `<p class="legenda" style="margin:0">${tm.legenda}</p>`).join("");
+function s2(t) {
+  linhas($("#s2-tit"), t, 3.05, 0.08);
+  // tema ativo
+  let k = 0;
+  S2_TROCA.forEach((x, i) => { if (t >= x) k = i; });
+  $$(".palavra").forEach((w, i) => {
+    // cada palavra acende quando é a vez dela e esmaece quando a próxima entra
+    const on = prog(t, S2_TROCA[i], S2_TROCA[i] + 0.3) - (i < 2 ? prog(t, S2_TROCA[i + 1], S2_TROCA[i + 1] + 0.3) : 0);
+    w.style.color = `rgba(${on > 0.5 ? "255,255,255" : "217,227,228"},${lerp(0.38, 1, on)})`;
+    w.style.opacity = 1;
+  });
+  $$(".legenda").forEach((l, i) => {
+    const ent = eo(prog(t, S2_TROCA[i] + 0.25, S2_TROCA[i] + 0.75));
+    const sai = i < 2 ? eio(prog(t, S2_TROCA[i + 1] - 0.05, S2_TROCA[i + 1] + 0.25)) : 0;
+    l.style.position = "absolute";
+    l.style.top = "0";
+    l.style.width = "760px";
+    l.style.opacity = ent * (1 - sai);
+    l.style.transform = `translateY(${(1 - ent) * 24 - sai * 16}px)`;
+  });
+  $$("#s2 .barra i").forEach((b, i) => {
+    const fim = i < 2 ? S2_TROCA[i + 1] : 9;
+    b.style.width = (t >= fim ? 100 : prog(t, S2_TROCA[i], fim) * 100) + "%";
+  });
+  s2El.forEach((p, n) => {
+    const t0 = 3.05 + ((p.c - 1) + (p.r - 1)) * 0.06;
+    const a = eo(prog(t, t0, t0 + 0.55));
+    p.el.style.opacity = a;
+    p.el.style.transform = `scale(${lerp(0.7, 1, a)})`;
+    if (p.tipo === "foto") {
+      const imgs = $$("img", p.el);
+      imgs.forEach((im, j) => {
+        const at = n * 0.04;
+        const ent = j === 0 ? 1 : eo(prog(t, S2_TROCA[j] + at, S2_TROCA[j] + at + 0.45));
+        im.style.opacity = ent;
+        im.style.transform = `scale(${lerp(1.18, 1.0, ent) + 0.05 * prog(t, S2_TROCA[j], 9)})`;
+        im.style.zIndex = j;
+      });
+    } else {
+      let g = p.g;
+      [5.0, 7.0].forEach((x, j) => (g += 90 * eo(prog(t, x + n * 0.03, x + n * 0.03 + 0.5))));
+      giro(p.el, g);
+    }
+  });
+}
+
+// ---------- S3: 4.922 ----------
+const ODO = "4.922";
+$("#s3-odo").innerHTML = [...ODO].map((ch) =>
+  /\d/.test(ch) ? `<span class="dig"><span class="fita">${Array.from({ length: 30 }, (_, i) => `<span>${i % 10}</span>`).join("")}</span></span>` : `<span>${ch}</span>`
+).join("");
+const medalhas = [
+  { n: 267, rot: "ouros", cor: C.ouro },
+  { n: 353, rot: "pratas", cor: C.gelo },
+  { n: 493, rot: "bronzes", cor: C.coral },
+  { n: 295, rot: "seleções internacionais", cor: C.petc, forma: "quarto" },
+];
+$("#s3-med").innerHTML = medalhas.map((m) => `<div class="medalha"><div style="width:84px;height:84px">${modulo(m.forma || "anel", m.cor)}</div><div><b>0</b><small>${m.rot}</small></div></div>`).join("");
+function s3(t) {
+  surge($("#s3-rot"), t, 9.05, 0.5, 20);
+  const digs = $$("#s3-odo .fita");
+  let k = 0;
+  [...ODO].forEach((ch) => {
+    if (!/\d/.test(ch)) return;
+    const alvo = 20 + Number(ch);
+    const a = eo5(prog(t, 9.1 + k * 0.08, 10.6 + k * 0.14));
+    digs[k].style.transform = `translateY(${-a * alvo * 1.12}em)`;
+    k++;
+  });
+  const z = eo(prog(t, 9.0, 9.5));
+  $("#s3-odo").style.opacity = z;
+  surge($("#s3-cap"), t, 10.4, 0.6);
+  const f = eo5(prog(t, 9.3, 10.3));
+  const foto = $("#s3-foto");
+  foto.style.clipPath = `circle(${f * 142}% at 100% 100%)`;
+  foto.querySelector("img").style.transform = `scale(${1.15 - 0.1 * prog(t, 9.3, 15)})`;
+  surge($("#s3-ano"), t, 11.9, 0.5, 20);
+  $$("#s3-med .medalha").forEach((m, i) => {
+    const t0 = 12.0 + i * 0.22;
+    surge(m, t, t0, 0.5, 40);
+    m.querySelector("b").textContent = fmt(medalhas[i].n * eo(prog(t, t0, t0 + 1.1)));
+    giro(m, -180 * (1 - eo(prog(t, t0, t0 + 0.8))));
+  });
+}
+
+// ---------- S4: 1º lugar ----------
+const primeiros = [
+  { t0: 15.25, frase: ["do Brasil no IYPT, o torneio", "internacional de física."], foto: "../public/mapa/galeria_162_1785841865_1.webp", pos: "50% 40%" },
+  { t0: 16.75, frase: ["do Brasil em debate", "competitivo."], foto: "../public/mapa/IMG_0500.webp", pos: "50% 45%" },
+  { t0: 18.25, frase: ["do Brasil em duas", "modalidades de robótica."], foto: "../public/mapa/WhatsApp-Image-2026-04-29-at-11-40-09.webp", pos: "50% 50%" },
+  { t0: 19.6, frase: ["em Goiás, em seis", "áreas do conhecimento."], foto: null },
+];
+$("#s4-frases").innerHTML = primeiros.map((p) => `<h2 class="t abs" style="left:0;top:0;font-size:78px;width:1000px">${p.frase.map((l) => `<span class="mask"><span>${l}</span></span>`).join("")}</h2>`).join("");
+$("#s4-fotos").innerHTML = primeiros.filter((p) => p.foto).map((p) => `<img src="${p.foto}" alt="" style="object-position:${p.pos}">`).join("");
+$("#s4-pills").innerHTML = ["Matemática", "Astronomia", "Linguística", "Física", "Economia", "Química"].map((x) => `<span class="pill">${x}</span>`).join("");
+function s4(t) {
+  surge($("#s4-rot"), t, 15.05, 0.4, 16);
+  const u = back(prog(t, 15.0, 15.55));
+  $("#s4-um").style.transform = `translateY(${(1 - cl(u, 0, 1)) * 200}px) scale(${lerp(0.8, 1, cl(u, 0, 1.1))})`;
+  $("#s4-um").style.opacity = prog(t, 15.0, 15.15);
+  $$("#s4-frases h2").forEach((h, i) => {
+    const prox = primeiros[i + 1];
+    linhas(h, t, primeiros[i].t0, 0.07, 0.5, prox ? prox.t0 - 0.3 : null);
+  });
+  $$("#s4-fotos img").forEach((im, i) => {
+    const t0 = primeiros[i].t0 - 0.05;
+    const a = eo5(prog(t, t0, t0 + 0.55));
+    im.style.clipPath = `circle(${a * 125}% at 100% 100%)`;
+    im.style.transform = `scale(${1.12 - 0.08 * prog(t, t0, t0 + 2)})`;
+  });
+  const fim = primeiros[3].t0 - 0.05;
+  const fo = eio(prog(t, fim, fim + 0.35));
+  $("#s4-fotos").style.opacity = 1 - fo;
+  $$("#s4-pills .pill").forEach((p, i) => {
+    const t0 = 19.75 + i * 0.1;
+    const a = back(prog(t, t0, t0 + 0.4));
+    p.style.opacity = prog(t, t0, t0 + 0.1);
+    p.style.transform = `scale(${cl(a, 0, 1.2)})`;
+  });
+}
+
+// ---------- S5: mapa ----------
+let grade = null, pontosMapa = [], terra = [];
+const M = { cel: 1920 / 90, y0: 300 };
+const GOIANIA = { lng: -49.2648, lat: -16.6869 };
+const destinos = [
+  { nome: "Yale.", lng: -72.98967, lat: 41.257131, foto: "../public/mapa/galeria_1_1777323461_1.webp", leg: "YMUN, Yale Model United Nations" },
+  { nome: "Harvard.", lng: -71.122214, lat: 42.365743, foto: "../public/mapa/IMG_3693.webp", leg: "HMUN, Harvard Model United Nations" },
+  { nome: "Londres.", lng: -0.1276, lat: 51.5072, foto: "../public/mapa/IMG_0033.webp", leg: "BEO, British English Olympics" },
+  { nome: "Zurique.", lng: 8.541042, lat: 47.374449, foto: "../public/mapa/galeria_162_1785841868_2.webp", leg: "IYPT, torneio internacional de física" },
+  { nome: "o Texas.", lng: -98.545612, lat: 31.263891, foto: "../public/mapa/IMG_0089.webp", leg: "Agro Arena, viagem de estudos" },
+  { nome: "o Bahrein.", lng: 50.55, lat: 26.07, foto: "../public/mapa/galeria_47_1777467645_0.webp", leg: "ISF Gymnasiade, torneio esportivo" },
+  { nome: "Toronto.", lng: -79.383935, lat: 43.653482, foto: "../public/mapa/galeria_163_1785843329_0.webp", leg: "Summer Program de imersão acadêmica" },
+];
+const D0 = 21.35, DP = 1.2, MUNDO = D0 + destinos.length * DP; // 29.75
+const CORCAT = { aprovacao: "#4cc3c8", olimpiada: C.ouro, viagem: "#e8eef0", torneio: C.coral };
+const xy = (lng, lat) => {
+  let x = lng; while (x < grade.lon0) x += 360; while (x >= grade.lon0 + 360) x -= 360;
+  return [((x - grade.lon0) / grade.step) * M.cel, M.y0 + ((grade.lat0 - lat) / grade.step) * M.cel];
+};
+function prepararMapa(g, conquistas) {
+  grade = g;
+  const L = g.linhas, rows = L.length, cols = L[0].length;
+  const isT = (c, r) => r >= 0 && r < rows && L[r][(c + cols) % cols] === "1";
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+    if (!isT(c, r)) continue;
+    const n = isT(c, r - 1), s = isT(c, r + 1), l = isT(c + 1, r), o = isT(c - 1, r);
+    const viz = +n + +s + +l + +o, h = hash(c, r);
+    const mancha = Math.sin(c * 0.21 + Math.sin(r * 0.33) * 2.1) + Math.cos(r * 0.27 - c * 0.07);
+    let forma = "cheio", gi = 0, tom = mancha > 0.9 ? 1 : 0;
+    if (viz === 0) forma = "ponto";
+    else if (viz === 1) { forma = "folha"; gi = n ? 1 : l ? 2 : s ? 3 : 0; }
+    else if (viz === 2 && n !== s) { forma = "quarto"; gi = n && o ? 0 : n && l ? 1 : s && l ? 2 : 3; }
+    else if (viz === 4 && h > 0.94) { forma = "listras"; gi = h > 0.97 ? 1 : 0; }
+    else if (viz === 4 && h < 0.04) { forma = "triangulo"; tom = 2; gi = Math.floor(h * 1000) % 4; }
+    terra.push({ c, r, forma, gi, tom });
+  }
+  const vistos = new Map();
+  conquistas.filter((x) => x.cat !== "arena").forEach((x) => {
+    const [px, py] = xy(x.lng, x.lat);
+    const k = Math.floor(px / M.cel) + ":" + Math.floor((py - M.y0) / M.cel);
+    if (!vistos.has(k)) vistos.set(k, { x: (Math.floor(px / M.cel) + 0.5) * M.cel, y: M.y0 + (Math.floor((py - M.y0) / M.cel) + 0.5) * M.cel, cat: x.cat, n: 0 });
+    vistos.get(k).n++;
+  });
+  pontosMapa = [...vistos.values()];
+  const paises = new Set(conquistas.filter((x) => x.cat !== "arena").map((x) => x.pais)).size;
+  const total = conquistas.filter((x) => x.cat !== "arena").length;
+  $("#s5-tot").textContent = `${total} conquistas em ${paises} países, no mapa do Arena`;
+  $("#s5-card").innerHTML = destinos.map((d) => `<img src="${d.foto}" alt="">`).join("");
+}
+const TOM = ["#34434a", "#40525a", "#1d5a5e"];
+function celula(ctx, it, s) {
+  const m = s * 0.06;
+  ctx.fillStyle = it.forma === "listras" ? "#7a898f" : TOM[it.tom];
+  ctx.beginPath();
+  if (it.forma === "quarto") { ctx.moveTo(m, m); ctx.arc(m, m, s - 2 * m, 0, Math.PI / 2); }
+  else if (it.forma === "ponto") ctx.arc(s / 2, s / 2, s * 0.36, 0, Math.PI * 2);
+  else if (it.forma === "triangulo") { ctx.moveTo(m, m); ctx.lineTo(s - m, m); ctx.lineTo(m, s - m); }
+  else if (it.forma === "folha") { ctx.moveTo(m, m); ctx.lineTo(s - m, m); ctx.lineTo(s - m, s / 2); ctx.arc(s / 2, s / 2, s / 2 - m, 0, Math.PI / 2); ctx.lineTo(m, s - m); }
+  else if (it.forma === "listras") {
+    ctx.save(); ctx.rect(m, m, s - 2 * m, s - 2 * m); ctx.clip(); ctx.strokeStyle = ctx.fillStyle; ctx.lineWidth = s * 0.155;
+    for (let k = 0; k < 6; k++) { ctx.moveTo((k / 2.5) * s - s, s * 2); ctx.lineTo((k / 2.5) * s + s, 0); }
+    ctx.stroke(); ctx.restore(); return;
+  } else ctx.rect(m, m, s - 2 * m, s - 2 * m);
+  ctx.fill();
+}
+function arco(ctx, a, b, p, cor, larg) {
+  const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2, d = Math.hypot(b[0] - a[0], b[1] - a[1]);
+  const cx = mx, cy = my - d * 0.32;
+  ctx.strokeStyle = cor; ctx.lineWidth = larg; ctx.lineCap = "round";
+  ctx.beginPath();
+  const N = 60;
+  for (let i = 0; i <= N * p; i++) {
+    const u = i / N, x = (1 - u) ** 2 * a[0] + 2 * (1 - u) * u * cx + u * u * b[0], y = (1 - u) ** 2 * a[1] + 2 * (1 - u) * u * cy + u * u * b[1];
+    i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+  }
+  ctx.stroke();
+}
+function anel(ctx, x, y, r, cor, furo = 0.48) {
+  ctx.fillStyle = cor; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.arc(x, y, r * furo, 0, Math.PI * 2, true); ctx.fill("evenodd");
+}
+function s5(t) {
+  const ctx = $("#s5-mapa").getContext("2d");
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.fillStyle = C.g900; ctx.fillRect(0, 0, 1920, 1080);
+  if (!grade) return;
+  const go = xy(GOIANIA.lng, GOIANIA.lat);
+  // leve aproximação contínua
+  const z = lerp(1.0, 1.06, eio(prog(t, 21, 31)));
+  ctx.translate(go[0], go[1]); ctx.scale(z, z); ctx.translate(-go[0], -go[1]);
+  const s = M.cel;
+  terra.forEach((it) => {
+    const x = it.c * s, y = M.y0 + it.r * s;
+    const d = Math.hypot(x - go[0], y - go[1]) / 1920;
+    const a = eo(prog(t, 20.9 + d * 1.1, 21.35 + d * 1.1));
+    if (a <= 0) return;
+    ctx.save(); ctx.translate(x + s / 2, y + s / 2); ctx.scale(a, a); ctx.rotate((it.gi * Math.PI) / 2 + (1 - a) * Math.PI / 2); ctx.translate(-s / 2, -s / 2);
+    celula(ctx, it, s); ctx.restore();
+  });
+  // todos os pontos no final
+  pontosMapa.forEach((p, i) => {
+    const d = Math.hypot(p.x - go[0], p.y - go[1]) / 1920;
+    const t0 = MUNDO + 0.05 + d * 0.7 + hash(i, 3) * 0.15;
+    const a = prog(t, t0, t0 + 0.45);
+    if (a <= 0) return;
+    ctx.globalAlpha = 0.5 * (1 - eo(prog(t, t0 + 0.2, t0 + 1.0)));
+    arco(ctx, go, [p.x, p.y], eo(a), CORCAT[p.cat], 1.5);
+    ctx.globalAlpha = 1;
+    const r = (p.n > 1 ? 6.5 : 4.8) * back(prog(t, t0 + 0.3, t0 + 0.6));
+    if (r > 0) anel(ctx, p.x, p.y, r, CORCAT[p.cat]);
+  });
+  // destinos em sequência
+  destinos.forEach((dd, i) => {
+    const t0 = D0 + i * DP;
+    if (t < t0) return;
+    const b = xy(dd.lng, dd.lat);
+    const atual = t < t0 + DP || i === destinos.length - 1 && t < MUNDO;
+    ctx.globalAlpha = atual ? 1 : lerp(1, 0.35, prog(t, t0 + DP, t0 + DP + 0.3));
+    arco(ctx, go, b, eo(prog(t, t0, t0 + 0.55)), C.petc, 3.5);
+    const r = 11 * back(prog(t, t0 + 0.45, t0 + 0.75));
+    if (r > 0) anel(ctx, b[0], b[1], r, C.petc);
+    if (atual) {
+      const pu = prog(t, t0 + 0.5, t0 + 1.2);
+      ctx.strokeStyle = C.petc; ctx.lineWidth = 2; ctx.globalAlpha = 1 - pu;
+      ctx.beginPath(); ctx.arc(b[0], b[1], 11 + pu * 34, 0, Math.PI * 2); ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  });
+  // Goiânia
+  const gr = 9 * back(prog(t, 20.95, 21.35));
+  if (gr > 0) { ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(go[0], go[1], gr, 0, Math.PI * 2); ctx.fill(); }
+
+  // título: o destino troca como na hero da landing
+  linhas($("#s5-tit"), t, 21.05);
+  let k = cl(Math.floor((t - D0) / DP), 0, destinos.length - 1);
+  const dest = $("#s5-dest");
+  if (t >= MUNDO) { dest.textContent = "o mundo."; k = -1; } else dest.textContent = destinos[k].nome;
+  const tt = t >= MUNDO ? MUNDO : D0 + k * DP;
+  const a = eo5(prog(t, tt, tt + 0.35));
+  dest.style.display = "inline-block";
+  dest.style.transform = `translateY(${(1 - a) * 40}px)`;
+  dest.style.opacity = t < D0 ? 0 : a;
+  // foto do destino
+  const card = $("#s5-card");
+  $$("img", card).forEach((im, i) => {
+    const t0 = D0 + i * DP + 0.15;
+    const e = eo5(prog(t, t0, t0 + 0.45));
+    im.style.clipPath = `circle(${e * 142}% at 0% 100%)`;
+    im.style.transform = `scale(${1.15 - 0.1 * prog(t, t0, t0 + 1.5)})`;
+  });
+  const fora = eio(prog(t, MUNDO - 0.1, MUNDO + 0.3));
+  card.style.opacity = prog(t, D0 + 0.1, D0 + 0.2) * (1 - fora);
+  const leg = $("#s5-leg");
+  leg.textContent = k >= 0 ? destinos[k].leg : "";
+  leg.style.opacity = t < D0 ? 0 : eo(prog(t, (k >= 0 ? D0 + k * DP : 0) + 0.3, (k >= 0 ? D0 + k * DP : 0) + 0.6)) * (1 - fora);
+  surge($("#s5-tot"), t, MUNDO + 0.4, 0.5, 16);
+}
+
+// ---------- S6: números ----------
+const stats = [
+  { n: 65, suf: "", txt: "ex-alunos aprovados em universidades de 11 países", forma: "quarto", cor: C.pet, g: 0 },
+  { n: 21, suf: "", txt: "países com competições acadêmicas fora do Brasil", forma: "anel", cor: C.pet, g: 0 },
+  { n: 295, suf: "", txt: "seleções para competições internacionais em 2024", forma: "triangulo", cor: C.grafite, g: 0 },
+  { n: 6, suf: "ª", txt: "escola do Brasil no College Board, e a única de Goiás", forma: "folha", cor: C.pet7, g: 90 },
+];
+const pos6 = [[120, 170], [1040, 170], [120, 600], [1040, 600]];
+$("#s6-stats").innerHTML = stats.map((s, i) => `<div class="stat" style="left:${pos6[i][0]}px;top:${pos6[i][1]}px"><div class="ic">${modulo(s.forma, s.cor)}</div><div class="num">0</div><div class="txt">${s.txt}</div></div>`).join("");
+function s6(t) {
+  surge($("#s6-rot"), t, 31.05, 0.4, 16);
+  $("#s6-h").style.transform = `scaleX(${eo5(prog(t, 31.0, 31.9))})`; $("#s6-h").style.transformOrigin = "0 0";
+  $("#s6-v").style.transform = `scaleY(${eo5(prog(t, 31.2, 32.1))})`; $("#s6-v").style.transformOrigin = "0 0";
+  $$("#s6-stats .stat").forEach((el, i) => {
+    const t0 = 31.25 + i * 0.75;
+    const s = stats[i];
+    const ic = el.querySelector(".ic");
+    const a = back(prog(t, t0, t0 + 0.5));
+    ic.style.transform = `scale(${cl(a, 0, 1.2)})`;
+    giro(ic, s.g - 180 * (1 - eo(prog(t, t0, t0 + 0.7))) + 90 * eio(prog(t, 35.5, 36.0)));
+    const num = el.querySelector(".num");
+    num.textContent = fmt(s.n * eo(prog(t, t0 + 0.05, t0 + 1.0))) + s.suf;
+    surge(num, t, t0 + 0.05, 0.4, 40);
+    surge(el.querySelector(".txt"), t, t0 + 0.25, 0.5, 20);
+  });
+}
+
+// ---------- S7 ----------
+function s7a(t) {
+  $("#s7a-img").style.transform = `scale(${lerp(1.04, 1.16, prog(t, 37, 40.5))}) translateX(${lerp(0, -20, prog(t, 37, 40.5))}px)`;
+  surge($("#s7a-rot"), t, 37.15, 0.4, 16);
+  linhas($("#s7a-tit"), t, 37.25, 0.1);
+}
+function s7b(t) {
+  $("#s7b-img").style.transform = `scale(${lerp(1.16, 1.04, prog(t, 40.5, 44))})`;
+  surge($("#s7b-rot"), t, 40.65, 0.4, 16);
+  linhas($("#s7b-tit"), t, 40.75, 0.1);
+  surge($("#s7b-sub"), t, 41.4, 0.5, 20);
+}
+
+// ---------- S8 ----------
+const faixa = [["quarto", C.pet, 0], ["cheio", C.g600], ["anel", C.gelo, 0], ["triangulo", C.pet7, 90], ["listras", C.gelo, 0], ["folha", C.pet, 0], ["ponto", C.gelo, 0], ["quarto", C.gelo, 90],
+  ["cheio", C.pet7], ["triangulo", C.gelo, 0], ["anel", C.pet, 0], ["folha", C.gelo, 180], ["listras", C.pet, 90], ["quarto", C.pet, 270], ["ponto", C.pet, 0], ["folha", C.pet7, 90]];
+$("#s8-faixa").innerHTML = faixa.map((f, i) => `<div class="peca" style="left:${i * 120}px;top:0;width:120px;height:120px">${modulo(f[0], f[1])}</div>`).join("");
+function s8(t) {
+  const tit = $("#s8-tit");
+  $$(".mask > span", tit).forEach((s, i) => {
+    const t0 = 44.1 + i * 0.5;
+    const a = eo5(prog(t, t0, t0 + 0.5));
+    const sai = eio(prog(t, 46.4 + i * 0.05, 46.8 + i * 0.05));
+    s.style.transform = `translateY(${(1 - a) * 110 - sai * 110}%)`;
+  });
+  surge($("#s8-logo"), t, 46.85, 0.6, 30);
+  $("#s8-logo").style.transform += ` scale(${lerp(0.92, 1, eo(prog(t, 46.85, 47.5)))})`;
+  surge($("#s8-cta"), t, 47.3, 0.5, 24);
+  surge($("#s8-ctt"), t, 47.55, 0.5, 20);
+  $$("#s8-faixa .peca").forEach((p, i) => {
+    const t0 = 44.2 + Math.abs(i - 7.5) * 0.05;
+    const a = eo5(prog(t, t0, t0 + 0.6));
+    p.style.transform = `translateY(${(1 - a) * 130}px)`;
+    giro(p, (faixa[i][2] || 0) + 90 * eio(prog(t, 46.4 + i * 0.02, 46.9 + i * 0.02)));
+  });
+}
+
+// ---------- transição: módulos cobrem a tela ----------
+const CORTES = [3, 9, 15, 21, 31, 37, 40.5, 44];
+const PALETA = [[C.pet, C.pet7, C.g600], [C.pet7, C.pet, C.petc], [C.g600, C.pet, C.pet7]];
+function wipe(t) {
+  const ctx = $("#wipe").getContext("2d");
+  ctx.clearRect(0, 0, 1920, 1080);
+  const S = 120;
+  CORTES.forEach((b, ci) => {
+    if (t < b - 0.45 || t > b + 0.45) return;
+    const canto = ci % 4;
+    const pal = PALETA[ci % 3];
+    for (let r = 0; r < 9; r++) for (let c = 0; c < 16; c++) {
+      const cc = canto & 1 ? 15 - c : c, rr = canto & 2 ? 8 - r : r;
+      const d = ((cc + rr * 1.1) / (15 + 8 * 1.1)) * 0.2;
+      const pc = eio(prog(t, b - 0.42 + d, b - 0.22 + d));
+      const pu = eio(prog(t, b + 0.02 + d, b + 0.22 + d));
+      if (pc <= 0 || pu >= 1) continue;
+      const x = c * S, y = r * S;
+      ctx.save();
+      ctx.beginPath(); ctx.rect(x, y, S, S); ctx.clip();
+      ctx.fillStyle = pal[Math.floor(hash(c + ci, r) * 3)];
+      const g = (Math.floor(hash(r, c + ci) * 4) + canto) % 4;
+      const cx0 = x + (g === 1 || g === 2 ? S : 0), cy0 = y + (g >= 2 ? S : 0);
+      const cx1 = x + (g === 1 || g === 2 ? 0 : S), cy1 = y + (g >= 2 ? 0 : S);
+      ctx.beginPath();
+      if (pu <= 0) ctx.arc(cx0, cy0, pc * S * 1.42, 0, Math.PI * 2);
+      else { ctx.rect(x, y, S, S); ctx.moveTo(cx1, cy1); ctx.arc(cx1, cy1, pu * S * 1.42, 0, Math.PI * 2, true); }
+      ctx.fill("evenodd");
+      // um terço das células mostra um módulo da marca enquanto a tela está coberta
+      const h = hash(c * 3 + ci, r * 7);
+      const m = eo(prog(t, b - 0.3 + d, b - 0.05 + d)) * (1 - eio(prog(t, b + d, b + 0.16 + d)));
+      if (h < 0.34 && m > 0) {
+        ctx.fillStyle = h < 0.12 ? C.gelo : h < 0.23 ? C.g900 : C.petc;
+        ctx.translate(x + S / 2, y + S / 2); ctx.rotate(((g + 1) * Math.PI) / 2 + (1 - m) * Math.PI / 2); ctx.scale(m, m); ctx.translate(-S / 2, -S / 2);
+        ctx.beginPath();
+        const f = Math.floor(h * 100) % 4;
+        if (f === 0) { ctx.moveTo(0, S); ctx.arc(0, S, S, -Math.PI / 2, 0); }
+        else if (f === 1) { ctx.arc(S / 2, S / 2, S * 0.34, 0, Math.PI * 2); ctx.arc(S / 2, S / 2, S * 0.17, 0, Math.PI * 2, true); }
+        else if (f === 2) { ctx.moveTo(0, 0); ctx.lineTo(S, 0); ctx.lineTo(0, S); }
+        else ctx.arc(S / 2, S / 2, S * 0.22, 0, Math.PI * 2);
+        ctx.fill("evenodd");
+      }
+      ctx.restore();
+    }
+  });
+}
+
+// ---------- linha do tempo ----------
+const CENAS = [
+  { id: "s1", a: 0, b: 3, f: s1 }, { id: "s2", a: 3, b: 9, f: s2 }, { id: "s3", a: 9, b: 15, f: s3 }, { id: "s4", a: 15, b: 21, f: s4 },
+  { id: "s5", a: 21, b: 31, f: s5 }, { id: "s6", a: 31, b: 37, f: s6 }, { id: "s7a", a: 37, b: 40.5, f: s7a }, { id: "s7b", a: 40.5, b: 44, f: s7b },
+  { id: "s8", a: 44, b: DUR + 1, f: s8 },
+];
+function seek(t) {
+  CENAS.forEach((c) => {
+    const on = t >= c.a && t < c.b;
+    document.getElementById(c.id).style.visibility = on ? "visible" : "hidden";
+    if (on) c.f(t);
+  });
+  wipe(t);
+  $("#preto").style.opacity = eio(prog(t, DUR - 0.7, DUR - 0.05));
+}
+window.seek = seek;
+window.DUR = DUR;
+
+async function preparar() {
+  const [g, cq] = await Promise.all([fetch("../src/data/land-grid.json").then((r) => r.json()), fetch("../src/data/conquistas.json").then((r) => r.json())]);
+  prepararMapa(g, cq);
+  await document.fonts.load('800 100px "SG"');
+  await document.fonts.load('italic 800 100px "SG"');
+  await document.fonts.load('600 100px "SG"');
+  await document.fonts.ready;
+  await Promise.all([...document.images].map((im) => (im.complete ? im.decode().catch(() => {}) : new Promise((ok) => { im.onload = im.onerror = ok; }))));
+  // o título da hero tem de caber à esquerda do mosaico
+  const tit = $("#s2-tit");
+  let fs = 112;
+  while (Math.max(...$$(".mask > span", tit).map((s) => s.offsetWidth)) > 780 && fs > 70) tit.style.fontSize = --fs + "px";
+}
+window.pronto = preparar().then(() => {
+  const q = new URLSearchParams(location.search);
+  if (q.has("render")) return seek(0);
+  document.body.classList.add("previa");
+  const ajustar = () => ($("#palco").style.transform = `scale(${Math.min(innerWidth / 1920, innerHeight / 1080)})`);
+  ajustar(); addEventListener("resize", ajustar);
+  if (q.has("t")) return seek(Number(q.get("t")));
+  // prévia em tempo real; clique para tocar com a trilha
+  const audio = new Audio("trilha.wav");
+  let t0 = performance.now();
+  const loop = () => { const t = ((performance.now() - t0) / 1000) % DUR; seek(t); requestAnimationFrame(loop); };
+  addEventListener("click", () => { audio.currentTime = 0; audio.play(); t0 = performance.now(); });
+  loop();
+});
+</script>
+</body>
+</html>
