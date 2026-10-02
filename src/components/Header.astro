@@ -54,33 +54,26 @@ const links = [
 </header>
 
 <script>
-  // A pílula ganha sombra só depois da primeira dobra; na hero ela fica branca sobre a faixa branca, sem sombra.
+  /*
+    Enquanto a hero está na tela, o menu é a faixa branca de cima da moldura e o topo arredondado da hero fica preso
+    logo abaixo dela: a moldura "fecha" de cima para baixo (--corte, lido em Hero.astro). A pílula só aparece quando
+    a hero sai inteira da tela.
+  */
   const topo = document.querySelector<HTMLElement>("[data-topo]")!;
   const hero = document.querySelector<HTMLElement>("[data-hero]");
-  // --saida vai de 0 a 1 enquanto a hero sobe por baixo da pílula (do pé ao topo dela)
-  const barra = topo.querySelector<HTMLElement>(".topo__barra")!;
   let pedido = 0;
-  const medirSaida = () => {
+  const medir = () => {
     pedido = 0;
-    if (!hero) return;
-    const p = barra.getBoundingClientRect();
-    const alto = p.top + 6;
-    const baixo = p.bottom - 6;
-    const h = hero.getBoundingClientRect().top;
-    const saida = Math.min(1, Math.max(0, (baixo - h) / (baixo - alto)));
-    topo.style.setProperty("--saida", saida.toFixed(3));
+    if (!hero) return topo.classList.add("solto");
+    const fundoMenu = topo.getBoundingClientRect().bottom;
+    const h = hero.getBoundingClientRect();
+    const corte = Math.min(h.height, Math.max(0, fundoMenu - h.top));
+    hero.style.setProperty("--corte", `${corte.toFixed(1)}px`);
+    topo.classList.toggle("solto", h.bottom <= fundoMenu);
   };
-  addEventListener("scroll", () => (pedido ||= requestAnimationFrame(medirSaida)), { passive: true });
-  addEventListener("resize", medirSaida);
-  medirSaida();
-
-  if (hero) {
-    new IntersectionObserver(([e]) => topo.classList.toggle("solto", !e.isIntersecting), {
-      rootMargin: `-${topo.offsetHeight}px 0px 0px 0px`,
-    }).observe(hero);
-  } else {
-    topo.classList.add("solto");
-  }
+  addEventListener("scroll", () => (pedido ||= requestAnimationFrame(medir)), { passive: true });
+  addEventListener("resize", medir);
+  medir();
 
   const botao = document.querySelector<HTMLButtonElement>("[data-menu]");
   const painel = document.getElementById("menu-movel");
@@ -137,6 +130,17 @@ const links = [
     gap: 2rem;
   }
 
+  /* faixa branca da moldura enquanto a hero está na tela */
+  .topo {
+    background: var(--branco);
+    transition: background-color 200ms var(--ease);
+  }
+
+  .topo.solto {
+    background: transparent;
+  }
+
+  /* pílula: só depois da hero */
   .topo__barra::before {
     content: "";
     position: absolute;
@@ -144,14 +148,18 @@ const links = [
     /* 10 px de respiro em volta do CTA (40 px de altura numa pílula de 60); a ponta esquerda, toda redonda, abraça o logo */
     inset: 6px max(6px, calc(var(--gutter) - 10px)) 6px max(6px, calc(var(--gutter) - 30px));
     background: var(--branco);
-    /* cantos de cima: retos na faixa branca, redondos (30 px = meia altura) quando a pílula sai dela */
-    border-radius: calc(var(--saida, 0) * 30px) calc(var(--saida, 0) * 30px) 30px 30px;
-    box-shadow: 0 0 0 1px rgb(28 37 41 / 0), 0 6px 14px rgb(28 37 41 / 0);
-    transition: box-shadow 240ms var(--ease);
+    border-radius: 999px;
+    box-shadow: 0 0 0 1px rgb(28 37 41 / 0.08), 0 6px 14px rgb(28 37 41 / 0.12);
+    opacity: 0;
+    transform: translateY(-6px);
+    transition:
+      opacity 220ms var(--ease),
+      transform 220ms var(--ease);
   }
 
   .topo.solto .topo__barra::before {
-    box-shadow: 0 0 0 1px rgb(28 37 41 / 0.08), 0 6px 14px rgb(28 37 41 / 0.12);
+    opacity: 1;
+    transform: none;
   }
 
   .topo__marca {

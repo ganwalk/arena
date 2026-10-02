@@ -32,10 +32,46 @@ const [destaque, ...demais] = noticias;
         }
       </ul>
     </div>
+
+    <ul role="list" class="noti__carrossel" aria-label="Notícias">
+      {
+        noticias.map((n) => (
+          <li>
+            <a href={n.href}>
+              <img src={`${n.foto}-800.webp`} width="800" height="533" alt="" loading="lazy" />
+              <time datetime={n.data}>{data(n.data)}</time>
+              <h3>{n.titulo}</h3>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
   </div>
 </section>
 
 <style>
+  .noti__carrossel {
+    display: none;
+  }
+
+  .noti__carrossel img {
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    margin-bottom: 0.875rem;
+    border-top-right-radius: 24%;
+  }
+
+  @media (max-width: 720px) {
+    .noti__grid {
+      display: none;
+    }
+    .noti__carrossel {
+      display: flex;
+      margin-top: 1.5rem;
+    }
+  }
+
   .noti {
     padding-block: clamp(4rem, 2rem + 7vw, 8rem);
   }

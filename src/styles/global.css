@@ -240,3 +240,80 @@ button {
     animation-duration: 0.01ms !important;
   }
 }
+
+/*
+  Celular: uma ideia por tela. O desktop mostra tudo; no celular cada seção fica com o título, a peça principal e
+  uma ação. Itens paralelos (parceiros, notícias) passam para um carrossel manual, um por tela, em vez de empilhar.
+*/
+.so-celular {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .so-celular {
+    display: inline;
+  }
+
+  .painel__texto > p {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .painel-vivo__grade,
+  .painel-vivo__legenda {
+    max-width: 240px !important;
+  }
+
+  .so-desktop,
+  .noti__grid,
+  .rodape__marca p,
+  .etapas__nota,
+  .etapas__lista li:not(:has(.ativa)),
+  .mundo__numeros p:not(:first-child),
+  .palco__arraste,
+  .mundo .paises,
+  .detalhe__vazio p:not(.detalhe__chamada),
+  .olimp__foto,
+  .olimp__texto,
+  .olimp__ano,
+  .parc__cabeca .lead,
+  .parceiro__texto,
+  .prop__citacao,
+  .pilar__texto,
+  .vida__cabeca .lead,
+  .painel__foto2,
+  .painel__texto h4,
+  .painel__texto .itens,
+  .visita .lead,
+  .unidade p:first-of-type,
+  .unidade a[href^="mailto"],
+  .unidade a[href^="mailto"] + br {
+    display: none !important;
+  }
+
+  /* carrossel manual: um item por tela, com o próximo aparecendo na borda */
+  .parc__grade,
+  .noti__carrossel {
+    display: flex !important;
+    gap: 0.875rem !important;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    margin-inline: calc(-1 * var(--gutter)) !important;
+    padding-inline: var(--gutter) !important;
+    scroll-padding-inline: var(--gutter);
+  }
+
+  .parc__grade::-webkit-scrollbar,
+  .noti__carrossel::-webkit-scrollbar {
+    display: none;
+  }
+
+  .parc__grade > *,
+  .noti__carrossel > * {
+    flex: 0 0 84%;
+    scroll-snap-align: start;
+  }
+}

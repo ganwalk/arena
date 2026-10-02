@@ -205,7 +205,8 @@ const primeiro = temas[0];
     --m: clamp(10px, 1.1vw, 16px);
     position: relative;
     /* moldura branca arredondada; a mesma medida é usada pelo menu em Header.astro */
-    clip-path: inset(0 var(--m) var(--m) round calc(2.25 * var(--m)));
+    /* o topo arredondado acompanha a rolagem e fica preso sob o menu: o quadro fecha de cima para baixo */
+    clip-path: inset(var(--corte, 0px) var(--m) var(--m) round calc(2.25 * var(--m)));
     display: grid;
     grid-template-columns: minmax(0, 1fr) var(--altura);
     min-height: var(--altura);
