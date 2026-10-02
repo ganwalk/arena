@@ -356,9 +356,24 @@ const faixas = [
     }
     .etapa {
       grid-template-columns: 1fr;
+      padding-block: 1rem;
     }
     .etapa__serie {
       grid-row: 2;
+    }
+    .etapa__nome {
+      font-size: var(--t-20);
+    }
+    .etapa__seta {
+      top: 1.2rem;
+    }
+    /* no celular, só a etapa da idade escolhida mostra descrição e endereço */
+    .etapa:not(.ativa) .etapa__texto,
+    .etapa:not(.ativa) .etapa__unidade {
+      display: none;
+    }
+    .etapa.ativa {
+      padding-block: 1.25rem;
     }
   }
 </style>
