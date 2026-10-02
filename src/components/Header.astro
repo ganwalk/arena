@@ -34,7 +34,7 @@ const links = [
       <a class="botao topo__cta" href="#visita">Agendar visita</a>
       <button class="topo__menu" type="button" aria-expanded="false" aria-controls="menu-movel" data-menu>
         <span class="sr-only">Abrir menu</span>
-        <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18M3 12h18M3 17h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path class="i-abrir" d="M3 7h18M3 12h18M3 17h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" /><path class="i-fechar" d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
       </button>
     </div>
   </div>
@@ -248,6 +248,15 @@ const links = [
     /* totalmente arredondado, concêntrico às pontas da pílula */
     border-radius: 999px;
     padding-inline: 1.25rem;
+  }
+
+  .topo__menu .i-fechar,
+  .topo__menu[aria-expanded="true"] .i-abrir {
+    display: none;
+  }
+
+  .topo__menu[aria-expanded="true"] .i-fechar {
+    display: inline;
   }
 
   .topo__menu {

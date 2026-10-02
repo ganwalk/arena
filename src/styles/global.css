@@ -190,6 +190,14 @@ button {
   transition: text-decoration-color 160ms var(--ease);
 }
 
+@media (pointer: coarse) {
+  .link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+}
+
 .link:hover {
   text-decoration-thickness: 2px;
 }

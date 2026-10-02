@@ -12,22 +12,22 @@ import { acessos, institucional, redes, unidades } from "../data/site";
       </ul>
     </div>
 
-    <nav aria-labelledby="rod-inst">
-      <h2 id="rod-inst">Institucional</h2>
+    <details class="rodape__grupo" open data-grupo>
+      <summary><h2>Institucional</h2></summary>
       <ul role="list">
         {institucional.map((l) => <li><a href={l.href}>{l.rotulo}</a></li>)}
       </ul>
-    </nav>
+    </details>
 
-    <nav aria-labelledby="rod-acesso">
-      <h2 id="rod-acesso">Área do aluno</h2>
+    <details class="rodape__grupo" open data-grupo>
+      <summary><h2>Área do aluno</h2></summary>
       <ul role="list">
         {acessos.map((l) => <li><a href={l.href} rel="noopener">{l.rotulo}</a></li>)}
       </ul>
-    </nav>
+    </details>
 
-    <div>
-      <h2>Telefones</h2>
+    <details class="rodape__grupo" open data-grupo>
+      <summary><h2>Telefones</h2></summary>
       <ul role="list">
         {
           unidades.map((u) => (
@@ -38,12 +38,26 @@ import { acessos, institucional, redes, unidades } from "../data/site";
           ))
         }
       </ul>
-    </div>
+    </details>
   </div>
   <div class="wrap rodape__fim">
     <p>© 2026 Colégio Arena. Direitos reservados.</p>
   </div>
 </footer>
+
+<script>
+  // No celular os grupos do rodapé começam recolhidos; no desktop ficam abertos e sem ação no título.
+  const celular = matchMedia("(max-width: 720px)");
+  const grupos = [...document.querySelectorAll<HTMLDetailsElement>("[data-grupo]")];
+  const ajustar = () => grupos.forEach((g) => (g.open = !celular.matches));
+  ajustar();
+  celular.addEventListener("change", ajustar);
+  grupos.forEach((g) =>
+    g.querySelector("summary")!.addEventListener("click", (e) => {
+      if (!celular.matches) e.preventDefault();
+    }),
+  );
+</script>
 
 <style>
   .rodape {
@@ -92,6 +106,15 @@ import { acessos, institucional, redes, unidades } from "../data/site";
     text-underline-offset: 0.2em;
   }
 
+  .rodape__grupo summary {
+    list-style: none;
+    cursor: default;
+  }
+
+  .rodape__grupo summary::-webkit-details-marker {
+    display: none;
+  }
+
   .rodape__unidade {
     display: block;
     color: #a9b4b7;
@@ -110,9 +133,58 @@ import { acessos, institucional, redes, unidades } from "../data/site";
     }
   }
 
-  @media (max-width: 560px) {
+  @media (max-width: 720px) {
     .rodape__grid {
       grid-template-columns: 1fr;
+      gap: 0;
+    }
+    .rodape__marca {
+      padding-bottom: 1.5rem;
+    }
+    .rodape__redes a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+    }
+    .rodape__grupo {
+      border-top: 1px solid #45545b;
+    }
+    .rodape__grupo summary {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      min-height: 52px;
+      cursor: pointer;
+    }
+    .rodape__grupo summary h2 {
+      margin: 0;
+    }
+    .rodape__grupo summary::after {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-right: 1.5px solid currentColor;
+      border-bottom: 1.5px solid currentColor;
+      transform: translateY(-3px) rotate(45deg);
+      transition: transform 180ms var(--ease);
+    }
+    .rodape__grupo[open] summary::after {
+      transform: translateY(2px) rotate(-135deg);
+    }
+    .rodape__grupo ul {
+      padding-bottom: 1rem;
+    }
+    .rodape__grupo li {
+      padding: 0;
+    }
+    .rodape__grupo a {
+      display: flex;
+      align-items: center;
+      min-height: 44px;
+    }
+    .rodape__fim {
+      margin-top: 0;
+      border-top: 1px solid #45545b;
     }
   }
 </style>
