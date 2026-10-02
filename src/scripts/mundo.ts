@@ -61,7 +61,12 @@ function tituloGrupo(regs: Registro[]) {
 
 const lugar = (r: Registro) => [r.cidade, pais(r.pais)].filter(Boolean).join(", ");
 
-export async function iniciarMundo(secao: HTMLElement) {
+export interface ApiMundo {
+  abrir(id: number): void;
+  sortear(): void;
+}
+
+export async function iniciarMundo(secao: HTMLElement): Promise<ApiMundo | null> {
   const palco = secao.querySelector<HTMLElement>("[data-palco]")!;
   const tela = secao.querySelector<HTMLElement>("[data-tela]")!;
   const canvas = secao.querySelector<HTMLCanvasElement>("[data-canvas]")!;
@@ -78,7 +83,7 @@ export async function iniciarMundo(secao: HTMLElement) {
     dados = await (await fetch("/mundo.json")).json();
   } catch {
     carregando.textContent = "Não foi possível carregar o mapa. Recarregue a página para tentar de novo.";
-    return;
+    return null;
   }
   carregando.remove();
 
@@ -336,4 +341,38 @@ export async function iniciarMundo(secao: HTMLElement) {
       }),
     );
   }
+
+  let filtroAtual = 15;
+  filtros.forEach((b) => b.addEventListener("click", () => (filtroAtual = Number(b.dataset.filtro))));
+
+  /** Seleciona o ponto do registro e abre o registro no painel. */
+  function abrir(id: number) {
+    const r = porId.get(id);
+    if (!r) return;
+    const i = pontos.findIndex((p) => p.ids.includes(id));
+    const p = pontos[i];
+    const regs = p.ids.map((x) => porId.get(x)!);
+    selecionado = i;
+    mapa.definirSelecao(i);
+    desenharArco(i, true);
+    marcarPais(null);
+    detalhe.innerHTML = registroHTML(r, regs.length > 1 ? { titulo: tituloGrupo(regs), ids: p.ids } : undefined);
+    ligarRegistro(r);
+  }
+
+  /** Abre um registro ao acaso entre os que passam no filtro atual. */
+  function sortear() {
+    const candidatos = dados.registros.filter((r) => BIT[r.cat] & filtroAtual && r.id !== (atualId ?? -1));
+    const r = candidatos[Math.floor(Math.random() * candidatos.length)];
+    atualId = r.id;
+    abrir(r.id);
+    tela.scrollIntoView({ behavior: reduzir ? "auto" : "smooth", block: "center" });
+    // no celular, o mapa rola até o ponto sorteado
+    const p = pontos.find((x) => x.ids.includes(r.id))!;
+    const c = mapa.centroCss(p.c, p.r);
+    palco.scrollTo({ left: c.x - palco.clientWidth / 2, behavior: reduzir ? "auto" : "smooth" });
+  }
+  let atualId: number | null = null;
+
+  return { abrir, sortear };
 }

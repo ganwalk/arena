@@ -47,7 +47,7 @@ const id = `l${Math.random().toString(36).slice(2, 8)}`;
   }
   .modulo__forma {
     transform-origin: 50px 50px;
-    transform: rotate(var(--giro));
+    transform: rotate(calc(var(--giro) + var(--extra, 0deg)));
     transition: transform 280ms var(--ease);
   }
 </style>

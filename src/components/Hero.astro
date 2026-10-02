@@ -1,140 +1,528 @@
 ---
-import Modulo from "./Modulo.astro";
+import { destinos, HERO_VIDEO } from "../data/site";
+import { registros } from "../lib/mundo";
+
+// Fotos de cada destino, tiradas da base do mapa.
+const lista = destinos.map((d) => {
+  const r = registros.find((x) => x.id === d.id)!;
+  const fotos = [...(r.capa ? [r.capa] : []), ...r.fotos].filter((f) => !(d.excluir ?? []).includes(f)).slice(0, 10);
+  return { nome: d.nome, id: d.id, legenda: d.legenda, fotos };
+});
+
+// Mosaico 4 x 4 no ritmo do painel da marca: fotos recortadas por módulos e módulos de cor.
+type Peca =
+  | { tipo: "foto"; c: number; r: number; tam?: 2; forma: string; giro: number }
+  | { tipo: "cor"; c: number; r: number; forma: string; cor: string; fundo: string; giro: number };
+const pecas: Peca[] = [
+  { tipo: "foto", c: 1, r: 1, forma: "quarto", giro: 0 },
+  { tipo: "cor", c: 2, r: 1, forma: "anel", cor: "var(--areia)", fundo: "var(--grafite-600)", giro: 0 },
+  { tipo: "foto", c: 3, r: 1, tam: 2, forma: "folha-grande", giro: 0 },
+  { tipo: "cor", c: 1, r: 2, forma: "triangulo", cor: "var(--petroleo)", fundo: "transparent", giro: 0 },
+  { tipo: "foto", c: 2, r: 2, forma: "folha", giro: 90 },
+  { tipo: "foto", c: 1, r: 3, forma: "circulo", giro: 0 },
+  { tipo: "cor", c: 2, r: 3, forma: "listras", cor: "var(--areia)", fundo: "transparent", giro: 0 },
+  { tipo: "foto", c: 3, r: 3, forma: "quarto", giro: 270 },
+  { tipo: "cor", c: 4, r: 3, forma: "quarto", cor: "var(--petroleo)", fundo: "transparent", giro: 180 },
+  { tipo: "cor", c: 1, r: 4, forma: "folha", cor: "var(--areia)", fundo: "transparent", giro: 180 },
+  { tipo: "foto", c: 2, r: 4, forma: "quarto", giro: 90 },
+  { tipo: "cor", c: 3, r: 4, forma: "ponto", cor: "var(--petroleo)", fundo: "var(--grafite-600)", giro: 0 },
+  { tipo: "foto", c: 4, r: 4, forma: "folha", giro: 270 },
+];
+let n = 0;
+const fotosPecas = pecas.map((p) => (p.tipo === "foto" ? n++ : -1));
+const primeiro = lista[0];
+const foto = (i: number, d = primeiro) => d.fotos[i % d.fotos.length];
 ---
 
-<section class="hero" aria-labelledby="hero-titulo">
-  <div class="wrap hero__grid">
-    <div class="hero__texto">
-      <h1 id="hero-titulo" class="titulo hero__titulo">Do Setor Bueno para Harvard, Bocconi e Coimbra.</h1>
-      <p class="lead hero__lead">
-        Da Educação Infantil ao pré-vestibular, em três unidades em Goiânia. O Arena usa o material do Sistema Poliedro,
-        tem turmas olímpicas desde o Fundamental e é a única escola de Goiás no College Board.
-      </p>
-      <div class="hero__acoes">
-        <a class="botao" href="#visita">Agendar uma visita</a>
-        <a class="link" href="#etapas">Ver as etapas de ensino</a>
-      </div>
+<section class="hero" aria-labelledby="hero-titulo" data-hero>
+  <div class="hero__texto">
+    <h1 id="hero-titulo" class="titulo hero__titulo">
+      <span class="hero__linha">Do Setor Bueno</span>
+      <span class="hero__linha">para <span class="hero__destino" data-destino aria-live="polite">{primeiro.nome}</span>.</span>
+    </h1>
+    <p class="hero__legenda">
+      <span data-legenda>{primeiro.legenda}</span>.
+      <button type="button" class="hero__ver" data-ver>Ver no mapa</button>
+    </p>
+
+    <p class="hero__lead">
+      Da Educação Infantil ao pré-vestibular, em três unidades em Goiânia. O Arena usa o material do Sistema Poliedro,
+      tem turmas olímpicas desde o Fundamental e é a única escola de Goiás no College Board.
+    </p>
+    <div class="hero__acoes">
+      <a class="botao" href="#visita">Agendar uma visita</a>
+      <a class="hero__link" href="#etapas">Ver as etapas de ensino</a>
     </div>
 
-    <div class="hero__painel" data-painel>
-      <figure class="hero__foto">
-        <img
-          src="/img/hero-1600.webp"
-          srcset="/img/hero-800.webp 800w, /img/hero-1600.webp 1600w"
-          sizes="(min-width: 960px) 45vw, 100vw"
-          width="1600"
-          height="768"
-          alt="Alunos do Fundamental com a camiseta do Arena conversando no pátio"
-          fetchpriority="high"
-        />
-      </figure>
-      <div class="m m--a"><Modulo forma="quarto" cor="var(--petroleo)" fundo="var(--grafite)" giro={90} /></div>
-      <div class="m m--b"><Modulo forma="listras" cor="var(--grafite)" fundo="var(--papel)" /></div>
-      <div class="m m--c"><Modulo forma="anel" cor="var(--areia)" fundo="var(--grafite)" /></div>
-      <div class="m m--d"><Modulo forma="triangulo" cor="var(--petroleo)" fundo="var(--grafite)" giro={270} /></div>
-      <div class="m m--e"><Modulo forma="folha" cor="var(--areia)" fundo="var(--papel)" giro={180} /></div>
-      <div class="m m--f"><Modulo forma="quarto" cor="var(--petroleo)" fundo="var(--papel)" giro={0} /></div>
-      <div class="m m--g"><Modulo forma="folha" cor="var(--grafite)" fundo="var(--petroleo)" giro={90} /></div>
+    <div class="hero__destinos">
+      <button type="button" class="hero__pausa" data-pausa aria-pressed="false">
+        <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+          <path class="i-pausa" d="M3 2h3v10H3zM8 2h3v10H8z" fill="currentColor" />
+          <path class="i-tocar" d="M3 1.5v11L12 7z" fill="currentColor" />
+        </svg>
+        <span class="sr-only" data-pausa-rotulo>Pausar a troca de destinos</span>
+      </button>
+      <ul role="list">
+        {
+          lista.map((d, i) => (
+            <li>
+              <button type="button" data-ir={i} aria-current={i === 0 ? "true" : "false"}>
+                {d.nome.replace(/^o /, "")}
+                <span class="hero__barra" aria-hidden="true" />
+              </button>
+            </li>
+          ))
+        }
+      </ul>
     </div>
   </div>
+
+  <div class="mosaico" data-mosaico aria-hidden="true">
+    {
+      pecas.map((p, i) =>
+        p.tipo === "foto" ? (
+          <button
+            type="button"
+            tabindex="-1"
+            class:list={["peca", "peca--foto", `forma-${p.forma}`, { "peca--grande": p.tam === 2 }]}
+            style={`grid-column:${p.c} / span ${p.tam ?? 1};grid-row:${p.r} / span ${p.tam ?? 1};--giro:${p.giro}deg`}
+            data-foto={fotosPecas[i]}
+          >
+            <span class="peca__forma">
+              {p.tam === 2 && HERO_VIDEO ? (
+                <video class="peca__video" src={HERO_VIDEO.src} poster={HERO_VIDEO.poster} autoplay muted loop playsinline />
+              ) : (
+                <>
+                  <img class="peca__img ativa" src={`/mapa/${p.tam === 2 ? "" : "t/"}${foto(fotosPecas[i])}`} alt="" decoding="async" />
+                  <img class="peca__img" alt="" decoding="async" />
+                </>
+              )}
+            </span>
+          </button>
+        ) : (
+          <span
+            class:list={["peca", "peca--cor", `forma-${p.forma}`]}
+            style={`grid-column:${p.c};grid-row:${p.r};--giro:${p.giro}deg;--cor:${p.cor};--fundo:${p.fundo}`}
+            data-gira
+          >
+            <span class="peca__forma" />
+          </span>
+        ),
+      )
+    }
+  </div>
+
+  <script type="application/json" data-destinos set:html={JSON.stringify(lista)} />
 </section>
 
 <script>
-  // Cada módulo gira 90° quando o cursor passa por ele: resposta ao gesto, sem animação contínua.
-  const reduzir = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (!reduzir) {
-    document.querySelectorAll<HTMLElement>("[data-painel] .m").forEach((m) => {
-      let giro = 0;
-      m.addEventListener("pointerenter", () => {
-        giro += 90;
-        m.style.setProperty("--extra", `${giro}deg`);
-      });
-    });
+  interface Destino {
+    nome: string;
+    id: number;
+    legenda: string;
+    fotos: string[];
   }
+  const hero = document.querySelector<HTMLElement>("[data-hero]")!;
+  const lista: Destino[] = JSON.parse(hero.querySelector("[data-destinos]")!.textContent!);
+  const reduzir = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const palavra = hero.querySelector<HTMLElement>("[data-destino]")!;
+  const legenda = hero.querySelector<HTMLElement>("[data-legenda]")!;
+  const botoes = [...hero.querySelectorAll<HTMLButtonElement>("[data-ir]")];
+  const pausa = hero.querySelector<HTMLButtonElement>("[data-pausa]")!;
+  const pecas = [...hero.querySelectorAll<HTMLElement>("[data-foto]")];
+  const INTERVALO = 5200;
+
+  let atual = 0;
+  let pausado = reduzir;
+  let relogio = 0;
+
+  // pré-carrega as fotos do próximo destino para a troca não piscar
+  const carregar = (d: Destino) =>
+    d.fotos.forEach((f) => {
+      new Image().src = `/mapa/t/${f}`;
+    });
+
+  function girar(el: HTMLElement, passos = 1) {
+    const g = Number(el.dataset.extra || 0) + 90 * passos;
+    el.dataset.extra = String(g);
+    el.style.setProperty("--extra", `${g}deg`);
+  }
+
+  function ir(i: number, manual = false) {
+    atual = (i + lista.length) % lista.length;
+    const d = lista[atual];
+    palavra.classList.remove("entra");
+    void palavra.offsetWidth;
+    palavra.textContent = d.nome;
+    palavra.classList.add("entra");
+    legenda.textContent = d.legenda;
+    botoes.forEach((b, k) => b.setAttribute("aria-current", String(k === atual)));
+    pecas.forEach((p, k) => {
+      const n = Number(p.dataset.foto);
+      const imgs = p.querySelectorAll<HTMLImageElement>(".peca__img");
+      if (imgs.length < 2) return;
+      const [a, b] = imgs[0].classList.contains("ativa") ? [imgs[0], imgs[1]] : [imgs[1], imgs[0]];
+      const grande = p.classList.contains("peca--grande");
+      setTimeout(
+        () => {
+          b.src = `/mapa/${grande ? "" : "t/"}${d.fotos[n % d.fotos.length]}`;
+          const trocar = () => {
+            b.classList.add("ativa");
+            a.classList.remove("ativa");
+            if (!reduzir) girar(p);
+          };
+          b.complete ? trocar() : b.addEventListener("load", trocar, { once: true });
+        },
+        reduzir ? 0 : k * 70,
+      );
+    });
+    carregar(lista[(atual + 1) % lista.length]);
+    reiniciar(manual);
+  }
+
+  function reiniciar(manual = false) {
+    clearTimeout(relogio);
+    hero.style.setProperty("--intervalo", `${INTERVALO}ms`);
+    hero.classList.remove("contando");
+    void hero.offsetWidth;
+    if (pausado) return;
+    hero.classList.add("contando");
+    relogio = window.setTimeout(() => ir(atual + 1), manual ? INTERVALO * 1.6 : INTERVALO);
+  }
+
+  function definirPausa(v: boolean) {
+    pausado = v;
+    pausa.setAttribute("aria-pressed", String(v));
+    hero.querySelector("[data-pausa-rotulo]")!.textContent = v ? "Retomar a troca de destinos" : "Pausar a troca de destinos";
+    hero.classList.toggle("pausado", v);
+    reiniciar();
+  }
+
+  botoes.forEach((b) => b.addEventListener("click", () => ir(Number(b.dataset.ir), true)));
+  pausa.addEventListener("click", () => definirPausa(!pausado));
+  if (reduzir) definirPausa(true);
+
+  // abre o registro do destino atual no mapa
+  const abrir = () => window.dispatchEvent(new CustomEvent("arena:abrir", { detail: { id: lista[atual].id } }));
+  hero.querySelector("[data-ver]")!.addEventListener("click", abrir);
+  pecas.forEach((p) => p.addEventListener("click", abrir));
+
+  // os módulos giram quando o cursor passa
+  if (!reduzir) {
+    hero.querySelectorAll<HTMLElement>(".peca").forEach((p) => p.addEventListener("pointerenter", () => girar(p)));
+  }
+
+  // a troca automática só corre com a hero na tela e a aba visível
+  new IntersectionObserver(([e]) => {
+    if (!e.isIntersecting) clearTimeout(relogio), hero.classList.remove("contando");
+    else reiniciar();
+  }).observe(hero);
+  document.addEventListener("visibilitychange", () => (document.hidden ? clearTimeout(relogio) : reiniciar()));
+
+  carregar(lista[1]);
+  reiniciar();
 </script>
 
 <style>
   .hero {
-    padding-block: clamp(2.5rem, 1rem + 5vw, 5.5rem) clamp(3rem, 1rem + 6vw, 6.5rem);
-  }
-
-  .hero__grid {
+    --altura: clamp(560px, calc(100svh - var(--header-h)), 860px);
+    position: relative;
     display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    gap: 2rem var(--gutter);
-    align-items: center;
+    grid-template-columns: minmax(0, 1fr) var(--altura);
+    min-height: var(--altura);
+    background: var(--grafite);
+    color: var(--branco);
+    overflow: hidden;
   }
 
   .hero__texto {
-    grid-column: 1 / span 6;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: clamp(2.5rem, 1rem + 4vw, 4.5rem) clamp(1.5rem, 1rem + 3vw, 4rem) 2rem
+      max(var(--gutter), calc((100vw - var(--max)) / 2 + var(--gutter)));
   }
 
   .hero__titulo {
-    font-size: var(--t-64);
-    max-width: 11em;
-    color: var(--grafite);
+    font-size: clamp(2.5rem, 4.3vw, 4.75rem);
+    line-height: 1.02;
+  }
+
+  .hero__linha {
+    display: block;
+    white-space: nowrap;
+  }
+
+  .hero__destino {
+    display: inline-block;
+    color: var(--branco);
+    text-decoration: underline;
+    text-decoration-color: var(--petroleo);
+    text-decoration-thickness: 0.08em;
+    text-underline-offset: 0.12em;
+  }
+
+  .hero__destino.entra {
+    animation: entra 420ms var(--ease);
+  }
+
+  @keyframes entra {
+    from {
+      opacity: 0;
+      transform: translateY(0.25em);
+    }
+  }
+
+  .hero__legenda {
+    margin-top: 1rem;
+    color: #c6d0d2;
+    font-size: var(--t-16);
+    line-height: 1.5;
+    min-height: 3em;
+  }
+
+  .hero__ver {
+    border: 0;
+    background: none;
+    padding: 0.25rem 0;
+    color: var(--petroleo-claro);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    cursor: pointer;
   }
 
   .hero__lead {
-    margin-top: 1.5rem;
-    max-width: 33em;
+    margin-top: 1.75rem;
+    max-width: 34em;
+    font-size: var(--t-18);
+    line-height: 1.55;
+    color: #dbe2e3;
   }
 
   .hero__acoes {
-    margin-top: 2.25rem;
+    margin-top: 2rem;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 1rem 1.75rem;
   }
 
-  .hero__painel {
-    grid-column: 7 / span 6;
+  .hero .botao {
+    background: var(--petroleo);
+    color: var(--grafite-900);
+  }
+
+  .hero .botao:hover {
+    background: var(--petroleo-claro);
+  }
+
+  .hero__link {
+    color: var(--branco);
+    font-weight: 600;
+    text-underline-offset: 0.25em;
+  }
+
+  .hero__destinos {
+    margin-top: auto;
+    padding-top: 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .hero__destinos ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.25rem;
+  }
+
+  .hero__destinos button[data-ir] {
+    position: relative;
+    border: 0;
+    background: none;
+    padding: 0.75rem 0;
+    color: #a9b6b9;
+    font-size: var(--t-14);
+    font-weight: 550;
+    cursor: pointer;
+  }
+
+  .hero__destinos button[data-ir]:hover,
+  .hero__destinos button[aria-current="true"] {
+    color: var(--branco);
+  }
+
+  .hero__barra {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0.35rem;
+    height: 2px;
+    background: #4a5a61;
+    transform-origin: left;
+    transform: scaleX(0);
+  }
+
+  [aria-current="true"] .hero__barra {
+    transform: scaleX(1);
+    background: var(--petroleo);
+  }
+
+  .hero.contando [aria-current="true"] .hero__barra {
+    animation: conta var(--intervalo) linear;
+  }
+
+  @keyframes conta {
+    from {
+      transform: scaleX(0);
+    }
+  }
+
+  .hero__pausa {
+    flex: none;
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border: 1px solid #56666d;
+    border-radius: 50%;
+    background: none;
+    color: var(--branco);
+    cursor: pointer;
+  }
+
+  .hero__pausa:hover {
+    border-color: var(--branco);
+  }
+
+  .hero__pausa .i-tocar,
+  .hero.pausado .i-pausa {
+    display: none;
+  }
+
+  .hero.pausado .i-tocar {
+    display: block;
+  }
+
+  /* ---------- mosaico */
+  .mosaico {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(4, auto);
-    aspect-ratio: 1;
+    grid-template-rows: repeat(4, 1fr);
+    height: var(--altura);
+    width: var(--altura);
   }
 
-  .hero__foto {
-    grid-column: 1 / span 3;
-    grid-row: 1 / span 3;
-    overflow: hidden;
-    border-top-left-radius: 33.333%;
-    background: var(--grafite);
-  }
-
-  .hero__foto img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: 45% 40%;
-  }
-
-  .m {
-    aspect-ratio: 1;
+  .peca {
     --extra: 0deg;
+    position: relative;
+    display: block;
+    padding: 0;
+    border: 0;
+    background: var(--fundo, transparent);
+    overflow: hidden;
   }
 
-  .m :global(.modulo__forma) {
+  .peca--foto {
+    cursor: pointer;
+  }
+
+  .peca__forma {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
     transform: rotate(calc(var(--giro) + var(--extra)));
+    transition: transform 520ms var(--ease);
   }
 
-  .m--a { grid-column: 4; grid-row: 1; }
-  .m--b { grid-column: 4; grid-row: 2; }
-  .m--c { grid-column: 4; grid-row: 3; }
-  .m--d { grid-column: 1; grid-row: 4; }
-  .m--e { grid-column: 2; grid-row: 4; }
-  .m--f { grid-column: 3; grid-row: 4; }
-  .m--g { grid-column: 4; grid-row: 4; }
+  .peca--cor .peca__forma {
+    background: var(--cor);
+  }
 
-  @media (max-width: 959px) {
-    .hero__texto,
-    .hero__painel {
-      grid-column: 1 / -1;
+  /* a foto gira junto com o módulo e volta na direção oposta, para ficar sempre de pé */
+  .peca__img,
+  .peca__video {
+    position: absolute;
+    inset: -21%;
+    width: 142%;
+    height: 142%;
+    max-width: none;
+    object-fit: cover;
+    opacity: 0;
+    transform: rotate(calc(-1 * (var(--giro) + var(--extra))));
+    transition:
+      transform 520ms var(--ease),
+      opacity 380ms var(--ease);
+  }
+
+  .peca__img.ativa,
+  .peca__video {
+    opacity: 1;
+  }
+
+  .forma-quarto .peca__forma {
+    border-top-right-radius: 100%;
+  }
+  .forma-folha .peca__forma {
+    border-top-right-radius: 50%;
+  }
+  .forma-folha-grande .peca__forma {
+    border-top-left-radius: 50%;
+  }
+  .forma-circulo .peca__forma,
+  .forma-ponto .peca__forma {
+    border-radius: 50%;
+  }
+  .forma-ponto .peca__forma {
+    inset: 28%;
+  }
+  .forma-anel .peca__forma {
+    inset: 14%;
+    border-radius: 50%;
+    background: none !important;
+    border: calc(var(--altura) / 4 * 0.16) solid var(--cor);
+  }
+  .forma-triangulo .peca__forma {
+    clip-path: polygon(0 0, 100% 0, 0 100%);
+  }
+  .forma-listras .peca__forma {
+    background: repeating-linear-gradient(-45deg, var(--cor) 0 9%, transparent 9% 20%) !important;
+  }
+
+  .peca--foto:hover .peca__img {
+    filter: saturate(1.1);
+  }
+
+  @media (max-width: 1100px) {
+    .hero__titulo {
+      font-size: clamp(2.25rem, 9.6vw, 4.5rem);
     }
-    .hero__painel {
-      max-width: 560px;
+    .hero {
+      --altura: min(100vw, 620px);
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .hero__texto {
+      padding-inline: var(--gutter);
+    }
+    .mosaico {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1;
+      max-width: 620px;
+      margin-inline: auto;
+    }
+    .hero__destinos {
+      margin-top: 2rem;
+    }
+    .hero__destinos ul {
+      min-width: 0;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .hero__destinos li {
+      flex: none;
     }
   }
 </style>

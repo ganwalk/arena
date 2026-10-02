@@ -25,7 +25,19 @@ Seguindo o [no-red-flags](https://github.com/armandoauvp/no-red-flags):
 - **Tipo:** Schibsted Grotesk, a fonte que o site atual já usa. Itálico pesado só nos títulos, como na campanha "Uma escola forte, inovadora e humanizada".
 - **Estrutura:** o módulo quadrado do painel geométrico da marca (quarto de círculo, triângulo, listras, anel). Grid de 12 colunas e filetes finos, sem cartões decorativos.
 
-Motion: uma única entrada orquestrada na página (o mapa se monta a partir de Goiânia). O resto só se move em resposta ao usuário. `prefers-reduced-motion` desliga tudo.
+Motion: a hero troca de destino sozinha, como um vídeo (com pausa), e o mapa se monta a partir de Goiânia na primeira vez que aparece. O resto só se move em resposta ao usuário: módulos giram ao toque, o arco é desenhado ao escolher um ponto. `prefers-reduced-motion` desliga tudo.
+
+### Hero
+
+Um mosaico 4 × 4 no ritmo do painel da marca: módulos de cor e módulos que recortam fotos reais da base do mapa. O título percorre destinos reais ("Do Setor Bueno para Yale.", Harvard, Budapeste, Londres, Zurique, Texas, Paris, Toronto) e as fotos trocam junto, girando o recorte. Os módulos giram ao passar o cursor, e clicar numa foto ou em "Ver no mapa" abre o registro no mapa.
+
+- A troca automática tem botão de pausa, para quando a hero sai da tela ou a aba fica oculta e não roda com `prefers-reduced-motion`.
+- Os destinos ficam em `destinos` (`src/data/site.ts`).
+- **Vídeo:** o módulo grande está pronto para o vídeo institucional. Coloque o arquivo em `public/video/` (MP4 H.264, sem áudio, 10 a 20 s em loop, até uns 4 MB) e preencha `HERO_VIDEO` em `src/data/site.ts`. Não foi possível baixar os vídeos do canal TV Arena deste ambiente.
+
+### Etapas
+
+Um seletor de idade (2 a 18 anos) acende a etapa correspondente e troca a foto. As faixas são as habituais do sistema brasileiro, com o aviso de que a série depende do mês de nascimento.
 
 ### Arena pelo mundo
 
@@ -34,6 +46,7 @@ Cada célula de terra (4° × 4°) é um módulo do painel. A costa é arredonda
 - WebGL2 com instâncias (uma chamada de desenho para a terra, outra para os pontos). Sem WebGL2, o mesmo desenho sai estático em Canvas 2D.
 - Os dados (`/mundo.json`, cerca de 160 KB) só são baixados quando a seção se aproxima da tela.
 - A lista de países dá acesso por teclado a todos os registros.
+- "Sortear uma conquista" abre um registro ao acaso entre os do filtro atual.
 
 ## Dados
 

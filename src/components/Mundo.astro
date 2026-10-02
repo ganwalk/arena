@@ -40,6 +40,10 @@ const fmt = new Intl.NumberFormat("pt-BR");
           </button>
         ))
       }
+      <button type="button" class="sortear" data-sortear>
+        <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M2 2h16v16H2z" fill="none" stroke="currentColor" stroke-width="1.6" /><circle cx="6.5" cy="6.5" r="1.5" fill="currentColor" /><circle cx="13.5" cy="13.5" r="1.5" fill="currentColor" /><circle cx="10" cy="10" r="1.5" fill="currentColor" /></svg>
+        Sortear uma conquista
+      </button>
     </div>
   </div>
 
@@ -83,22 +87,35 @@ const fmt = new Intl.NumberFormat("pt-BR");
       </div>
     </div>
   </div>
+  </div>
 </section>
 
 <script>
-  import { iniciarMundo } from "../scripts/mundo";
+  import { iniciarMundo, type ApiMundo } from "../scripts/mundo";
 
   const secao = document.getElementById("mundo")!;
+  let api: Promise<ApiMundo | null> | null = null;
+  const iniciar = () => (api ??= iniciarMundo(secao));
   const obs = new IntersectionObserver(
     (entradas) => {
       if (entradas.some((e) => e.isIntersecting)) {
         obs.disconnect();
-        iniciarMundo(secao);
+        iniciar();
       }
     },
     { rootMargin: "600px 0px" },
   );
   obs.observe(secao);
+
+  // a hero pede para abrir um registro: rola até o mapa e abre
+  window.addEventListener("arena:abrir", async (e) => {
+    const id = (e as CustomEvent<{ id: number }>).detail.id;
+    const reduzir = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    secao.querySelector("[data-tela]")!.scrollIntoView({ behavior: reduzir ? "auto" : "smooth", block: "start" });
+    const m = await iniciar();
+    m?.abrir(id);
+  });
+  secao.querySelector("[data-sortear]")!.addEventListener("click", async () => (await iniciar())?.sortear());
 </script>
 
 <style>
@@ -179,6 +196,37 @@ const fmt = new Intl.NumberFormat("pt-BR");
     background: var(--branco);
     border-color: var(--branco);
     color: var(--grafite-900);
+  }
+
+  .sortear {
+    flex: none;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    margin-left: auto;
+    padding: 0.5rem 1rem;
+    border: 0;
+    border-radius: var(--r-1);
+    background: var(--petroleo);
+    color: var(--grafite-900);
+    font-size: var(--t-14);
+    font-weight: 650;
+    cursor: pointer;
+    transition: background-color 160ms var(--ease);
+  }
+
+  .sortear:hover {
+    background: var(--petroleo-claro);
+  }
+
+  .sortear:active svg {
+    transform: rotate(90deg);
+  }
+
+  .sortear svg {
+    transition: transform 200ms var(--ease);
   }
 
   .filtro__marca {

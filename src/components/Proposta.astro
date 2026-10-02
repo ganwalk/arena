@@ -23,9 +23,9 @@ const praticas = [
     <div class="prop__cabeca">
       <h2 id="prop-titulo" class="titulo h2">Ensino forte e humanizado</h2>
       <div class="prop__modulos" aria-hidden="true">
-        <Modulo forma="quarto" cor="var(--petroleo)" giro={90} />
-        <Modulo forma="anel" cor="var(--grafite)" />
-        <Modulo forma="listras" cor="var(--areia)" />
+        <span data-gira><Modulo forma="quarto" cor="var(--petroleo)" giro={90} /></span>
+        <span data-gira><Modulo forma="anel" cor="var(--grafite)" /></span>
+        <span data-gira><Modulo forma="listras" cor="var(--areia)" /></span>
       </div>
     </div>
 
@@ -75,6 +75,10 @@ const praticas = [
     display: grid;
     grid-template-columns: repeat(3, 56px);
     margin-top: 2rem;
+  }
+
+  .prop__modulos span {
+    cursor: default;
   }
 
   .prop__modulos :global(svg) {

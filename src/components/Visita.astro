@@ -52,8 +52,8 @@ import Modulo from "./Modulo.astro";
     </div>
 
     <div class="visita__modulos" aria-hidden="true">
-      <Modulo forma="folha" cor="var(--grafite)" giro={270} />
-      <Modulo forma="quarto" cor="var(--petroleo)" giro={180} />
+      <span data-gira><Modulo forma="folha" cor="var(--grafite)" giro={270} /></span>
+      <span data-gira><Modulo forma="quarto" cor="var(--petroleo)" giro={180} /></span>
     </div>
   </div>
 </section>
@@ -209,7 +209,6 @@ import Modulo from "./Modulo.astro";
     right: 0;
     bottom: calc(-1 * clamp(4rem, 2rem + 7vw, 8rem));
     display: flex;
-    pointer-events: none;
   }
 
   .visita__modulos :global(svg) {

@@ -141,3 +141,18 @@ export const redes = [
   { rotulo: "YouTube", href: "https://youtube.com/tvarena" },
   { rotulo: "Facebook", href: "https://facebook.com/colegioarena" },
 ];
+
+/** Vídeo institucional da hero. Quando existir, coloque o arquivo em public/video/ e informe o caminho aqui. */
+export const HERO_VIDEO: { src: string; poster: string } | null = null;
+
+/** Destinos que a hero percorre. Cada um aponta para um registro do mapa "Arena pelo mundo". */
+export const destinos = [
+  { nome: "Yale", id: 1, legenda: "YMUN, a simulação da ONU da Universidade Yale" },
+  { nome: "Harvard", id: 7, legenda: "HMUN, a simulação da ONU de Harvard" },
+  { nome: "Budapeste", id: 45, legenda: "FISEC Games, o mundial escolar de esportes", excluir: ["images.webp", "galeria_45_1785842388_3.webp", "galeria_45_1785842389_4.webp"] },
+  { nome: "Londres", id: 17, legenda: "British English Olympics, em Londres" },
+  { nome: "Zurique", id: 162, legenda: "IYPT, o torneio internacional de física" },
+  { nome: "o Texas", id: 19, legenda: "Agro Arena, viagem de estudos sobre agronegócio" },
+  { nome: "Paris", id: 12, legenda: "Arena World Discovery, viagem de estudos pela Europa" },
+  { nome: "Toronto", id: 163, legenda: "Summer Program de imersão acadêmica no Canadá" },
+];
