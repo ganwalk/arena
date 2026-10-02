@@ -55,6 +55,26 @@ const primeiro = temas[0];
     </div>
   </div>
 
+  <!-- celular: uma foto grande por tema, sem mosaico; a marca entra só no quarto de círculo do canto -->
+  <div class="hero__foto-movel" aria-hidden="true">
+    {
+      temas.map((t, i) => (
+        <img
+          class:list={["hero__foto-movel-img", { ativa: i === 0 }]}
+          data-movel={i}
+          src={`${t.grande.src}-800.webp`}
+          srcset={`${t.grande.src}-800.webp 800w, ${t.grande.src}-1600.webp 1600w`}
+          sizes="100vw"
+          style={`object-position:${t.grande.foco}`}
+          alt=""
+          loading={i === 0 ? "eager" : "lazy"}
+          decoding="async"
+        />
+      ))
+    }
+    <span class="hero__canto" />
+  </div>
+
   <div class="mosaico" data-mosaico>
     {
       pecas.map((p, i) =>
@@ -120,6 +140,8 @@ const primeiro = temas[0];
   const botoes = [...hero.querySelectorAll<HTMLButtonElement>("[data-ir]")];
   const pecas = [...hero.querySelectorAll<HTMLElement>("[data-foto]")];
   const INTERVALO = 3800;
+  const celular = matchMedia("(max-width: 760px)");
+  const fotosMovel = [...hero.querySelectorAll<HTMLImageElement>("[data-movel]")];
 
   let atual = 0;
   let parado = reduzir;
@@ -155,12 +177,14 @@ const primeiro = temas[0];
       l.setAttribute("aria-hidden", String(k !== atual));
       l.querySelector("a")!.tabIndex = k === atual ? 0 : -1;
     });
-    pecas.forEach((p, k) => {
+    fotosMovel.forEach((f, k) => f.classList.toggle("ativa", k === atual));
+    // no celular o mosaico está oculto: não baixa as fotos dele
+    if (!celular.matches) pecas.forEach((p, k) => {
       const atraso = reduzir ? 0 : k * 70;
       if (p.dataset.foto === "grande") trocar(p, `${t.grande.src}-1600.webp`, atraso, t.grande.foco, t.grande.alt);
       else trocar(p, t.fotos[Number(p.dataset.foto) % t.fotos.length], atraso);
     });
-    carregar(temas[(atual + 1) % temas.length]);
+    if (!celular.matches) carregar(temas[(atual + 1) % temas.length]);
     reiniciar(manual);
   }
 
@@ -194,7 +218,7 @@ const primeiro = temas[0];
   }).observe(hero);
   document.addEventListener("visibilitychange", () => (document.hidden ? clearTimeout(relogio) : reiniciar()));
 
-  carregar(temas[1]);
+  if (!celular.matches) carregar(temas[1]);
   reiniciar();
 </script>
 
@@ -443,6 +467,10 @@ const primeiro = temas[0];
     }
   }
 
+  .hero__foto-movel {
+    display: none;
+  }
+
   /* celular: fotos primeiro, sem moldura, só o título e o botão */
   @media (max-width: 760px) {
     .hero {
@@ -450,8 +478,43 @@ const primeiro = temas[0];
       min-height: 0;
     }
     .mosaico {
+      display: none;
+    }
+    .hero__foto-movel {
       order: -1;
-      max-width: none;
+      position: relative;
+      display: block;
+      aspect-ratio: 4 / 5;
+      max-height: 68svh;
+      width: 100%;
+      overflow: hidden;
+      background: var(--grafite-800);
+    }
+    .hero__foto-movel-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transform: scale(1.04);
+      transition:
+        opacity 600ms var(--ease),
+        transform 3800ms linear;
+    }
+    .hero__foto-movel-img.ativa {
+      opacity: 1;
+      transform: scale(1);
+    }
+    /* o único elemento da marca: um quarto de círculo petróleo que liga a foto ao título */
+    .hero__canto {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 76px;
+      height: 76px;
+      background: var(--petroleo);
+      border-top-right-radius: 100%;
     }
     .hero__texto {
       padding-block: 1.5rem 2rem;
