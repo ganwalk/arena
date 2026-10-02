@@ -4,7 +4,7 @@
 /*
   Direção
   Cor: grafite da marca como base escura, petróleo como única cor de ação, areia do painel como superfície de apoio.
-  Tipo: Schibsted Grotesk, a fonte que o site atual já usa; itálico pesado só nos títulos, como na campanha da marca.
+  Tipo: Schibsted Grotesk, a fonte que o site atual já usa; títulos em peso 800, itálico só no destino da hero.
   Estrutura: o módulo quadrado do painel geométrico. Grid de 12 colunas, filetes finos, sem cartões decorativos.
 */
 :root {
@@ -125,7 +125,6 @@ button {
 
 .titulo {
   font-weight: 800;
-  font-style: italic;
   letter-spacing: -0.015em;
   line-height: 1.04;
 }

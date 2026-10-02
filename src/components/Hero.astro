@@ -225,7 +225,7 @@ const foto = (i: number, d = primeiro) => d.fotos[i % d.fotos.length];
 
 <style>
   .hero {
-    --altura: clamp(560px, calc(100svh - var(--header-h)), 860px);
+    --altura: clamp(560px, min(calc(100svh - var(--header-h)), 56vw), 860px);
     --moldura: calc(1 - var(--rolagem, 0));
     --m: clamp(10px, 1.1vw, 16px);
     position: relative;
@@ -255,6 +255,10 @@ const foto = (i: number, d = primeiro) => d.fotos[i % d.fotos.length];
   .hero__linha {
     display: block;
     white-space: nowrap;
+  }
+
+  .hero__linha + .hero__linha {
+    font-style: italic;
   }
 
   .hero__destino {

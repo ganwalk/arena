@@ -22,7 +22,7 @@ npm run check    # tipos e diagnósticos do Astro
 Seguindo o [no-red-flags](https://github.com/armandoauvp/no-red-flags):
 
 - **Cor:** grafite da marca (`#2E3B42`) como base escura, petróleo (`#209BA0`, e `#0B7377` para texto e botões, por contraste) como única cor de ação, areia do painel (`#E3DDD2`) como superfície de apoio.
-- **Tipo:** Schibsted Grotesk, a fonte que o site atual já usa. Itálico pesado só nos títulos, como na campanha "Uma escola forte, inovadora e humanizada".
+- **Tipo:** Schibsted Grotesk, a fonte que o site atual já usa. Títulos em peso 800, sem itálico; o itálico da campanha da marca aparece só no destino da hero ("para Yale.").
 - **Estrutura:** o módulo quadrado do painel geométrico da marca (quarto de círculo, triângulo, listras, anel). Grid de 12 colunas e filetes finos, sem cartões decorativos.
 
 Motion: a hero troca de destino sozinha, como um vídeo (com pausa), e o mapa se monta a partir de Goiânia na primeira vez que aparece. O resto só se move em resposta ao usuário: módulos giram ao toque, o arco é desenhado ao escolher um ponto. `prefers-reduced-motion` desliga tudo.
