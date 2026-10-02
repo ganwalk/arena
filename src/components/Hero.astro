@@ -5,7 +5,7 @@ import { registros } from "../lib/mundo";
 // Fotos de cada destino, tiradas da base do mapa.
 const lista = destinos.map((d) => {
   const r = registros.find((x) => x.id === d.id)!;
-  const fotos = [...(r.capa ? [r.capa] : []), ...r.fotos].filter((f) => !(d.excluir ?? []).includes(f)).slice(0, 10);
+  const fotos = [...(r.capa ? [r.capa] : []), ...r.fotos].slice(0, 10);
   return { nome: d.nome, id: d.id, legenda: d.legenda, fotos };
 });
 

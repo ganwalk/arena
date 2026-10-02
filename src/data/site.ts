@@ -149,7 +149,6 @@ export const HERO_VIDEO: { src: string; poster: string } | null = null;
 export const destinos = [
   { nome: "Yale", id: 1, legenda: "YMUN, a simulação da ONU da Universidade Yale" },
   { nome: "Harvard", id: 7, legenda: "HMUN, a simulação da ONU de Harvard" },
-  { nome: "Budapeste", id: 45, legenda: "FISEC Games, o mundial escolar de esportes", excluir: ["images.webp", "galeria_45_1785842388_3.webp", "galeria_45_1785842389_4.webp"] },
   { nome: "Londres", id: 17, legenda: "British English Olympics, em Londres" },
   { nome: "Zurique", id: 162, legenda: "IYPT, o torneio internacional de física" },
   { nome: "o Texas", id: 19, legenda: "Agro Arena, viagem de estudos sobre agronegócio" },
