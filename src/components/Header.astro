@@ -11,9 +11,6 @@ const links = [
 ---
 
 <header class="topo" data-topo>
-  <svg class="topo__liquido" aria-hidden="true" focusable="false">
-    <path data-corpo fill="#fff" />
-  </svg>
   <div class="wrap topo__barra">
     <a class="topo__marca" href="/" aria-label="Colégio Arena, página inicial">
       <img src="/brand/arena.svg" alt="Colégio Arena" width="120" height="43" />
@@ -57,92 +54,16 @@ const links = [
 </header>
 
 <script>
-  // Rolagem com mola: o valor exibido persegue o da rolagem com inércia e um leve balanço, como um fluido.
-  const raiz = document.documentElement;
+  // A pílula ganha sombra só depois da primeira dobra; na hero ela fica branca sobre a faixa branca, sem sombra.
   const topo = document.querySelector<HTMLElement>("[data-topo]")!;
-  const svg = topo.querySelector<SVGSVGElement>(".topo__liquido")!;
-  const corpo = svg.querySelector<SVGPathElement>("[data-corpo]")!;
-  const barra = topo.querySelector<HTMLElement>(".topo__barra")!;
-  const reduzirMov = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const DISTANCIA = 220;
-
-  let x = Math.min(1, scrollY / DISTANCIA);
-  let v = 0;
-  let quadro = 0;
-  let limites = { W: 0, L: 0, R: 0, H: 72, m: 16 };
-  const semMoldura = matchMedia("(max-width: 760px)");
-
-  const medir = () => {
-    const b = barra.getBoundingClientRect();
-    const pad = parseFloat(getComputedStyle(barra).paddingLeft);
-    // mesma medida da moldura da hero (Hero.astro: --m = clamp(10px, 1.1vw, 16px))
-    const m = semMoldura.matches ? 0 : Math.min(16, Math.max(10, innerWidth * 0.011));
-    limites = { W: topo.clientWidth, L: b.left + pad - 18, R: b.right - pad + 8, H: b.height, m };
-  };
-  const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
-
-  /*
-    Uma única forma branca. Em repouso é uma faixa de borda a borda (branco sobre o branco da página, sob a
-    moldura da hero). Ao rolar, as laterais recuam, a base sobe e os cantos arredondam até virar a pílula.
-  */
-  const n = (v: number) => v.toFixed(2);
-  const suaviza = (t: number) => t * t * (3 - 2 * t);
-  function forma(x1: number, x2: number, y1: number, y2: number, c: number) {
-    const k = Math.min(c, (y2 - y1) / 2, (x2 - x1) / 2);
-    return [
-      `M${n(x1 + k)} ${n(y1)}H${n(x2 - k)}`,
-      `A${n(k)} ${n(k)} 0 0 1 ${n(x2)} ${n(y1 + k)}V${n(y2 - k)}`,
-      `A${n(k)} ${n(k)} 0 0 1 ${n(x2 - k)} ${n(y2)}H${n(x1 + k)}`,
-      `A${n(k)} ${n(k)} 0 0 1 ${n(x1)} ${n(y2 - k)}V${n(y1 + k)}`,
-      `A${n(k)} ${n(k)} 0 0 1 ${n(x1 + k)} ${n(y1)}Z`,
-    ].join("");
+  const hero = document.querySelector<HTMLElement>("[data-hero]");
+  if (hero) {
+    new IntersectionObserver(([e]) => topo.classList.toggle("solto", !e.isIntersecting), {
+      rootMargin: `-${topo.offsetHeight}px 0px 0px 0px`,
+    }).observe(hero);
+  } else {
+    topo.classList.add("solto");
   }
-
-  function pintar() {
-    const { W, L, R, H } = limites;
-    const r = Math.max(0, Math.min(1, x));
-    raiz.style.setProperty("--rolagem", r.toFixed(4));
-    const t = suaviza(r);
-    corpo.setAttribute("d", forma(lerp(0, L, t), lerp(W, R, t), lerp(0, 8, t), lerp(H, H - 8, t), lerp(0, 22, t)));
-    const sombra = Math.max(0, (r - 0.5) / 0.5);
-    svg.style.filter = sombra
-      ? `drop-shadow(0 0 0.6px rgba(28,37,41,${(0.4 * sombra).toFixed(3)})) drop-shadow(0 6px 10px rgba(28,37,41,${(0.12 * sombra).toFixed(3)}))`
-      : "none";
-  }
-
-  // mola calibrada para 60 quadros/s (sem balanço, acompanha a rolagem com um leve atraso); em telas mais rápidas, subpassos
-  let antes = 0;
-  function passo(agora: number) {
-    quadro = 0;
-    const alvo = Math.min(1, Math.max(0, scrollY / DISTANCIA));
-    if (reduzirMov) {
-      x = alvo;
-      v = 0;
-    } else {
-      const passos = antes ? Math.min(4, Math.max(1, Math.round((agora - antes) / 16.7))) : 1;
-      for (let i = 0; i < passos; i++) {
-        v = v * 0.7 + (alvo - x) * 0.045;
-        x += v;
-      }
-    }
-    antes = agora;
-    pintar();
-    if (Math.abs(v) > 0.0003 || Math.abs(alvo - x) > 0.0003) quadro = requestAnimationFrame(passo);
-    else antes = 0;
-  }
-  const pedir = () => (quadro ||= requestAnimationFrame(passo));
-
-  medir();
-  pintar();
-  addEventListener("scroll", pedir, { passive: true });
-  addEventListener("resize", () => {
-    medir();
-    pintar();
-  });
-  document.fonts?.ready.then(() => {
-    medir();
-    pintar();
-  });
 
   const botao = document.querySelector<HTMLButtonElement>("[data-menu]");
   const painel = document.getElementById("menu-movel");
@@ -179,26 +100,14 @@ const links = [
 
 <style>
   /*
-    O cabeçalho começa como a faixa de cima da moldura branca da hero e, ao rolar, se contrai continuamente até
-    virar uma pílula flutuante. A forma é desenhada no SVG .topo__liquido pelo script abaixo.
+    O menu é sempre a mesma pílula branca. No topo da página ela fica sobre a faixa branca acima da hero, sem
+    sombra, e por isso some no fundo; ao rolar, passa por cima da hero. A sombra só aparece fora da primeira dobra.
   */
   .topo {
-    --r: var(--rolagem, 0);
     position: sticky;
     top: 0;
     z-index: 50;
     isolation: isolate;
-  }
-
-  .topo__liquido {
-    position: absolute;
-    z-index: -1;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: calc(var(--header-h) + 48px);
-    overflow: visible;
-    pointer-events: none;
   }
 
   /* marca à esquerda, navegação centralizada, CTA à direita */
@@ -209,6 +118,21 @@ const links = [
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
     gap: 2rem;
+  }
+
+  .topo__barra::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: 8px calc(var(--gutter) - 8px) 8px calc(var(--gutter) - 18px);
+    background: var(--branco);
+    border-radius: 22px;
+    box-shadow: 0 0 0 1px rgb(28 37 41 / 0), 0 6px 14px rgb(28 37 41 / 0);
+    transition: box-shadow 240ms var(--ease);
+  }
+
+  .topo.solto .topo__barra::before {
+    box-shadow: 0 0 0 1px rgb(28 37 41 / 0.08), 0 6px 14px rgb(28 37 41 / 0.12);
   }
 
   .topo__marca {
@@ -303,7 +227,7 @@ const links = [
     padding: 0.5rem 1rem;
     font-size: var(--t-14);
     /* raio concêntrico ao da pílula: 22 px da pílula - 8 px de respiro = 14 px */
-    border-radius: calc(var(--r-1) + clamp(0, var(--r), 1) * 10px);
+    border-radius: 14px;
   }
 
   .topo__menu {
