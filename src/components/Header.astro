@@ -12,17 +12,7 @@ const links = [
 
 <header class="topo" data-topo>
   <svg class="topo__liquido" aria-hidden="true" focusable="false">
-    <defs>
-      <filter id="liquido" x="-10%" y="-50%" width="120%" height="200%">
-        <feGaussianBlur in="SourceGraphic" stdDeviation="9" result="borrado" />
-        <feColorMatrix in="borrado" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 24 -11" />
-      </filter>
-    </defs>
-    <g filter="url(#liquido)" fill="#fff">
-      <rect data-corpo />
-      <circle data-gota="0" r="0" />
-      <circle data-gota="1" r="0" />
-    </g>
+    <rect data-corpo fill="#fff" />
   </svg>
   <div class="wrap topo__barra">
     <a class="topo__marca" href="/" aria-label="Colégio Arena, página inicial">
@@ -72,7 +62,6 @@ const links = [
   const topo = document.querySelector<HTMLElement>("[data-topo]")!;
   const svg = topo.querySelector<SVGSVGElement>(".topo__liquido")!;
   const corpo = svg.querySelector<SVGRectElement>("[data-corpo]")!;
-  const gotas = [...svg.querySelectorAll<SVGCircleElement>("[data-gota]")];
   const barra = topo.querySelector<HTMLElement>(".topo__barra")!;
   const reduzirMov = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const DISTANCIA = 220;
@@ -94,8 +83,8 @@ const links = [
     const r = Math.max(-0.08, Math.min(1.12, x));
     const t = Math.max(0, Math.min(1, r));
     raiz.style.setProperty("--rolagem", r.toFixed(4));
-    // corpo: da faixa inteira até a pílula; a velocidade achata e alarga um pouco a forma
-    const aperto = Math.max(-1, Math.min(1, v * 22));
+    // corpo: da faixa inteira até a pílula; a velocidade deforma a forma de leve
+    const aperto = Math.max(-1, Math.min(1, v * 10));
     const y = lerp(-40, 8, r);
     const h = lerp(H + 40, H - 16, r) - aperto * 6;
     const left = lerp(0, L, t) - aperto * 6;
@@ -105,20 +94,10 @@ const links = [
     corpo.setAttribute("width", String(Math.max(0, right - left)));
     corpo.setAttribute("height", String(Math.max(0, h)));
     corpo.setAttribute("rx", String(lerp(0, 22, t)));
-    // gotas: saem das bordas da faixa e são sugadas pela pílula no meio do caminho
-    const bolha = reduzirMov ? 0 : Math.sin(Math.PI * t);
-    gotas.forEach((g, i) => {
-      const lado = i === 0 ? 1 : -1;
-      const origem = i === 0 ? 24 : W - 24;
-      const destino = i === 0 ? L + 30 : R - 30;
-      g.setAttribute("cx", String(lerp(origem, destino, t * t)));
-      g.setAttribute("cy", String(H / 2 + bolha * 18 * lado * 0.4 + bolha * 10));
-      g.setAttribute("r", String(bolha * 24));
-    });
     svg.style.filter = `drop-shadow(0 0 0.6px rgba(28,37,41,${(0.45 * t).toFixed(3)})) drop-shadow(0 6px 10px rgba(28,37,41,${(0.13 * t).toFixed(3)}))`;
   }
 
-  // mola calibrada para 60 quadros/s (90% do caminho em ~420 ms, ~4% de balanço); em telas mais rápidas, subpassos
+  // mola calibrada para 60 quadros/s (90% do caminho em ~420 ms, balanço de ~1%); em telas mais rápidas, subpassos
   let antes = 0;
   function passo(agora: number) {
     quadro = 0;
@@ -129,7 +108,7 @@ const links = [
     } else {
       const passos = antes ? Math.min(4, Math.max(1, Math.round((agora - antes) / 16.7))) : 1;
       for (let i = 0; i < passos; i++) {
-        v = v * 0.86 + (alvo - x) * 0.01;
+        v = v * 0.83 + (alvo - x) * 0.012;
         x += v;
       }
     }
@@ -187,7 +166,7 @@ const links = [
 
 <style>
   /*
-    O cabeçalho começa como a faixa de cima da moldura branca da hero e, ao rolar, escorre como um líquido até
+    O cabeçalho começa como a faixa de cima da moldura branca da hero e, ao rolar, se contrai continuamente até
     virar uma pílula flutuante. A forma é desenhada no SVG .topo__liquido pelo script abaixo.
   */
   .topo {
