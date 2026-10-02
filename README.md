@@ -29,11 +29,17 @@ Motion: a hero troca de destino sozinha, como um vídeo (com pausa), e o mapa se
 
 ### Hero
 
+A página abre com a hero dentro de uma moldura branca arredondada, e o menu é a faixa de cima dessa moldura. Nos primeiros 220 px de rolagem a moldura se desfaz (`clip-path`, sem reflow) e o menu vira uma barra flutuante arredondada. O progresso fica em `--rolagem`, atualizado por `Base.astro`.
+
 Um mosaico 4 × 4 no ritmo do painel da marca: módulos de cor e módulos que recortam fotos reais da base do mapa. O título percorre destinos reais ("Do Setor Bueno para Yale.", Harvard, Budapeste, Londres, Zurique, Texas, Paris, Toronto) e as fotos trocam junto, girando o recorte. Os módulos giram ao passar o cursor, e clicar numa foto ou em "Ver no mapa" abre o registro no mapa.
 
 - A troca automática tem botão de pausa, para quando a hero sai da tela ou a aba fica oculta e não roda com `prefers-reduced-motion`.
 - Os destinos ficam em `destinos` (`src/data/site.ts`).
 - **Vídeo:** o módulo grande está pronto para o vídeo institucional. Coloque o arquivo em `public/video/` (MP4 H.264, sem áudio, 10 a 20 s em loop, até uns 4 MB) e preencha `HERO_VIDEO` em `src/data/site.ts`. Não foi possível baixar os vídeos do canal TV Arena deste ambiente.
+
+### Fazenda, laboratório, palco e quadra
+
+Explorador em abas (AgroLab, Laboratórios, Eletivas, Palco e quadra, Escola de Pais), com setas e Home/End no teclado. Cada aba é um módulo da marca e mostra fotos reais, o texto e os itens concretos tirados das notícias, das páginas de etapas e da base do mapa (resultados da FISEC).
 
 ### Etapas
 

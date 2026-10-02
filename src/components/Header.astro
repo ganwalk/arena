@@ -86,19 +86,36 @@ const links = [
 </script>
 
 <style>
+  /*
+    O cabeçalho começa como a faixa de cima da moldura branca da hero e, ao rolar, vira uma barra flutuante
+    arredondada. --rolagem (0 a 1) vem do script em Base.astro.
+  */
   .topo {
+    --r: var(--rolagem, 0);
+    --pilula: min(1, calc(var(--r) * 2));
     position: sticky;
     top: 0;
     z-index: 50;
-    background: var(--papel);
-    border-bottom: 1px solid var(--filete);
+    background: color-mix(in srgb, var(--papel) calc((1 - var(--r)) * 100%), transparent);
   }
 
   .topo__barra {
+    position: relative;
     height: var(--header-h);
     display: flex;
     align-items: center;
     gap: 2rem;
+  }
+
+  .topo__barra::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: calc(var(--r) * 9px) calc(var(--gutter) - var(--r) * 14px);
+    background: color-mix(in srgb, var(--branco) calc(var(--pilula) * 100%), transparent);
+    border: 1px solid color-mix(in srgb, var(--filete) calc(var(--pilula) * 100%), transparent);
+    border-radius: calc(var(--r) * 16px);
+    box-shadow: 0 6px 14px rgb(28 37 41 / calc(var(--r) * 0.14));
   }
 
   .topo__marca img {

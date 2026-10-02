@@ -226,7 +226,11 @@ const foto = (i: number, d = primeiro) => d.fotos[i % d.fotos.length];
 <style>
   .hero {
     --altura: clamp(560px, calc(100svh - var(--header-h)), 860px);
+    --moldura: calc(1 - var(--rolagem, 0));
+    --m: clamp(10px, 1.1vw, 16px);
     position: relative;
+    /* moldura branca arredondada que se desfaz com a rolagem */
+    clip-path: inset(0 calc(var(--moldura) * var(--m)) calc(var(--moldura) * var(--m)) round calc(var(--moldura) * 2.25 * var(--m)));
     display: grid;
     grid-template-columns: minmax(0, 1fr) var(--altura);
     min-height: var(--altura);

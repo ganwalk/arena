@@ -1,47 +1,183 @@
 ---
 import { SITE_ATUAL } from "../data/site";
+import Modulo from "./Modulo.astro";
+
+// Cinco experiências fora da aula regular. Fontes: notícias de 2026, páginas de etapas e a base do mapa.
+const abas = [
+  {
+    id: "agrolab",
+    aba: "AgroLab",
+    forma: "quarto",
+    titulo: "AgroLab, a Escola de Agro do Arena",
+    texto:
+      "Uma mini fazenda modelo com tecnologias reais do agronegócio brasileiro. Foram dois anos de pesquisa até encontrar o lugar. Na primeira visita, alunos do 7º e do 9º ano estudaram a área de plantio, coletaram amostras de solo com técnicas diferentes e tiveram a primeira aula com drones.",
+    itensTitulo: "O que tem lá",
+    itens: ["Manejo inteligente da água", "Monitoramento por drones", "Análise de solo em campo", "Uso consciente de recursos", "Aproveitamento de resíduos"],
+    foto: { src: "/img/agrolab-1600.webp", alt: "Alunos em campo durante a primeira visita ao AgroLab" },
+    foto2: { src: "/mapa/t/galeria_19_1777388973_0.webp", alt: "Alunos na viagem Agro Arena, nos Estados Unidos", legenda: "Agro Arena, viagem de estudos ao Texas" },
+    link: { rotulo: "Ler sobre o AgroLab", href: `${SITE_ATUAL}/noticia/319/arena-lanca-agrolab-laboratorio-de-vivencia-do-agronegocio` },
+  },
+  {
+    id: "laboratorios",
+    aba: "Laboratórios",
+    forma: "anel",
+    titulo: "Laboratórios e Ateliê de Matemática",
+    texto:
+      "No Ensino Médio, os laboratórios de ciências fazem parte dos itinerários formativos. No Fundamental II, os projetos de extensão acontecem nos laboratórios da escola e em aulas de campo. Nos anos iniciais, o Ateliê de Matemática leva a disciplina para além do lápis e do caderno, com investigação de conceitos e hipóteses.",
+    itensTitulo: "Onde acontece",
+    itens: ["Laboratórios de ciências", "Aulas de campo", "Ateliê de Matemática", "Projetos de extensão"],
+    foto: { src: "/img/aulas-praticas-1600.webp", alt: "Aluno observa através de um anel luminoso em aula prática" },
+    foto2: { src: "/img/fundamental-1-800.webp", alt: "Crianças montam uma estrutura com palitos com o professor", legenda: "Ensino Fundamental I" },
+    link: { rotulo: "Ler a proposta pedagógica", href: `${SITE_ATUAL}/conheca/proposta-pedagogica` },
+  },
+  {
+    id: "eletivas",
+    aba: "Eletivas",
+    forma: "triangulo",
+    titulo: "Eletivas, plantões e turmas avançadas",
+    texto:
+      "As disciplinas eletivas deixam o aluno estudar temas que escolheu. O primeiro encontro da Escola de Política recebeu o professor Fred Galves, da Faculdade de Ciências Sociais da UFG e coordenador do Projeto Politizar, para falar de jovens e democracia. À tarde, o Fundamental II tem plantões de dúvidas e turmas avançadas para quem quer mais desafio.",
+    itensTitulo: "No horário extra",
+    itens: ["Escola de Política", "Plantões de Português, Matemática, Física e Química", "Turmas avançadas de olimpíadas", "Disciplinas eletivas extras"],
+    foto: { src: "/img/escola-de-politica-1600.webp", alt: "Professor Fred Galves fala aos alunos no auditório do Arena" },
+    foto2: { src: "/img/olimpicas-800.webp", alt: "Medalhas das olimpíadas internas do Arena", legenda: "Medalhas do Arena Fundamental" },
+    link: { rotulo: "Ler sobre a Escola de Política", href: `${SITE_ATUAL}/noticia/320/primeiro-encontro-da-escola-de-politica-no-arena` },
+  },
+  {
+    id: "palco-quadra",
+    aba: "Palco e quadra",
+    forma: "folha",
+    titulo: "Palco e quadra",
+    texto:
+      "Dança, música e teatro, para aprimorar habilidades ou para incentivar os mais tímidos. A quadra poliesportiva recebe o JOGAR, os Jogos Internos do Arena, e os times do colégio já disputaram o mundial escolar da FISEC em Budapeste: 3º lugar no futsal masculino em 2025 e 4º lugar no vôlei feminino em 2026.",
+    itensTitulo: "Atividades",
+    itens: ["Dança", "Música", "Teatro", "Futsal", "Vôlei", "Basquete"],
+    foto: { src: "/mapa/galeria_45_1785842388_0.webp", alt: "Delegação do Arena com bandeiras do Brasil em Budapeste" },
+    foto2: { src: "/mapa/t/galeria_45_1777464802_1.webp", alt: "Time de futsal do Arena na quadra da FISEC", legenda: "FISEC Games, Budapeste" },
+    link: null,
+  },
+  {
+    id: "pais",
+    aba: "Escola de Pais",
+    forma: "listras",
+    titulo: "Escola de Pais",
+    texto:
+      "Encontros em que pais, mães e responsáveis debatem com especialistas o crescer entre a infância e a adolescência, para levar a conversa da escola para casa.",
+    itensTitulo: "Temas dos encontros",
+    itens: ["Autoridade", "Frustrações", "Relacionamentos", "Bullying", "Sexualidade", "Drogas", "Vestibular", "Escolha de carreira", "Depressão", "Uso de tecnologias"],
+    foto: { src: "/img/escola-de-pais-1600.webp", alt: "Pais e responsáveis assistem a uma palestra da Escola de Pais" },
+    foto2: null,
+    link: { rotulo: "Conhecer a Escola de Pais", href: `${SITE_ATUAL}/pais/escola-de-pais` },
+  },
+] as const;
+
 ---
 
-<section class="vida" aria-labelledby="vida-titulo">
+<section class="vida" id="vida" aria-labelledby="vida-titulo">
   <div class="wrap">
-    <h2 id="vida-titulo" class="titulo h2 vida__titulo">AgroLab, eletivas e Escola de Pais</h2>
-
-    <article class="vida__agro">
-      <figure>
-        <img src="/img/agrolab-800.webp" srcset="/img/agrolab-800.webp 800w, /img/agrolab-1600.webp 1200w" sizes="(min-width: 960px) 55vw, 100vw" width="1200" height="801" alt="Alunos em campo durante a primeira visita ao AgroLab" loading="lazy" />
-      </figure>
-      <div>
-        <h3>AgroLab</h3>
-        <p>
-          Uma mini fazenda modelo com manejo de água, monitoramento por drones, análise de solo em campo e
-          aproveitamento de resíduos. Na primeira visita, alunos do 7º e do 9º ano coletaram amostras de solo e tiveram
-          a primeira aula com drones.
-        </p>
-        <a class="link" href={`${SITE_ATUAL}/noticia/319/arena-lanca-agrolab-laboratorio-de-vivencia-do-agronegocio`}>Ler sobre o AgroLab</a>
-      </div>
-    </article>
-
-    <div class="vida__dupla">
-      <article>
-        <img src="/img/escola-de-politica-800.webp" width="800" height="534" alt="Professor Fred Galves fala aos alunos no auditório do Arena" loading="lazy" />
-        <h3>Escola de Política</h3>
-        <p>
-          Disciplina eletiva. No primeiro encontro, o professor Fred Galves, da Faculdade de Ciências Sociais da UFG,
-          conversou com os alunos sobre como os jovens formam valores políticos.
-        </p>
-      </article>
-      <article>
-        <img src="/img/escola-de-pais-800.webp" width="800" height="533" alt="Pais e responsáveis assistem a uma palestra da Escola de Pais" loading="lazy" />
-        <h3>Escola de Pais</h3>
-        <p>
-          Encontros com especialistas para pais e responsáveis sobre autoridade, frustração, bullying, uso de tecnologia,
-          escolha de carreira e outros temas da adolescência.
-        </p>
-        <a class="link" href={`${SITE_ATUAL}/pais/escola-de-pais`}>Conhecer a Escola de Pais</a>
-      </article>
+    <div class="vida__cabeca">
+      <h2 id="vida-titulo" class="titulo h2">Fazenda, laboratório, palco e quadra</h2>
+      <p class="lead">O que o Arena oferece além das aulas regulares, da mini fazenda do AgroLab à Escola de Pais.</p>
     </div>
+
+    <div class="abas" role="tablist" aria-label="Experiências no Arena" data-abas>
+      {
+        abas.map((a, i) => (
+          <button
+            type="button"
+            role="tab"
+            id={`aba-${a.id}`}
+            aria-controls={`painel-${a.id}`}
+            aria-selected={i === 0 ? "true" : "false"}
+            tabindex={i === 0 ? 0 : -1}
+            class="aba"
+            data-gira
+          >
+            <span class="aba__modulo">
+              <Modulo forma={a.forma} cor="currentColor" />
+            </span>
+            <span class="aba__rotulo">{a.aba}</span>
+          </button>
+        ))
+      }
+    </div>
+
+    {
+      abas.map((a, i) => (
+        <div class="painel" role="tabpanel" id={`painel-${a.id}`} aria-labelledby={`aba-${a.id}`} hidden={i !== 0} tabindex="0">
+          <div class="painel__fotos">
+            <figure class="painel__foto">
+              <img src={a.foto.src} alt={a.foto.alt} loading="lazy" decoding="async" />
+            </figure>
+            {a.foto2 && (
+              <figure class="painel__foto2">
+                <img src={a.foto2.src} alt={a.foto2.alt} loading="lazy" decoding="async" />
+                <figcaption>{a.foto2.legenda}</figcaption>
+              </figure>
+            )}
+            <span class="painel__modulo" data-gira aria-hidden="true">
+              <Modulo forma={a.forma} cor="var(--petroleo)" fundo="var(--grafite)" />
+            </span>
+          </div>
+
+          <div class="painel__texto">
+            <h3>{a.titulo}</h3>
+            <p>{a.texto}</p>
+            <h4>{a.itensTitulo}</h4>
+            <ul role="list" class:list={["itens", { "itens--temas": a.itens.length > 6 }]}>
+              {a.itens.map((item) => (
+                <li data-gira>
+                  <span class="itens__modulo" aria-hidden="true">
+                    <Modulo forma={a.forma} cor="var(--petroleo-700)" />
+                  </span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+            {a.link && (
+              <a class="link" href={a.link.href}>
+                {a.link.rotulo}
+              </a>
+            )}
+          </div>
+        </div>
+      ))
+    }
   </div>
 </section>
+
+<script>
+  // Abas acessíveis: clique, setas, Home e End.
+  const lista = document.querySelector<HTMLElement>("[data-abas]")!;
+  const abas = [...lista.querySelectorAll<HTMLButtonElement>("[role=tab]")];
+  const reduzir = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function ativar(i: number, focar = false) {
+    abas.forEach((a, k) => {
+      const sel = k === i;
+      a.setAttribute("aria-selected", String(sel));
+      a.tabIndex = sel ? 0 : -1;
+      const painel = document.getElementById(a.getAttribute("aria-controls")!)!;
+      painel.hidden = !sel;
+      if (sel && !reduzir) {
+        painel.classList.remove("entra");
+        void painel.offsetWidth;
+        painel.classList.add("entra");
+      }
+    });
+    if (focar) abas[i].focus();
+    abas[i].scrollIntoView({ block: "nearest", inline: "nearest" });
+  }
+
+  abas.forEach((a, i) => a.addEventListener("click", () => ativar(i)));
+  lista.addEventListener("keydown", (e) => {
+    const i = abas.findIndex((a) => a.getAttribute("aria-selected") === "true");
+    const mapa: Record<string, number> = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: abas.length - 1 };
+    if (!(e.key in mapa)) return;
+    e.preventDefault();
+    ativar((mapa[e.key] + abas.length) % abas.length, true);
+  });
+</script>
 
 <style>
   .vida {
@@ -50,75 +186,244 @@ import { SITE_ATUAL } from "../data/site";
     border-top: 1px solid var(--filete);
   }
 
-  .vida__titulo {
-    max-width: 14em;
-  }
-
-  .vida__agro {
-    margin-top: clamp(2rem, 1rem + 3vw, 3.5rem);
+  .vida__cabeca {
     display: grid;
     grid-template-columns: repeat(12, minmax(0, 1fr));
-    gap: 2rem var(--gutter);
+    gap: 1.5rem var(--gutter);
     align-items: end;
   }
 
-  .vida__agro figure {
+  .vida__cabeca h2 {
     grid-column: 1 / span 7;
-    overflow: hidden;
-    border-bottom-right-radius: 20%;
+    font-size: var(--t-64);
+    max-width: 11em;
   }
 
-  .vida__agro img {
-    width: 100%;
-    aspect-ratio: 3 / 2;
-    object-fit: cover;
-  }
-
-  .vida__agro > div {
+  .vida__cabeca .lead {
     grid-column: 9 / span 4;
+    font-size: var(--t-18);
   }
 
-  .vida h3 {
-    font-size: var(--t-24);
-    font-weight: 750;
+  /* ---------- abas: cada uma é um módulo do painel */
+  .abas {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    margin-top: clamp(2.5rem, 1rem + 4vw, 4rem);
+    border-top: 1px solid var(--tinta);
+  }
+
+  .aba {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    min-height: 76px;
+    padding: 1rem 1rem 1rem 0;
+    border: 0;
+    border-bottom: 1px solid var(--filete);
+    background: none;
+    color: var(--tinta-2);
+    font-size: var(--t-18);
+    font-weight: 650;
+    text-align: left;
+    cursor: pointer;
+    transition:
+      color 160ms var(--ease),
+      border-color 160ms var(--ease);
+  }
+
+  .aba__modulo {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    color: #b8b2a6;
+    transition: color 160ms var(--ease);
+  }
+
+  .aba:hover {
     color: var(--grafite);
   }
 
-  .vida p {
-    margin-block: 0.75rem 1rem;
-    color: var(--tinta-2);
+  .aba[aria-selected="true"] {
+    color: var(--grafite);
+    border-bottom: 3px solid var(--grafite);
   }
 
-  .vida__dupla {
-    margin-top: clamp(3rem, 1rem + 5vw, 5rem);
+  .aba[aria-selected="true"] .aba__modulo {
+    color: var(--petroleo);
+  }
+
+  /* ---------- painel */
+  .painel {
     display: grid;
     grid-template-columns: repeat(12, minmax(0, 1fr));
     gap: 2.5rem var(--gutter);
+    padding-top: clamp(2rem, 1rem + 3vw, 3.5rem);
+    outline: none;
   }
 
-  .vida__dupla article:first-child {
-    grid-column: 2 / span 5;
+  .painel[hidden] {
+    display: none;
   }
 
-  .vida__dupla article:last-child {
-    grid-column: 8 / span 5;
-    margin-top: clamp(0rem, -2rem + 8vw, 6rem);
+  .painel.entra .painel__foto img {
+    animation: revela 520ms var(--ease);
   }
 
-  .vida__dupla img {
+  .painel.entra .painel__texto {
+    animation: sobe 380ms var(--ease);
+  }
+
+  @keyframes revela {
+    from {
+      clip-path: inset(0 100% 0 0);
+    }
+  }
+
+  @keyframes sobe {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+  }
+
+  .painel__fotos {
+    grid-column: 1 / span 7;
+    position: relative;
+    padding-bottom: 3rem;
+  }
+
+  .painel__foto {
+    overflow: hidden;
+    border-top-right-radius: 26%;
+    background: var(--areia);
+  }
+
+  .painel__foto img {
     width: 100%;
-    aspect-ratio: 3 / 2;
+    aspect-ratio: 4 / 3;
     object-fit: cover;
-    margin-bottom: 1.25rem;
+  }
+
+  .painel__foto2 {
+    position: absolute;
+    right: calc(-1 * var(--gutter) / 2);
+    bottom: 0;
+    width: 38%;
+    background: var(--papel);
+    padding: 8px 8px 0;
+    box-shadow: 0 8px 14px rgb(31 42 47 / 0.12);
+  }
+
+  .painel__foto2 img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-bottom-left-radius: 30%;
+  }
+
+  .painel__foto2 figcaption {
+    padding: 0.5rem 0.25rem 0.625rem;
+    font-size: var(--t-12);
+    color: var(--tinta-2);
+  }
+
+  .painel__modulo {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 72px;
+    height: 72px;
+  }
+
+  .painel__texto {
+    grid-column: 8 / span 5;
+    align-self: center;
+  }
+
+  .painel__texto h3 {
+    font-size: var(--t-32);
+    font-weight: 750;
+    line-height: 1.15;
+    color: var(--grafite);
+  }
+
+  .painel__texto > p {
+    margin-top: 1rem;
+    color: var(--tinta-2);
+    font-size: var(--t-18);
+    line-height: 1.6;
+  }
+
+  .painel__texto h4 {
+    margin-top: 1.75rem;
+    font-size: var(--t-14);
+    font-weight: 600;
+    color: var(--tinta-2);
+  }
+
+  .itens {
+    margin-block: 0.75rem 1.5rem;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem 1.25rem;
+  }
+
+  .itens li {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--filete);
+    font-weight: 600;
+    color: var(--grafite);
+    line-height: 1.3;
+  }
+
+  .itens__modulo {
+    flex: none;
+    width: 18px;
+    height: 18px;
+  }
+
+  .itens--temas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .itens--temas li {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--filete);
+    border-radius: var(--r-1);
+    background: var(--papel);
   }
 
   @media (max-width: 959px) {
-    .vida__agro figure,
-    .vida__agro > div,
-    .vida__dupla article:first-child,
-    .vida__dupla article:last-child {
+    .vida__cabeca h2,
+    .vida__cabeca .lead,
+    .painel__fotos,
+    .painel__texto {
       grid-column: 1 / -1;
-      margin-top: 0;
+    }
+    .abas {
+      display: flex;
+      overflow-x: auto;
+      scrollbar-width: none;
+      margin-inline: calc(-1 * var(--gutter));
+      padding-inline: var(--gutter);
+    }
+    .aba {
+      flex: none;
+      padding-right: 1.5rem;
+      font-size: var(--t-16);
+    }
+    .painel__foto2 {
+      right: 0;
+      width: 44%;
+    }
+    .painel__modulo {
+      width: 52px;
+      height: 52px;
     }
   }
 </style>
