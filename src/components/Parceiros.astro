@@ -1,6 +1,5 @@
 ---
 import { SITE_ATUAL } from "../data/site";
-import Modulo from "./Modulo.astro";
 
 const parceiros = [
   {
@@ -11,8 +10,6 @@ const parceiros = [
     numero: "20+ estados",
     texto: "Material didático da Educação Infantil ao pré-vestibular, com livro digital, o aplicativo P+ e o Portal Edros para as famílias.",
     link: { rotulo: "Conhecer o Poliedro", href: `${SITE_ATUAL}/pagina/sistema-de-ensino-poliedro` },
-    forma: "quarto" as const,
-    giro: 1 as const,
   },
   {
     logo: "/brand/parceiros/college-board.svg",
@@ -22,8 +19,6 @@ const parceiros = [
     numero: "6ª escola do Brasil",
     texto: "Membro desde novembro de 2019 e a única escola de Goiás no grupo, com voto nas decisões sobre o processo seletivo americano.",
     link: { rotulo: "Ler sobre o College Board", href: `${SITE_ATUAL}/pagina/college-board` },
-    forma: "anel" as const,
-    giro: 0 as const,
   },
   {
     logo: "/brand/parceiros/sat.svg",
@@ -33,8 +28,6 @@ const parceiros = [
     numero: "SAT Center desde 2018",
     texto: "O Arena aplica no próprio colégio a prova de admissão das universidades americanas, nas datas oficiais do College Board.",
     link: { rotulo: "Como fazer o SAT no Arena", href: `${SITE_ATUAL}/pagina/sat-center` },
-    forma: "listras" as const,
-    giro: 0 as const,
   },
 ];
 ---
@@ -48,22 +41,12 @@ const parceiros = [
 
     <ul role="list" class="parc__grade">
       {
-        parceiros.map((p, i) => (
+        parceiros.map((p) => (
           <li class="parceiro">
-            <div class="parceiro__vitrine" data-gira>
+            <div class="parceiro__vitrine">
               <img src={p.logo} alt={p.nome} width={p.largura} height={p.altura} loading="lazy" />
-              <span class="parceiro__modulo" aria-hidden="true">
-                <Modulo forma={p.forma} cor="var(--petroleo)" giro={p.giro === 1 ? 90 : 0} />
-              </span>
             </div>
             <p class="parceiro__numero">{p.numero}</p>
-            {i === 1 && (
-              <p class="escolas" aria-hidden="true">
-                {Array.from({ length: 6 }, (_, k) => (
-                  <span class:list={["escolas__ponto", { "escolas__ponto--arena": k === 5 }]} style={`--k:${k}`} />
-                ))}
-              </p>
-            )}
             <p class="parceiro__texto">{p.texto}</p>
             <a class="link" href={p.link.href}>
               {p.link.rotulo}
@@ -74,20 +57,6 @@ const parceiros = [
     </ul>
   </div>
 </section>
-
-<script>
-  const lista = document.querySelector<HTMLElement>(".parc__grade");
-  if (lista) {
-    new IntersectionObserver(
-      ([e], obs) => {
-        if (!e.isIntersecting) return;
-        lista.classList.add("visto");
-        obs.disconnect();
-      },
-      { threshold: 0.3 },
-    ).observe(lista);
-  }
-</script>
 
 <style>
   .parc {
@@ -125,45 +94,27 @@ const parceiros = [
     flex-direction: column;
   }
 
-  /* vitrine branca: a logo do parceiro como protagonista, um módulo da marca no canto */
+  /* vitrine branca: só a logo do parceiro, grande */
   .parceiro__vitrine {
-    --extra: 0deg;
-    position: relative;
+    overflow: hidden;
     display: grid;
     place-items: center;
-    aspect-ratio: 4 / 3;
-    padding: 2rem 2.5rem;
+    aspect-ratio: 16 / 10;
+    padding: 2rem;
     background: var(--branco);
     border: 1px solid var(--filete);
-    border-top-right-radius: 32%;
-    overflow: hidden;
+    border-radius: var(--r-2);
   }
 
   .parceiro__vitrine img {
-    width: auto;
-    max-width: 78%;
-    max-height: 34%;
+    width: 82%;
+    height: auto;
+    max-height: 62%;
     object-fit: contain;
   }
 
-  .parceiro:nth-child(1) .parceiro__vitrine img {
-    max-height: 40%;
-  }
-
   .parceiro:nth-child(3) .parceiro__vitrine img {
-    max-height: 30%;
-  }
-
-  .parceiro__modulo {
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 22%;
-    aspect-ratio: 1;
-  }
-
-  .parceiro__modulo :global(.modulo__forma) {
-    transform: rotate(calc(var(--giro) + var(--extra)));
+    width: 44%;
   }
 
   .parceiro__numero {
@@ -187,38 +138,6 @@ const parceiros = [
     min-height: 44px;
   }
 
-  /* College Board: seis escolas brasileiras no grupo; a sexta é o Arena */
-  .escolas {
-    display: flex;
-    gap: 6px;
-    margin-top: 0.75rem;
-  }
-
-  .escolas__ponto {
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: #b9c6ca;
-    transform: scale(0);
-    transition: transform 320ms cubic-bezier(0.3, 1.4, 0.5, 1);
-    transition-delay: calc(var(--k) * 110ms);
-  }
-
-  .escolas__ponto--arena {
-    background: var(--petroleo);
-  }
-
-  .visto .escolas__ponto {
-    transform: scale(1);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .escolas__ponto {
-      transform: scale(1);
-      transition: none;
-    }
-  }
-
   @media (max-width: 959px) {
     .parc__cabeca h2,
     .parc__cabeca .lead {
@@ -230,9 +149,6 @@ const parceiros = [
     }
     .parceiro__vitrine {
       aspect-ratio: 2 / 1;
-    }
-    .parceiro__modulo {
-      width: 16%;
     }
   }
 </style>
