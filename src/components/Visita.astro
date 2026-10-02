@@ -70,14 +70,14 @@ import Modulo from "./Modulo.astro";
 </script>
 
 <style>
-  /* fachada da unidade do Fundamental com uma camada grafite por cima; tudo em branco */
+  /* fachada da unidade do Fundamental com uma camada preta por cima; tudo em branco */
   .visita {
     position: relative;
     padding-block: clamp(4rem, 2rem + 7vw, 8rem);
     background:
-      linear-gradient(rgb(28 37 41 / 0.84), rgb(28 37 41 / 0.84)),
+      linear-gradient(rgb(0 0 0 / 0.78), rgb(0 0 0 / 0.78)),
       url("/mapa/galeria_70_1777980660_2.webp") center 40% / cover no-repeat,
-      var(--grafite-900);
+      #000;
     color: var(--branco);
     overflow: hidden;
   }
