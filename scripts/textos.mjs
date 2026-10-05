@@ -80,7 +80,7 @@ const ERROS = [
 
 /** Avisos: padrões que às vezes são legítimos e pedem leitura humana. */
 const AVISOS = [
-  [/\bn[ãa]o [ée] (s[óo] |apenas )?[^.;:!?]{1,40}[,.;] *(é|e sim)\b/i, "contraste binário (“não é X, é Y”): diga Y"],
+  [/(^|[^\p{L}])n[ãa]o [ée] (s[óo] |apenas )?[^.;:!?]{1,40}[,.;] *(é|e sim)(?=[\s,]|$)/iu, "contraste binário (“não é X, é Y”): diga Y"],
   [/\bn[ãa]o (apenas|s[óo]) [^.;!?]{1,60}(mas( tamb[ée]m)?|como tamb[ée]m)\b/i, "“não só X, mas Y”: diga os dois"],
   [/\b(simplesmente|literalmente|realmente|verdadeiramente|fundamentalmente|essencialmente|basicamente|crucialmente|inevitavelmente|honestamente)\b/i, "advérbio que costuma ser vazio"],
   [/\b(facilit\w+|otimiz\w+|aprimor\w+)\b/i, "verbo genérico: diga o que muda"],
