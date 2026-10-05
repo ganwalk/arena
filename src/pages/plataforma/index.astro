@@ -1,0 +1,22 @@
+---
+import "../../styles/global.css";
+import "../../plataforma/plataforma.css";
+import App from "../../plataforma/App";
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Plataforma Arena</title>
+    <meta name="description" content="Protótipo da plataforma do Colégio Arena: aluno, professor, família, gestão e captação. Dados fictícios." />
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#1c2529" />
+    <link rel="icon" href="/brand/simbolo.svg" type="image/svg+xml" />
+  </head>
+  <body class="plataforma">
+    <App client:only="preact" />
+    <noscript>A Plataforma Arena precisa de JavaScript ativado.</noscript>
+  </body>
+</html>

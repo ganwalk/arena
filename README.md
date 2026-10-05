@@ -1,6 +1,8 @@
-# Colégio Arena: landing page
+# Colégio Arena: landing page e Plataforma Arena
 
 Primeira peça da nova linguagem visual do ecossistema do Colégio Arena. Astro (site estático), WebGL2 no mapa "Arena pelo mundo" e nenhum framework de UI no cliente.
+
+No mesmo deploy, em `/plataforma/`, está o protótipo de alta fidelidade da **Plataforma Arena**: portais do aluno, do professor, da família, da gestão e da captação (CRM), alternáveis na mesma conta, com dados fictícios. Só essa rota carrega Preact. Detalhes, personas, mapa de telas e o caminho para produção em [`docs/plataforma.md`](docs/plataforma.md).
 
 ## Rodar
 
@@ -9,6 +11,7 @@ npm install
 npm run dev      # http://localhost:4321
 npm run build    # gera dist/
 npm run check    # tipos e diagnósticos do Astro
+npm test         # regras da plataforma (vitest)
 ```
 
 ## Publicar na Vercel
