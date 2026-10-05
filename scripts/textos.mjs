@@ -54,7 +54,7 @@ const ERROS = [
   [/\butiliz(ar|a|am|ando|e|ado|ada)\b/i, "use “usar”"],
   // frases vazias
   [/\bvale (a pena )?(ressaltar|destacar|notar|lembrar|mencionar)\b/i, "frase vazia: diga o fato"],
-  [/\b[ée] (importante|fundamental|essencial) (notar|ressaltar|destacar|lembrar)\b/i, "frase vazia"],
+  [/(^|[^\p{L}])[ée] (importante|fundamental|essencial) (notar|ressaltar|destacar|lembrar)\b/iu, "frase vazia"],
   [/\bno fim das contas\b/i, "frase vazia"],
   [/\bquando se trata de\b/i, "frase vazia"],
   [/\bem sua ess[êe]ncia\b/i, "frase vazia"],
