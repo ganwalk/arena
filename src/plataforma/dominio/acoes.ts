@@ -500,7 +500,7 @@ export interface DadosLead {
   bairro: string;
   origem: OrigemLead;
   contato: { nome: string; relacao: string; telefone: string; email?: string };
-  candidatos: { nome: string; anoNascimento: number; etapa: Etapa; serieInteresse: string; escolaAtual?: string }[];
+  candidatos: { nome: string; anoNascimento?: number; etapa: Etapa; serieInteresse: string; escolaAtual?: string }[];
   valorMensal: number;
   anoLetivo: number;
   nota?: string;
@@ -543,6 +543,43 @@ export function criarLead(b: Banco, atorId: string, d: DadosLead, agora: Date): 
   n.tarefasCrm.push({ id: novoId("tcrm"), titulo: `Retornar para ${d.contato.nome.trim().split(" ")[0]}`, prazo: somarDiasUteis(agora, 1).toISOString(), responsavelId: atorId, familiaId, oportunidadeId: id });
   auditar(n, atorId, "cadastrou lead", "oportunidade", id, agora, nome);
   return { ok: true, banco: n, id };
+}
+
+const VALOR_ETAPA: Record<Etapa, number> = { infantil: 1950, "fundamental-1": 2350, "fundamental-2": 2650, medio: 3150, "pre-vestibular": 1290 };
+
+/**
+ * Canal público: o formulário "Agende uma visita" do site cria o contato no funil,
+ * já atribuído a quem cuida do relacionamento e com tarefa de retorno para o dia útil seguinte.
+ */
+export function pedirVisitaPeloSite(
+  b: Banco,
+  d: { responsavel: string; telefone: string; crianca: string; etapa: Etapa },
+  agora: Date,
+): Resultado {
+  const comercial = b.usuarios.find((u) => u.ativo && u.papeis.includes("comercial") && !u.papeis.includes("coordenacao")) ?? b.usuarios.find((u) => u.ativo && u.papeis.includes("comercial"));
+  if (!comercial) return falha("O atendimento pelo site está indisponível. Use o WhatsApp da secretaria.");
+  if (!d.responsavel.trim()) return falha("Diga seu nome para a secretaria saber com quem falar.");
+  const r = criarLead(
+    b,
+    comercial.id,
+    {
+      familia: "",
+      bairro: "",
+      origem: "Site",
+      contato: { nome: d.responsavel, relacao: "Responsável", telefone: d.telefone },
+      candidatos: [{ nome: d.crianca.trim() || `Criança (${d.responsavel.trim().split(" ")[0]})`, etapa: d.etapa, serieInteresse: "" }],
+      valorMensal: VALOR_ETAPA[d.etapa],
+      anoLetivo: 2027,
+      nota: "Pediu visita pelo formulário do site.",
+    },
+    agora,
+  );
+  if (r.ok) {
+    r.banco.auditoria[0] = { ...r.banco.auditoria[0], acao: "recebeu pedido de visita pelo site" };
+    const f = r.banco.familias[0];
+    f.etiquetas = [...f.etiquetas, "Pediu visita"];
+  }
+  return r;
 }
 
 export function moverOportunidade(

@@ -252,3 +252,17 @@ describe("captação até a matrícula", () => {
     expect(m.banco.oportunidades.find((o) => o.id === lead.id)!.estagio).toBe("matriculado");
   });
 });
+
+describe("site → captação", () => {
+  it("o formulário público cria o contato no funil, atribuído ao relacionamento", () => {
+    const b0 = semente(agora);
+    expect(acao.pedirVisitaPeloSite(b0, { responsavel: "", telefone: "62 99999-0000", crianca: "", etapa: "medio" }, agora).ok).toBe(false);
+    expect(acao.pedirVisitaPeloSite(b0, { responsavel: "Rita Lopes", telefone: "123", crianca: "", etapa: "medio" }, agora).ok).toBe(false);
+    const r = ok(acao.pedirVisitaPeloSite(b0, { responsavel: "Rita Lopes", telefone: "62 99999-0000", crianca: "Caio", etapa: "medio" }, agora));
+    const o = r.banco.oportunidades.find((x) => x.id === r.id)!;
+    expect(o).toMatchObject({ estagio: "novo", responsavelId: "u-marcos", valorMensal: 3150 });
+    expect(r.banco.familias[0]).toMatchObject({ nome: "Família Lopes", origem: "Site" });
+    expect(r.banco.tarefasCrm.some((t) => t.oportunidadeId === r.id)).toBe(true);
+    expect(r.banco.auditoria[0].acao).toBe("recebeu pedido de visita pelo site");
+  });
+});

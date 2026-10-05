@@ -4,6 +4,16 @@ Um só endereço (`/plataforma/`), cinco portais: **Aluno**, **Professor**, **Fa
 
 Todas as telas funcionam com dados fictícios. As ações (publicar, entregar, entrar na fila, matricular…) passam pelas mesmas regras de permissão que o backend vai usar, então o protótipo serve para teste de uso e também como especificação para a construção.
 
+## Endereços e o fluxo único
+
+| Endereço | O que é |
+|---|---|
+| `/` | Página inicial da Plataforma Arena: o fluxo em sete etapas, “uma ação, várias telas”, os módulos com telas reais e o antes e depois. Cada etapa abre o protótipo já como a pessoa certa (`/plataforma/?como=u-marcos#/crm`). |
+| `/site/` | Site de captação do colégio (a landing). É a etapa 1: o formulário “Agende uma visita” chama `pedirVisitaPeloSite`, que cria família, contato, criança, oportunidade e tarefa de retorno no funil do relacionamento. Depois do envio, um link leva ao contato no CRM. |
+| `/plataforma/` | Os cinco portais. |
+
+As imagens de produto da página inicial (`public/plataforma/telas/`) são capturas do próprio protótipo, nos dois temas. Para regenerar depois de mudar as telas, capture de novo com o servidor rodando (1280 × 800 para computador, 390 × 780 para celular).
+
 ## Como abrir
 
 ```sh

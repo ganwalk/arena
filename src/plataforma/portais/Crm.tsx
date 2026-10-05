@@ -575,7 +575,7 @@ function Familia({ id }: { id: string }) {
                   <span class="linha__principal">
                     <span class="linha__titulo">{c.nome}</span>
                     <span class="linha__meta">
-                      {ANO_CAPTACAO - c.anoNascimento} anos em {ANO_CAPTACAO} · {c.serieInteresse} ({rotuloEtapa(c.etapa)}){c.escolaAtual && ` · vem de ${c.escolaAtual}`}
+                      {c.anoNascimento ? `${ANO_CAPTACAO - c.anoNascimento} anos em ${ANO_CAPTACAO} · ` : ""}{c.serieInteresse} ({rotuloEtapa(c.etapa)}){c.escolaAtual && ` · vem de ${c.escolaAtual}`}
                     </span>
                   </span>
                   {c.alunoId && <Selo tom="ok">Aluno</Selo>}

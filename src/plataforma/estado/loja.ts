@@ -63,6 +63,19 @@ const ouvintes = new Set<() => void>();
 function atual(): Estado {
   if (!estado) {
     estado = carregar();
+    // links da página inicial e do site: /plataforma/?como=u-marina#/aluno abre direto como aquela pessoa
+    if (typeof location !== "undefined" && location.pathname.startsWith("/plataforma")) {
+      const como = new URLSearchParams(location.search).get("como");
+      if (como && usuario(estado.banco, como)) {
+        estado = { ...estado, sessao: { ...estado.sessao, usuarioId: como, sessaoExpirada: false } };
+        try {
+          sessionStorage.setItem(CHAVE_SESSAO, JSON.stringify(estado.sessao));
+        } catch {
+          /* ignora */
+        }
+        history.replaceState(null, "", location.pathname + location.hash);
+      }
+    }
     if (typeof window !== "undefined") {
       window.addEventListener("storage", (e) => {
         if (e.key === CHAVE_BANCO || e.key === null) {
@@ -130,6 +143,13 @@ export const loja = {
     if (sessao.sessaoExpirada || !sessao.usuarioId) return { ok: false, erro: "Sua sessão expirou. Entre de novo para continuar; o que você escreveu continua na tela." };
     const r = acao(banco, sessao.usuarioId, new Date());
     if (r.ok && r.banco !== banco) definir({ banco: r.banco });
+    return r;
+  },
+
+  /** Canais públicos (o site do colégio): gravam sem sessão, com a mesma regra de domínio. */
+  registrarPublico(acao: (b: Banco, agora: Date) => Resultado): Resultado {
+    const r = acao(atual().banco, new Date());
+    if (r.ok && r.banco !== atual().banco) definir({ banco: r.banco });
     return r;
   },
 

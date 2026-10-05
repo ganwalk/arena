@@ -2,7 +2,11 @@
 
 Primeira peça da nova linguagem visual do ecossistema do Colégio Arena. Astro (site estático), WebGL2 no mapa "Arena pelo mundo" e nenhum framework de UI no cliente.
 
-No mesmo deploy, em `/plataforma/`, está o protótipo de alta fidelidade da **Plataforma Arena**: portais do aluno, do professor, da família, da gestão e da captação (CRM), alternáveis na mesma conta, com dados fictícios. Só essa rota carrega Preact. Detalhes, personas, mapa de telas e o caminho para produção em [`docs/plataforma.md`](docs/plataforma.md).
+O deploy tem três endereços que formam um fluxo só:
+
+- `/`: página inicial da **Plataforma Arena**, que explica o caminho completo (site → captação → matrícula → família → aluno → professor → gestão) e abre cada etapa já como a pessoa certa.
+- `/site/`: a landing de captação do colégio (etapa 1). O formulário “Agende uma visita” cria o contato no funil do CRM.
+- `/plataforma/`: o protótipo de alta fidelidade da **Plataforma Arena**: portais do aluno, do professor, da família, da gestão e da captação (CRM), alternáveis na mesma conta, com dados fictícios. Só essa rota carrega Preact. Detalhes, personas, mapa de telas e o caminho para produção em [`docs/plataforma.md`](docs/plataforma.md).
 
 ## Rodar
 

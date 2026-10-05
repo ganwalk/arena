@@ -276,7 +276,8 @@ export interface Candidato {
   id: string;
   familiaId: string;
   nome: string;
-  anoNascimento: number;
+  /** Pode faltar quando o contato veio pelo site. */
+  anoNascimento?: number;
   etapa: Etapa;
   serieInteresse: string;
   escolaAtual?: string;

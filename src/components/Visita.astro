@@ -8,27 +8,52 @@ import Modulo from "./Modulo.astro";
     <div class="visita__agendar">
       <h2 id="visita-titulo" class="titulo h2">Agende uma visita</h2>
       <p class="lead">
-        Escolha a etapa e envie a mensagem pelo WhatsApp da secretaria, {WHATSAPP_ROTULO}. Se preferir, ligue para a
-        unidade.
+        Deixe seu nome e telefone. A secretaria liga ou chama no WhatsApp até o próximo dia útil para marcar a visita.
       </p>
 
-      <form class="agenda" data-agenda action={`https://wa.me/${WHATSAPP}`} method="get" target="_blank">
+      <form class="agenda" data-agenda novalidate>
         <fieldset>
           <legend>Etapa de interesse</legend>
           <div class="agenda__opcoes">
             {
               etapas.filter((e) => e.id !== "online").map((e, i) => (
                 <label>
-                  <input type="radio" name="etapa" value={e.nome} checked={i === 0} />
+                  <input type="radio" name="etapa" value={e.id} data-nome={e.nome} checked={i === 0} />
                   <span>{e.nome}</span>
                 </label>
               ))
             }
           </div>
         </fieldset>
-        <input type="hidden" name="text" value="" data-texto />
-        <button class="botao" type="submit">Enviar pelo WhatsApp</button>
+        <div class="agenda__campos">
+          <label class="agenda__campo">
+            <span>Seu nome</span>
+            <input name="responsavel" autocomplete="name" required />
+          </label>
+          <label class="agenda__campo">
+            <span>Telefone com DDD</span>
+            <input name="telefone" type="tel" inputmode="tel" autocomplete="tel" placeholder="62 9…" required />
+          </label>
+          <label class="agenda__campo agenda__campo--largo">
+            <span>Nome da criança (opcional)</span>
+            <input name="crianca" />
+          </label>
+        </div>
+        <p class="agenda__erro" data-erro role="alert" hidden></p>
+        <div class="agenda__botoes">
+          <button class="botao" type="submit">Pedir visita</button>
+          <a class="agenda__whats" data-whats href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noopener">Prefiro o WhatsApp, {WHATSAPP_ROTULO}</a>
+        </div>
       </form>
+
+      <div class="agenda-ok" data-ok hidden tabindex="-1">
+        <p class="agenda-ok__titulo">Pedido recebido.</p>
+        <p>A secretaria entra em contato até o próximo dia útil para combinar o dia da visita.</p>
+        <p class="agenda-ok__demo">
+          Demonstração: esse pedido já entrou no funil de captação da Plataforma Arena.
+          <a data-ver-crm href="/plataforma/">Ver o contato no CRM</a>
+        </p>
+      </div>
     </div>
 
     <div class="visita__unidades">
@@ -59,13 +84,56 @@ import Modulo from "./Modulo.astro";
 </section>
 
 <script>
-  const form = document.querySelector<HTMLFormElement>("[data-agenda]");
-  form?.addEventListener("submit", () => {
-    const etapa = (form.querySelector("input[name=etapa]:checked") as HTMLInputElement | null)?.value ?? "";
-    form.querySelector<HTMLInputElement>("[data-texto]")!.value =
-      `Olá! Quero agendar uma visita ao Colégio Arena. Etapa de interesse: ${etapa}.`;
-    form.querySelectorAll<HTMLInputElement>("input[name=etapa]").forEach((i) => (i.disabled = true));
-    setTimeout(() => form.querySelectorAll<HTMLInputElement>("input[name=etapa]").forEach((i) => (i.disabled = false)));
+  import { pedirVisitaPeloSite } from "../plataforma/dominio/acoes";
+  import type { Etapa } from "../plataforma/dominio/tipos";
+  import { loja } from "../plataforma/estado/loja";
+
+  // O pedido vai direto para o funil da captação (na demonstração, o banco local da Plataforma Arena).
+  const ETAPA: Record<string, Etapa> = {
+    infantil: "infantil",
+    "fundamental-1": "fundamental-1",
+    "fundamental-2": "fundamental-2",
+    medio: "medio",
+    vestibulares: "pre-vestibular",
+  };
+  const form = document.querySelector<HTMLFormElement>("[data-agenda]")!;
+  const ok = document.querySelector<HTMLElement>("[data-ok]")!;
+  const erro = form.querySelector<HTMLElement>("[data-erro]")!;
+  const whats = form.querySelector<HTMLAnchorElement>("[data-whats]")!;
+
+  const etapaMarcada = () => form.querySelector<HTMLInputElement>("input[name=etapa]:checked")!;
+  const atualizarWhats = () => {
+    const texto = `Olá! Quero agendar uma visita ao Colégio Arena. Etapa de interesse: ${etapaMarcada().dataset.nome}.`;
+    whats.href = `${whats.href.split("?")[0]}?text=${encodeURIComponent(texto)}`;
+  };
+  form.addEventListener("change", atualizarWhats);
+  atualizarWhats();
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const dados = new FormData(form);
+    const r = loja.registrarPublico((b, agora) =>
+      pedirVisitaPeloSite(
+        b,
+        {
+          responsavel: String(dados.get("responsavel") ?? ""),
+          telefone: String(dados.get("telefone") ?? ""),
+          crianca: String(dados.get("crianca") ?? ""),
+          etapa: ETAPA[etapaMarcada().value] ?? "fundamental-1",
+        },
+        agora,
+      ),
+    );
+    if (!r.ok) {
+      erro.textContent = r.erro;
+      erro.hidden = false;
+      return;
+    }
+    const familia = r.banco.oportunidades.find((o) => o.id === r.id)?.familiaId;
+    ok.querySelector<HTMLAnchorElement>("[data-ver-crm]")!.href = `/plataforma/?como=u-marcos#/crm/familias/${familia}`;
+    form.hidden = true;
+    ok.hidden = false;
+    ok.focus();
   });
 </script>
 
@@ -168,8 +236,96 @@ import Modulo from "./Modulo.astro";
     outline-offset: 2px;
   }
 
-  .agenda .botao {
+  .agenda__campos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
     margin-top: 1.5rem;
+  }
+
+  .agenda__campo {
+    display: grid;
+    gap: 0.35rem;
+    font-size: var(--t-14);
+    font-weight: 600;
+  }
+
+  .agenda__campo--largo {
+    grid-column: 1 / -1;
+  }
+
+  .agenda__campo input {
+    min-height: 44px;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid rgb(255 255 255 / 0.45);
+    border-radius: var(--r-1);
+    background: rgb(255 255 255 / 0.06);
+    color: var(--branco);
+    font: inherit;
+    font-weight: 400;
+  }
+
+  .agenda__campo input:focus {
+    outline: 2px solid var(--branco);
+    outline-offset: 1px;
+  }
+
+  .agenda__erro {
+    margin-top: 0.75rem;
+    color: #ffb4ab;
+    font-weight: 600;
+  }
+
+  .agenda__botoes {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .agenda__whats {
+    color: #dbe2e3;
+    font-size: var(--t-14);
+  }
+
+  .agenda-ok {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    border: 1px solid rgb(255 255 255 / 0.35);
+    border-radius: var(--r-2);
+    display: grid;
+    gap: 0.5rem;
+    outline: none;
+  }
+
+  .agenda-ok__titulo {
+    font-size: var(--t-24);
+    font-weight: 800;
+  }
+
+  .agenda-ok__demo {
+    margin-top: 0.5rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgb(255 255 255 / 0.2);
+    color: #dbe2e3;
+    font-size: var(--t-14);
+  }
+
+  .agenda-ok__demo a {
+    display: inline-block;
+    margin-left: 0.25rem;
+    color: var(--branco);
+    font-weight: 700;
+  }
+
+  @media (max-width: 560px) {
+    .agenda__campos {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .agenda .botao {
     background: var(--branco);
     color: var(--grafite-900);
   }

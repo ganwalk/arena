@@ -68,7 +68,7 @@ export default function App() {
         Pular para o conteúdo
       </a>
       <header class="barra">
-        <a class="barra__marca" href="/" aria-label="Colégio Arena, site">
+        <a class="barra__marca" href="/" aria-label="Plataforma Arena, página inicial">
           <img src="/brand/simbolo.svg" alt="" width="28" height="28" />
           <span>
             Plataforma <strong>Arena</strong>

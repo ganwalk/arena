@@ -117,7 +117,7 @@ export const noticias = [
 ];
 
 export const acessos = [
-  { rotulo: "Plataforma Arena (protótipo)", href: "/plataforma/" },
+  { rotulo: "Plataforma Arena (protótipo)", href: "/" },
   { rotulo: "Arena Virtual", href: `${SITE_ATUAL}/arenavirtual` },
   { rotulo: "Portal do aluno", href: "https://aluno.colegioarena.com.br" },
   { rotulo: "EducaMobile", href: "https://educamobile.colegioarena.com.br" },
