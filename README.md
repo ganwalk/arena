@@ -1,12 +1,12 @@
 # Colégio Arena: landing page e Plataforma Arena
 
-Primeira peça da nova linguagem visual do ecossistema do Colégio Arena. Astro (site estático), WebGL2 no mapa "Arena pelo mundo" e nenhum framework de UI no cliente.
+Site, página inicial e protótipo da plataforma do Colégio Arena, com a nova linguagem visual da marca. Astro (páginas estáticas), WebGL2 no mapa "Arena pelo mundo" e Preact só nas telas da plataforma.
 
 O deploy tem três endereços que formam um fluxo só:
 
 - `/`: página inicial da **Plataforma Arena**, que explica o caminho completo (site → captação → matrícula → família → aluno → professor → gestão) e abre cada etapa já como a pessoa certa.
 - `/site/`: a landing de captação do colégio (etapa 1). O formulário “Agende uma visita” cria o contato no funil do CRM.
-- `/plataforma/`: o protótipo de alta fidelidade da **Plataforma Arena**: portais do aluno, do professor, da família, da gestão e da captação (CRM), alternáveis na mesma conta, com dados fictícios. Só essa rota carrega Preact. Detalhes, personas, mapa de telas e o caminho para produção em [`docs/plataforma.md`](docs/plataforma.md).
+- `/plataforma/`: o protótipo de alta fidelidade da **Plataforma Arena**: portais do aluno, do professor, da família, da gestão e da captação (CRM), alternáveis na mesma conta, com dados fictícios. O site carrega só o módulo de dados da plataforma, para gravar o pedido de visita. Detalhes, personas, mapa de telas e o caminho para produção em [`docs/plataforma.md`](docs/plataforma.md).
 
 ## Rodar
 
@@ -15,8 +15,11 @@ npm install
 npm run dev      # http://localhost:4321
 npm run build    # gera dist/
 npm run check    # tipos e diagnósticos do Astro
-npm test         # regras da plataforma (vitest)
+npm test         # regras da plataforma e verificação de texto (vitest)
+npm run textos   # só a verificação de texto, com avisos
 ```
+
+Regras de texto e de contribuição: [`CLAUDE.md`](CLAUDE.md).
 
 ## Publicar na Vercel
 
@@ -36,7 +39,7 @@ Motion: a hero troca de destino sozinha, como um vídeo (com pausa), e o mapa se
 
 ### Hero
 
-A página abre com a hero dentro de uma moldura branca arredondada, e o menu é a faixa de cima dessa moldura. Nos primeiros 220 px de rolagem a moldura se desfaz (`clip-path`, sem reflow) e o menu vira uma barra flutuante arredondada. O progresso fica em `--rolagem`, atualizado por `Base.astro`.
+O site (`/site/`) abre com a hero dentro de uma moldura branca arredondada, e o menu é a faixa de cima dessa moldura. Nos primeiros 220 px de rolagem a moldura se desfaz (`clip-path`, sem reflow) e o menu vira uma barra flutuante arredondada. O progresso fica em `--rolagem`, atualizado por `Base.astro`.
 
 Um mosaico 4 × 4 no ritmo do painel da marca: módulos de cor e módulos que recortam fotos reais da base do mapa. O título percorre destinos reais ("Do Setor Bueno para Yale.", Harvard, Londres, Zurique, Texas, Paris, Toronto) e as fotos trocam junto, girando o recorte. Os módulos giram ao passar o cursor, e clicar numa foto ou em "Ver no mapa" abre o registro no mapa.
 
@@ -85,4 +88,4 @@ Os números da seção (65 ex-alunos, 11 países de aprovação, 21 países de c
 
 ## Texto
 
-Todo texto novo ou reescrito foi validado com o [no-ai-slop](https://github.com/petergyang/no-ai-slop). Citações da escola (a frase da proposta pedagógica) e os textos da base do mapa ficaram como estão no site atual.
+Todo texto segue as regras de [`CLAUDE.md`](CLAUDE.md), adaptadas do [no-ai-slop](https://github.com/petergyang/no-ai-slop), e passa por `npm run textos`. Citações da escola (a frase da proposta pedagógica) e os textos da base do mapa ficaram como estão no site atual.

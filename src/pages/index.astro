@@ -62,10 +62,10 @@ const telas = fluxo.filter((e) => e.id !== "matricula");
         <div class="hub-wrap hub-hero__grade">
           <div class="hub-hero__texto">
             <p class="hub-olho">Colégio Arena · protótipo navegável</p>
-            <h1 class="hub-titulo">Do primeiro contato à sala de aula, <span>um caminho só.</span></h1>
+            <h1 class="hub-titulo">Do pedido de visita à sala de aula, <span>numa plataforma só.</span></h1>
             <p class="hub-lead">
-              O site que atrai a família, o funil que acompanha a decisão, a matrícula que cria os acessos e o dia a dia de
-              família, aluno, professor e gestão. Tudo na mesma plataforma, com os mesmos dados.
+              O site recebe o pedido de visita, o relacionamento acompanha a família até a decisão e a secretaria matricula.
+              A partir daí, família, aluno, professor e gestão usam a mesma plataforma, com os mesmos dados.
             </p>
             <div class="hub-hero__acoes">
               <a class="btn btn--primario hub-btn" href="#fluxo">Percorrer o fluxo</a>
@@ -102,7 +102,7 @@ const telas = fluxo.filter((e) => e.id !== "matricula");
               <span><strong>Pedido de visita pelo site</strong>Família Lopes · Ensino Médio</span>
             </div>
             <div class="hub-evento hub-evento--2">
-              <span class="hub-evento__ok">✓</span>
+              <span class="hub-evento__ok"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7" /></svg></span>
               <span><strong>Matrícula concluída</strong>Acessos de aluno e família criados</span>
             </div>
             <div class="hub-evento hub-evento--3">
@@ -117,10 +117,10 @@ const telas = fluxo.filter((e) => e.id !== "matricula");
       <section class="hub-secao" id="fluxo" aria-labelledby="fluxo-titulo">
         <div class="hub-wrap">
           <p class="hub-olho">O fluxo</p>
-          <h2 class="hub-h2" id="fluxo-titulo">Sete etapas, uma família só.</h2>
+          <h2 class="hub-h2" id="fluxo-titulo">O caminho de uma família, em sete etapas.</h2>
           <p class="hub-sub">
-            Cada etapa entrega a próxima. Clique numa delas para abrir a tela de verdade, já como a pessoa que cuida
-            daquela parte.
+            Cada etapa abre a tela do protótipo já como a pessoa que cuida daquela parte. O resultado de uma etapa é o
+            ponto de partida da seguinte.
           </p>
 
           <ol class="trilho" role="list">
@@ -155,7 +155,7 @@ const telas = fluxo.filter((e) => e.id !== "matricula");
           </ol>
           <p class="trilho__volta">
             <svg width="40" height="20" viewBox="0 0 40 20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M38 4v4a8 8 0 0 1-8 8H4M9 11l-5 5 5 5" /></svg>
-            Da gestão, a rematrícula e as indicações voltam para a captação. O ciclo recomeça com o histórico da família.
+            Na rematrícula, a família volta para o funil da captação, com o histórico guardado.
           </p>
         </div>
       </section>
@@ -165,10 +165,10 @@ const telas = fluxo.filter((e) => e.id !== "matricula");
         <div class="hub-wrap hub-juntos">
           <div>
             <p class="hub-olho">Como se conectam</p>
-            <h2 class="hub-h2" id="juntos-titulo">Uma ação, várias telas.</h2>
+            <h2 class="hub-h2" id="juntos-titulo">O que uma ação muda nas outras telas</h2>
             <p class="hub-sub">
-              Um cadastro só de pessoas e vínculos sustenta tudo. Por isso o que acontece numa ponta aparece na outra, sem
-              planilha nem repasse, e cada pessoa vê só o que é dela.
+              Todos os módulos leem o mesmo cadastro de pessoas, turmas e vínculos. Quando alguém age num módulo, os outros
+              mostram o resultado sem planilha nem repasse, e cada pessoa vê só o que o vínculo dela permite.
             </p>
             <a class="hub-link" href="/site/#visita">Teste: peça uma visita no site e veja o contato chegar ao funil →</a>
           </div>
@@ -189,7 +189,7 @@ const telas = fluxo.filter((e) => e.id !== "matricula");
       <section class="hub-secao" id="telas" aria-labelledby="telas-titulo">
         <div class="hub-wrap">
           <p class="hub-olho">Os módulos</p>
-          <h2 class="hub-h2" id="telas-titulo">Uma tela para cada papel.</h2>
+          <h2 class="hub-h2" id="telas-titulo">Um portal para cada papel</h2>
           <p class="hub-sub">Quem tem mais de um papel, como o professor que também é pai, troca de portal sem sair da conta.</p>
 
           <div class="modulos">
@@ -244,8 +244,8 @@ const telas = fluxo.filter((e) => e.id !== "matricula");
       <section class="hub-secao hub-secao--contraste" aria-labelledby="muda-titulo">
         <div class="hub-wrap">
           <p class="hub-olho">O que muda</p>
-          <h2 class="hub-h2" id="muda-titulo">Menos caminhos, mais escola.</h2>
-          <p class="hub-sub">Tirado da conversa com quem usa os sistemas de hoje.</p>
+          <h2 class="hub-h2" id="muda-titulo">O que muda para quem usa</h2>
+          <p class="hub-sub">Com base na entrevista com um aluno do 3º ano, em 30 de setembro de 2026.</p>
           <ul class="mudancas" role="list">
             {
               mudancas.map((m) => (
@@ -264,7 +264,7 @@ const telas = fluxo.filter((e) => e.id !== "matricula");
       <section class="hub-fim" aria-labelledby="fim-titulo">
         <div class="hub-wrap hub-fim__grade">
           <div>
-            <h2 class="hub-h2" id="fim-titulo">Veja o caminho inteiro em cinco minutos.</h2>
+            <h2 class="hub-h2" id="fim-titulo">Teste o caminho completo</h2>
             <p class="hub-sub">
               Peça uma visita no site, encontre o contato no funil, matricule como secretaria e entre como a família. Os
               dados são fictícios e ficam só neste navegador.

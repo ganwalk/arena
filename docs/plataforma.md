@@ -8,7 +8,7 @@ Todas as telas funcionam com dados fictícios. As ações (publicar, entregar, e
 
 | Endereço | O que é |
 |---|---|
-| `/` | Página inicial da Plataforma Arena: o fluxo em sete etapas, “uma ação, várias telas”, os módulos com telas reais e o antes e depois. Cada etapa abre o protótipo já como a pessoa certa (`/plataforma/?como=u-marcos#/crm`). |
+| `/` | Página inicial da Plataforma Arena: o fluxo em sete etapas, o que uma ação muda nas outras telas, os módulos com telas reais e o antes e depois. Cada etapa abre o protótipo já como a pessoa certa (`/plataforma/?como=u-marcos#/crm`). |
 | `/site/` | Site de captação do colégio (a landing). É a etapa 1: o formulário “Agende uma visita” chama `pedirVisitaPeloSite`, que cria família, contato, criança, oportunidade e tarefa de retorno no funil do relacionamento. Depois do envio, um link leva ao contato no CRM. |
 | `/plataforma/` | Os cinco portais. |
 
@@ -48,9 +48,9 @@ Os dados ficam no `localStorage` do navegador e são compartilhados entre abas. 
 ## Interface
 
 - **Cor pontual.** A base é neutra (grafite, cinzas frios, branco). O petróleo da marca aparece só na ação principal de cada tela, nos links, no foco do teclado e no marcador da seção ativa. Verde, âmbar e vermelho só indicam estado: um ponto no selo ou um número que exige atenção, sempre com texto ao lado. Nada depende só de cor.
-- **Claro e escuro.** Tokens semânticos em `plataforma.css` (`--fundo`, `--sup`, `--texto`, `--linha`, `--acao`…), com tema escuro próprio, não uma inversão. Segue o sistema por padrão; o botão de sol/lua na barra e o menu da pessoa (“Aparência”) fixam claro, escuro ou automático. A escolha é aplicada antes da primeira pintura, sem piscar.
+- **Claro e escuro.** Tokens semânticos em `plataforma.css` (`--fundo`, `--sup`, `--texto`, `--linha`, `--acao`…), com uma paleta escura própria. Segue o sistema por padrão; o botão de sol/lua na barra e o menu da pessoa (“Aparência”) fixam claro, escuro ou automático. A escolha é aplicada antes da primeira pintura, sem piscar.
 - **Pessoas com rosto.** Retratos de exemplo do Pexels (licença livre), guardados em `public/plataforma/pessoas/` com a lista de origem em `CREDITOS.md`. Sem foto, o avatar mostra as iniciais em cinza. Em produção, a foto vem do cadastro da escola, com a autorização devida; os retratos de exemplo não devem ir para o ar.
-- **Acessibilidade.** Alvos de toque de 44 px, foco visível, rótulos em todos os campos, estados anunciados (`aria-live`), navegação por teclado, contraste AA nos dois temas e `prefers-reduced-motion`.
+- **Acessibilidade.** Alvos de toque de 44 px, foco visível, rótulos em todos os campos, estados anunciados (`aria-live`), navegação por teclado, cores escolhidas para contraste AA nos dois temas (ainda sem medição com ferramenta) e `prefers-reduced-motion`.
 
 ## Dores observadas e o que cada portal responde
 
@@ -87,13 +87,13 @@ Lista vazia · filtro sem resultado · envio em andamento · arquivo recusado (f
 
 O Relaticle foi a referência de modelo e de experiência do CRM (Company → Família, People → Contato, Opportunity → Oportunidade, Tasks, Notes, funil em kanban). O código não foi incorporado porque:
 
-1. **Licença AGPL-3.0.** Um serviço de rede derivado dele obriga a oferecer o código-fonte completo aos usuários (incluindo a escola e as famílias). Para uma solução vendida ao colégio, isso precisa ser uma decisão comercial consciente, não um efeito colateral.
+1. **Licença AGPL-3.0.** Um serviço de rede derivado dele obriga a oferecer o código-fonte completo aos usuários (incluindo a escola e as famílias). Para um sistema vendido ao colégio, essa obrigação precisa ser aceita pelo comercial antes do contrato.
 2. **Pilha diferente.** Laravel 13, Filament 5 e PHP 8.5, com Horizon, Reverb e Postgres. A landing e os outros quatro portais estão em TypeScript; juntar tudo exigiria dois runtimes no mesmo deploy.
 3. **Escopo.** É um CRM de vendas multiempresa (workspaces, cobrança, IA, MCP). O funil escolar precisa de família com várias crianças, visita agendada, rematrícula e a passagem para aluno matriculado.
 
 Se a equipe preferir Filament, o desenho de domínio aqui (entidades, regras, ações) se traduz direto para Models, Policies e Actions do Laravel.
 
-## Pronto para construir: como o código está organizado
+## Como o código está organizado
 
 ```
 src/plataforma/
@@ -140,7 +140,7 @@ src/pages/plataforma/index.astro
 | Professor | Publicar, passar tarefa e avisar só nas turmas/disciplinas em que ensina; corrigir e retirar o que é seu; conferir entregas das suas tarefas; chamar a própria fila | Publicar em outra turma ou disciplina; editar material de colega |
 | Responsável | Ver avisos, notas, tarefas e agenda dos filhos com vínculo ativo; abrir solicitações sobre eles | Ver qualquer aluno sem vínculo explícito |
 | Coordenação | Tudo da gestão; retirar qualquer material com justificativa; avisos para a escola | Matricular (secretaria) |
-| Secretaria | Gestão, CRM e matrícula | — |
+| Secretaria | Gestão, CRM e matrícula | Publicar materiais e tarefas (é do professor) |
 | Comercial | CRM | Matricular; gestão escolar |
 
 ## O que falta para produção
@@ -151,6 +151,6 @@ Na ordem do dossiê (B6, P10), depois da validação com a escola em 7/10:
 - **Cadastro real**: importação de turmas, alunos, professores e responsáveis (CSV no piloto), com rotina de atualização e saída.
 - **Notificações**: push/e-mail para aviso novo, tarefa, chamada no plantão e resposta de atendimento.
 - **Integrações**: os serviços externos ficam como atalhos (nível 1). Integração de notas e simulados só com documentação e autorização dos fornecedores (D05).
-- **Landing → CRM**: o formulário “Agende uma visita” passa a criar o contato no funil além de abrir o WhatsApp.
+- **Site → CRM em produção**: no protótipo, o formulário “Agende uma visita” grava no banco local; em produção, chama a mesma ação por uma rota pública com proteção contra spam.
 - **LGPD e ECA Digital**: registro de finalidades, retenção e responsáveis antes de usar dados reais (B5).
 - **Decisões abertas**: endereços dos serviços externos, mensalidades usadas nas estimativas do CRM e prazos de resposta por setor são valores de exemplo, a confirmar com o colégio.

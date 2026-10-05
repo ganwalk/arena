@@ -483,7 +483,7 @@ function Plantoes() {
 
   return (
     <div class="pagina">
-      <Cabecalho titulo={`Plantões de hoje (${hoje.length})`} sub="Professores tirando dúvidas à tarde, presencialmente. Entre na fila sozinho ou com colegas e acompanhe sua vez daqui." />
+      <Cabecalho titulo={`Plantões de hoje (${hoje.length})`} sub="Os professores tiram dúvidas à tarde, na escola. Entre na fila sozinho ou com colegas e acompanhe sua vez daqui." />
       {hoje.length ? (
         <div class="plantoes">
           {hoje.map((p) => (

@@ -66,7 +66,7 @@ export function alunosAprovados(): Set<string> {
     for (const n of reg.alunos) if (!n.endsWith(":")) nomes.add(n.trim());
     if (reg.cat === "aprovacao" && reg.nome.startsWith("Aprova")) {
       for (const b of reg.texto) {
-        const m = b.x.match(/^([A-ZÀ-Ý][^—–-]{2,40}?)\s+[—–-]\s+/);
+        const m = b.x.match(/^([A-ZÀ-Ý][^—–-]{2,40}?)\s+[—–-]\s+/); // textos-ok: separa o título do texto original
         if (m) nomes.add(m[1].trim());
       }
     }

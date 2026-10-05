@@ -9,7 +9,8 @@
     "check": "astro check",
     "grid": "node scripts/build_grid.mjs /tmp/land.geojson && python3 scripts/build_grid.py /tmp/land.geojson",
     "dados": "python3 scripts/build_data.py",
-    "test": "vitest run"
+    "test": "vitest run",
+    "textos": "node scripts/textos.mjs --todos"
   },
   "dependencies": {
     "@astrojs/preact": "^4.1.3",

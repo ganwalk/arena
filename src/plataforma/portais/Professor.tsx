@@ -845,7 +845,7 @@ function Turmas({ id }: { id?: string }) {
   const minhas = banco.tarefas.filter((t) => t.professorId === eu!.id && t.turmaIds.includes(ativa ?? ""));
   return (
     <div class="pagina">
-      <Cabecalho titulo="Turmas" sub="Alunos e entregas de cada turma. Sem dados pessoais além do necessário." />
+      <Cabecalho titulo="Turmas" sub="Alunos e entregas de cada turma. A tela mostra só o nome e a situação de cada tarefa." />
       <Abas rotulo="Turma" ativa={ativa ?? ""} aoMudar={(t) => ir("professor", "turmas", t)} abas={turmas.map((t) => ({ id: t, rotulo: turma(banco, t)!.nome, contagem: alunosDaTurma(banco, t, dia).length }))} />
       <div class="tabela-rolagem">
         <table class="tabela">

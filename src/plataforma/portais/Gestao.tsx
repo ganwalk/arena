@@ -166,7 +166,7 @@ function Turmas() {
   const pessoas = termo ? banco.usuarios.filter((u) => u.nome.toLowerCase().includes(termo)).slice(0, 12) : [];
   return (
     <div class="pagina">
-      <Cabecalho titulo="Turmas e pessoas" sub="Os vínculos decidem o que cada pessoa vê. Mudou de turma ou saiu da escola? Ajuste aqui e o acesso muda na hora." />
+      <Cabecalho titulo="Turmas e pessoas" sub="Os vínculos decidem o que cada pessoa vê. Quando um aluno muda de turma ou sai da escola, ajuste aqui e o acesso muda na hora." />
       <label class="busca busca--larga">
         <span class="visualmente-oculto">Buscar pessoa</span>
         <input type="search" placeholder="Buscar aluno, responsável ou professor" value={busca} onInput={(e) => setBusca(e.currentTarget.value)} />
@@ -351,7 +351,7 @@ function Avisos() {
   const [ciencia, setCiencia] = useState(false);
   return (
     <div class="pagina">
-      <Cabecalho titulo="Avisos" sub="Uma fonte só para cada aviso. Se ainda sair pelo app atual, combine qual canal é o oficial para não haver duas versões." />
+      <Cabecalho titulo="Avisos" sub="Publique cada aviso num canal só. Enquanto o app atual estiver em uso, combine com a equipe qual dos dois é o oficial." />
       <div class="grade-2 grade-2--larga">
         <Secao titulo="Novo aviso">
           <form
@@ -475,7 +475,7 @@ function Plantoes() {
   const dia = diaDe(agora);
   return (
     <div class="pagina">
-      <Cabecalho titulo="Plantões" sub="Escala semanal e o movimento de hoje. Atendimento presencial, com fila e grupos como já funciona hoje." />
+      <Cabecalho titulo="Plantões" sub="Escala semanal e o movimento de hoje. O atendimento continua presencial, com fila e grupos, como hoje." />
       <div class="tabela-rolagem">
         <table class="tabela">
           <thead>
@@ -527,7 +527,7 @@ function Servicos() {
     <div class="pagina">
       <Cabecalho
         titulo="Serviços externos"
-        sub="Atalhos para os sistemas que continuam fora da plataforma (livro digital, simulados, financeiro). São links, não integrações: cada um mantém o próprio login."
+        sub="Atalhos para os sistemas que continuam fora da plataforma (livro digital, simulados, financeiro). Cada atalho abre o sistema com o login dele; a plataforma não troca dados com esses sistemas."
         acoes={
           <Botao icone="mais" onClick={() => setEdit({ nome: "", descricao: "", url: "", publico: ["aluno"] })}>
             Novo atalho
@@ -611,7 +611,7 @@ function Auditoria() {
   const { banco, agora } = useLoja();
   return (
     <div class="pagina pagina--estreita">
-      <Cabecalho titulo="Auditoria" sub="Quem fez o quê e quando. Guarda o resumo da ação, nunca o conteúdo completo nem senhas." />
+      <Cabecalho titulo="Auditoria" sub="Quem fez o quê e quando. O registro guarda o resumo da ação, nunca o conteúdo completo nem senhas." />
       <ListaAuditoria banco={banco} agora={agora} />
       <p class="fonte">Registro desta demonstração desde {dataHora(banco.auditoria.at(-1)?.em ?? agora.toISOString())}.</p>
     </div>

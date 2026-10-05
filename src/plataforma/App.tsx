@@ -262,7 +262,7 @@ function Entrada() {
         </div>
         <h1 class="entrada__titulo">Plataforma Arena</h1>
         <p class="entrada__lead">
-          Aluno, professor, família, gestão e captação no mesmo lugar. Esta é a versão de demonstração: as pessoas e os dados
+          Aluno, professor, família, gestão e captação usam a mesma plataforma. Nesta demonstração, as pessoas e os dados
           são fictícios e ficam só neste navegador.
         </p>
 

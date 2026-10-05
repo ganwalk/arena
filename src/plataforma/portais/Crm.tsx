@@ -691,7 +691,7 @@ function Tarefas() {
     );
   return (
     <div class="pagina pagina--estreita">
-      <Cabecalho titulo="Tarefas de relacionamento" sub="Retornos, confirmações de visita e envio de propostas. Nenhuma família sem próximo passo." />
+      <Cabecalho titulo="Tarefas de relacionamento" sub="Retornos, confirmações de visita e envio de propostas, ordenados pelo prazo." />
       <Abas rotulo="Responsável" ativa={so} aoMudar={setSo} abas={[{ id: "meus", rotulo: "Minhas" }, { id: "todos", rotulo: "Da equipe" }]} />
       {bloco("Atrasadas", atrasadas)}
       {bloco("Hoje", hoje)}

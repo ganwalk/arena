@@ -1,6 +1,6 @@
 /*
   Retratos de exemplo (Pexels, licença livre) para as pessoas fictícias da demonstração.
-  Ficam fora do domínio: em produção, a foto vem do cadastro e pode simplesmente não existir.
+  Ficam fora do domínio: em produção, a foto vem do cadastro e pode não existir.
 */
 const BASE = "/plataforma/pessoas/";
 
