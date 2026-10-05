@@ -1,7 +1,7 @@
 import type { ComponentChildren } from "preact";
 import { disciplina, MEDIA_APROVACAO, nomeDe, notasDoAluno, type SituacaoTarefa } from "../dominio/regras";
 import type { Aviso, Banco, Papel } from "../dominio/tipos";
-import { Botao, Icone, Selo, type Tom } from "./base";
+import { Avatar, Botao, Icone, Selo, type Tom } from "./base";
 import { data, dataHora, nota, quando } from "./formato";
 
 export const SITUACAO: Record<SituacaoTarefa, { rotulo: string; tom: Tom }> = {
@@ -58,6 +58,7 @@ export function ItemAviso({
       <h3 class="aviso__titulo">{aviso.titulo}</h3>
       <p class="aviso__corpo">{aviso.corpo}</p>
       <p class="aviso__autor">
+        <Avatar id={aviso.autorId} nome={nomeDe(banco, aviso.autorId)} tamanho={22} />
         {nomeDe(banco, aviso.autorId)}
         {extra}
       </p>

@@ -619,7 +619,7 @@ function Entregas({ id }: { id: string }) {
           return (
             <div key={a} class="entrega">
               <div class="entrega__linha">
-                <Avatar nome={nomeDe(banco, a)} tamanho={32} />
+                <Avatar id={a} nome={nomeDe(banco, a)} tamanho={32} />
                 <span class="linha__principal">
                   <span class="linha__titulo">{nomeDe(banco, a)}</span>
                   <span class="linha__meta">{e ? `${dataHora(e.enviadaEm)} · ${plural(e.anexos.length, "arquivo", "arquivos")}${e.tentativa > 1 ? ` · ${e.tentativa}ª tentativa` : ""}` : "Ainda não entregou"}</span>
@@ -708,6 +708,11 @@ function Plantao() {
             </div>
             {chamado && (
               <div class="chamado">
+                <span class="pilha-avatares">
+                  {chamado.alunoIds.map((x) => (
+                    <Avatar key={x} id={x} nome={nomeDe(banco, x)} tamanho={44} />
+                  ))}
+                </span>
                 <p class="chamado__rotulo">Em atendimento</p>
                 <p class="chamado__nomes">{chamado.alunoIds.map((x) => nomeDe(banco, x)).join(", ")}</p>
                 {chamado.duvida && <p>“{chamado.duvida}”</p>}
@@ -718,6 +723,11 @@ function Plantao() {
                 {aguardando.map((f, i) => (
                   <li key={f.id} class="fila__item">
                     <span class="fila__pos">{i + 1}</span>
+                    <span class="pilha-avatares">
+                      {f.alunoIds.map((x) => (
+                        <Avatar key={x} id={x} nome={nomeDe(banco, x)} tamanho={36} />
+                      ))}
+                    </span>
                     <span class="linha__principal">
                       <span class="linha__titulo">
                         {f.alunoIds.map((x) => nomeDe(banco, x)).join(", ")}
@@ -854,7 +864,12 @@ function Turmas({ id }: { id?: string }) {
               .sort((a, b) => nomeDe(banco, a).localeCompare(nomeDe(banco, b)))
               .map((a) => (
                 <tr key={a}>
-                  <th scope="row">{nomeDe(banco, a)}</th>
+                  <th scope="row">
+                    <span class="celula-pessoa">
+                      <Avatar id={a} nome={nomeDe(banco, a)} tamanho={28} />
+                      {nomeDe(banco, a)}
+                    </span>
+                  </th>
                   {minhas.map((t) => {
                     const s = situacaoTarefa(t, entregaDe(banco, t.id, a), agora);
                     return (

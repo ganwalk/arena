@@ -30,7 +30,7 @@ import {
 import type { Banco, Material, Tarefa } from "../dominio/tipos";
 import type { ItemNav } from "../App";
 import { href, ir, loja, useLoja } from "../estado/loja";
-import { Abas, Botao, Cabecalho, Campo, Estado, Icone, Secao, Selo, resultado } from "../ui/base";
+import { Abas, Avatar, Botao, Cabecalho, Campo, Estado, Icone, Secao, Selo, resultado } from "../ui/base";
 import { ItemAviso, Linha, SITUACAO, Servicos, TabelaNotas } from "../ui/comum";
 import { ListaAnexos, Miniatura, SeletorArquivos, useEnvio } from "../ui/envio";
 import { data, dataHora, nomeDia, plural, prazo, primeiroNome, quando } from "../ui/formato";
@@ -132,6 +132,7 @@ function Inicio() {
             <div class="linhas">
               {plantoes.map((p) => (
                 <Linha key={p.id} href={href("aluno", "plantoes")}>
+                  <Avatar id={p.professorId} nome={nomeDe(banco, p.professorId)} tamanho={36} />
                   <span class="linha__principal">
                     <span class="linha__titulo">
                       {disciplina(banco, p.disciplinaId)?.nome} · {nomeDe(banco, p.professorId)}
@@ -278,7 +279,7 @@ function DetalheMaterial({ id }: { id: string }) {
         voltar={voltar}
         sub={
           <>
-            {disciplina(banco, m.disciplinaId)?.nome} · {nomeDe(banco, m.autorId)} · publicado {quando(m.publicadoEm!, agora)}
+            <Avatar id={m.autorId} nome={nomeDe(banco, m.autorId)} tamanho={22} /> {disciplina(banco, m.disciplinaId)?.nome} · {nomeDe(banco, m.autorId)} · publicado {quando(m.publicadoEm!, agora)}
           </>
         }
       />
@@ -541,7 +542,8 @@ function CartaoPlantao({ plantaoId }: { plantaoId: string }) {
   return (
     <article class={`plantao${minha ? " plantao--meu" : ""}`}>
       <div class="plantao__topo">
-        <div>
+        <Avatar id={p.professorId} nome={nomeDe(banco, p.professorId)} tamanho={48} />
+        <div class="plantao__quem">
           <h2 class="plantao__disciplina">{disciplina(banco, p.disciplinaId)?.nome}</h2>
           <p class="plantao__prof">{nomeDe(banco, p.professorId)}</p>
         </div>

@@ -168,7 +168,7 @@ function CartaoOportunidade({ o, agora, aoArrastar, aoMover }: { o: Oportunidade
       <div class="cartao-op__rodape">
         <span class="suave">{reais(o.valorMensal)}/mês</span>
         {parado >= 7 && !["matriculado", "perdido"].includes(o.estagio) && <span class="cartao-op__parado">parado há {parado} dias</span>}
-        <Avatar nome={nomeDe(banco, o.responsavelId)} tamanho={22} />
+        <Avatar id={o.responsavelId} nome={nomeDe(banco, o.responsavelId)} tamanho={22} />
       </div>
       <label class="cartao-op__mover">
         <span class="visualmente-oculto">Mover {f.nome} para</span>
@@ -535,7 +535,7 @@ function Familia({ id }: { id: string }) {
             <ol class="tempo">
               {notas.map((n) => (
                 <li key={n.id}>
-                  <Avatar nome={nomeDe(banco, n.autorId)} tamanho={26} />
+                  <Avatar id={n.autorId} nome={nomeDe(banco, n.autorId)} tamanho={26} />
                   <div>
                     <p class="tempo__meta">
                       {nomeDe(banco, n.autorId)} · {quando(n.em, agora)}

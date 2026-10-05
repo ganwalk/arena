@@ -134,7 +134,7 @@ function Painel() {
             <div class="linhas">
               {atencao.map(({ a, baixas }) => (
                 <div class="linha" key={a.id}>
-                  <Avatar nome={a.nome} tamanho={30} />
+                  <Avatar id={a.id} nome={a.nome} tamanho={30} />
                   <span class="linha__principal">
                     <span class="linha__titulo">{a.nome}</span>
                     <span class="linha__meta">
@@ -179,7 +179,7 @@ function Turmas() {
                 const t = turmasDoAluno(banco, u.id, dia)[0];
                 return (
                   <Linha key={u.id} href={t ? href("gestao", "turmas", t) : undefined}>
-                    <Avatar nome={u.nome} tamanho={30} />
+                    <Avatar id={u.id} nome={u.nome} tamanho={30} />
                     <span class="linha__principal">
                       <span class="linha__titulo">{u.nome}</span>
                       <span class="linha__meta">
@@ -255,7 +255,12 @@ function DetalheTurma({ id }: { id: string }) {
                   const ok = vencidas.filter((x) => { const s = situacaoTarefa(x, entregaDe(banco, x.id, a), agora); return s === "enviada" || s === "conferida"; }).length;
                   return (
                     <tr key={a}>
-                      <th scope="row">{nomeDe(banco, a)}</th>
+                      <th scope="row">
+                        <span class="celula-pessoa">
+                          <Avatar id={a} nome={nomeDe(banco, a)} tamanho={28} />
+                          {nomeDe(banco, a)}
+                        </span>
+                      </th>
                       <td>{responsaveisDe(banco, a).map((r) => `${nomeDe(banco, r.responsavelId)} (${r.parentesco.toLowerCase()})`).join(", ") || <Selo tom="alerta">Sem responsável</Selo>}</td>
                       <td>{vencidas.length ? `${ok}/${vencidas.length}` : "–"}</td>
                       <td>
@@ -274,7 +279,7 @@ function DetalheTurma({ id }: { id: string }) {
           <div class="linhas">
             {profs.map((v) => (
               <div class="linha" key={`${v.professorId}${v.disciplinaId}`}>
-                <Avatar nome={nomeDe(banco, v.professorId)} tamanho={30} />
+                <Avatar id={v.professorId} nome={nomeDe(banco, v.professorId)} tamanho={30} />
                 <span class="linha__principal">
                   <span class="linha__titulo">{nomeDe(banco, v.professorId)}</span>
                   <span class="linha__meta">{disciplina(banco, v.disciplinaId)?.nome}</span>

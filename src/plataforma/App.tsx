@@ -14,6 +14,7 @@ import { PortalGestao, navGestao } from "./portais/Gestao";
 import { PortalPais, navPais } from "./portais/Pais";
 import { PortalProfessor, navProfessor } from "./portais/Professor";
 import { Avatar, Botao, Icone, Recados } from "./ui/base";
+import { BotaoTema, EscolhaTema } from "./ui/tema";
 
 export interface ItemNav {
   id: string;
@@ -88,7 +89,10 @@ export default function App() {
           </nav>
         )}
 
-        <MenuPessoa />
+        <div class="barra__fim">
+          <BotaoTema />
+          <MenuPessoa />
+        </div>
       </header>
 
       {sessao.semConexao && (
@@ -167,7 +171,7 @@ function MenuPessoa() {
   return (
     <div class="pessoa" ref={ref}>
       <button type="button" class="pessoa__botao" aria-expanded={aberto} aria-haspopup="true" onClick={() => setAberto(!aberto)}>
-        <Avatar nome={eu.nome} tamanho={32} />
+        <Avatar id={eu.id} nome={eu.nome} tamanho={32} />
         <span class="pessoa__texto">
           <span class="pessoa__nome">{eu.nome}</span>
           <span class="pessoa__cargo">{eu.cargo}</span>
@@ -183,7 +187,7 @@ function MenuPessoa() {
               return (
                 <li key={id}>
                   <button type="button" class="pessoa__opcao" aria-current={id === eu.id || undefined} onClick={() => trocar(id)}>
-                    <Avatar nome={u.nome} tamanho={28} />
+                    <Avatar id={u.id} nome={u.nome} tamanho={28} />
                     <span>
                       <span class="pessoa__nome">{u.nome}</span>
                       <span class="pessoa__cargo">{u.cargo}</span>
@@ -193,6 +197,8 @@ function MenuPessoa() {
               );
             })}
           </ul>
+          <p class="pessoa__grupo">Aparência</p>
+          <EscolhaTema />
           <p class="pessoa__grupo">Simular estados</p>
           <label class="pessoa__chave">
             <input type="checkbox" checked={sessao.semConexao} onChange={(e) => loja.ajustarDemo({ semConexao: e.currentTarget.checked })} />
@@ -248,9 +254,12 @@ function Entrada() {
   return (
     <div class="entrada">
       <div class="entrada__wrap">
-        <a class="entrada__marca" href="/">
-          <img src="/brand/arena.svg" alt="Colégio Arena" height="28" />
-        </a>
+        <div class="entrada__topo">
+          <a class="entrada__marca" href="/">
+            <img src="/brand/arena.svg" alt="Colégio Arena" height="28" />
+          </a>
+          <BotaoTema class="icone-btn" />
+        </div>
         <h1 class="entrada__titulo">Plataforma Arena</h1>
         <p class="entrada__lead">
           Aluno, professor, família, gestão e captação no mesmo lugar. Esta é a versão de demonstração: as pessoas e os dados
@@ -278,7 +287,7 @@ function Entrada() {
                           if (p) ir(p);
                         }}
                       >
-                        <Avatar nome={u.nome} tamanho={40} />
+                        <Avatar id={u.id} nome={u.nome} tamanho={40} />
                         <span>
                           <span class="pessoa__nome">{u.nome}</span>
                           <span class="pessoa__cargo">{u.cargo}</span>

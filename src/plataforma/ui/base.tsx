@@ -1,5 +1,6 @@
 import type { ComponentChildren, JSX } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
+import { fotoDe } from "./fotos";
 import { iniciais } from "./formato";
 
 /* ---------- ícones (traço de 1,75 px, 24 × 24) ---------- */
@@ -37,6 +38,8 @@ const CAMINHOS: Record<string, string> = {
   trocar: "M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7",
   lixo: "M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3",
   editar: "M4 20h4L19 9l-4-4L4 16zM13 7l4 4",
+  sol: "M12 4V2M12 22v-2M4 12H2M22 12h-2M5.6 5.6 4.2 4.2M19.8 19.8l-1.4-1.4M5.6 18.4l-1.4 1.4M19.8 4.2l-1.4 1.4M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10z",
+  lua: "M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z",
   wifi: "M2 2l20 20M8.5 16.5a5 5 0 0 1 7 0M5 13a10 10 0 0 1 5.2-2.8M19 13a10 10 0 0 0-2.1-1.6M2 8.8a15 15 0 0 1 4.2-2.6M22 8.8A15 15 0 0 0 11 5M12 20h.01",
 };
 
@@ -104,12 +107,14 @@ export function Selo({ tom = "neutro", children }: { tom?: Tom; children: Compon
   return <span class={`selo selo--${tom}`}>{children}</span>;
 }
 
-export function Avatar({ nome, tamanho = 36 }: { nome: string; tamanho?: number }) {
-  // tom estável por nome, entre os neutros e o petróleo da marca
-  let h = 0;
-  for (const c of nome) h = (h * 31 + c.charCodeAt(0)) % 4;
+export function Avatar({ id, nome, tamanho = 36 }: { id?: string; nome: string; tamanho?: number }) {
+  const foto = id ? fotoDe(id, nome) : null;
+  const [falhou, setFalhou] = useState(false);
+  if (foto && !falhou) {
+    return <img class="avatar avatar--foto" src={foto} alt="" width={tamanho} height={tamanho} loading="lazy" onError={() => setFalhou(true)} />;
+  }
   return (
-    <span class={`avatar avatar--${h}`} style={{ width: tamanho, height: tamanho, fontSize: tamanho * 0.38 }} aria-hidden="true">
+    <span class="avatar" style={{ width: tamanho, height: tamanho, fontSize: tamanho * 0.38 }} aria-hidden="true">
       {iniciais(nome)}
     </span>
   );

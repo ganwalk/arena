@@ -35,6 +35,13 @@ Os dados ficam no `localStorage` do navegador e são compartilhados entre abas. 
 | Paula Siqueira | Direção | Gestão, Captação | Visão geral e funil |
 | Marcos Teixeira | Relacionamento | Captação | Funil e tarefas |
 
+## Interface
+
+- **Cor pontual.** A base é neutra (grafite, cinzas frios, branco). O petróleo da marca aparece só na ação principal de cada tela, nos links, no foco do teclado e no marcador da seção ativa. Verde, âmbar e vermelho só indicam estado: um ponto no selo ou um número que exige atenção, sempre com texto ao lado. Nada depende só de cor.
+- **Claro e escuro.** Tokens semânticos em `plataforma.css` (`--fundo`, `--sup`, `--texto`, `--linha`, `--acao`…), com tema escuro próprio, não uma inversão. Segue o sistema por padrão; o botão de sol/lua na barra e o menu da pessoa (“Aparência”) fixam claro, escuro ou automático. A escolha é aplicada antes da primeira pintura, sem piscar.
+- **Pessoas com rosto.** Retratos de exemplo do Pexels (licença livre), guardados em `public/plataforma/pessoas/` com a lista de origem em `CREDITOS.md`. Sem foto, o avatar mostra as iniciais em cinza. Em produção, a foto vem do cadastro da escola, com a autorização devida; os retratos de exemplo não devem ir para o ar.
+- **Acessibilidade.** Alvos de toque de 44 px, foco visível, rótulos em todos os campos, estados anunciados (`aria-live`), navegação por teclado, contraste AA nos dois temas e `prefers-reduced-motion`.
+
 ## Dores observadas e o que cada portal responde
 
 Referências E01–E24 são do dossiê (`Dossie_Arena_Equipe.pdf`, A8).

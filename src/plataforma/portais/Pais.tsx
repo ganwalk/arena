@@ -75,7 +75,7 @@ function SeletorFilho({ banco, filhos, filho, escolher, agora }: { banco: Banco;
     <div class="filhos" role="tablist" aria-label="Filho">
       {filhos.map((f) => (
         <button key={f} type="button" role="tab" aria-selected={f === filho} class="filhos__item" onClick={() => escolher(f)}>
-          <Avatar nome={nomeDe(banco, f)} tamanho={28} />
+          <Avatar id={f} nome={nomeDe(banco, f)} tamanho={28} />
           <span>
             <span class="pessoa__nome">{primeiroNome(nomeDe(banco, f))}</span>
             <span class="pessoa__cargo">{turmasDoAluno(banco, f, diaDe(agora)).map((t) => turma(banco, t)?.nome).join(", ")}</span>
@@ -136,7 +136,7 @@ function Resumo() {
           return (
             <section key={f} class="filho-cartao" aria-label={nomeDe(banco, f)}>
               <div class="filho-cartao__topo">
-                <Avatar nome={nomeDe(banco, f)} tamanho={44} />
+                <Avatar id={f} nome={nomeDe(banco, f)} tamanho={44} />
                 <div>
                   <h2 class="secao__titulo">{nomeDe(banco, f)}</h2>
                   <p class="suave">{turmasDoAluno(banco, f, dia).map((t) => turma(banco, t)?.nome).join(", ")}</p>
@@ -285,9 +285,10 @@ export function LinhaSolicitacao({ banco, s, agora, portal = "pais" }: { banco: 
           {s.setor} · {primeiroNome(nomeDe(banco, s.alunoId))} · {s.protocolo}
           {portal === "gestao" && ` · ${nomeDe(banco, s.autorId)}`}
         </span>
+        {s.status === "aberta" && !atrasada && <span class="linha__meta">Resposta até {dataHora(s.prazoResposta)}</span>}
       </span>
       <span class="linha__lateral">
-        {atrasada ? <Selo tom="perigo">Prazo vencido</Selo> : s.status === "aberta" ? <span class="suave">resposta até {dataHora(s.prazoResposta)}</span> : null}
+        {atrasada && <Selo tom="perigo">Prazo vencido</Selo>}
         <Selo tom={STATUS_SOL[s.status].t}>{STATUS_SOL[s.status].r}</Selo>
       </span>
     </Linha>
@@ -414,6 +415,7 @@ export function Conversa({ id, portal = "pais" }: { id: string; portal?: "pais" 
           return (
             <li key={i} class={`mensagem${minha ? " mensagem--minha" : ""}`}>
               <p class="mensagem__autor">
+                <Avatar id={m.autorId} nome={nomeDe(banco, m.autorId)} tamanho={22} />
                 {nomeDe(banco, m.autorId)} · {quando(m.em, agora)}
               </p>
               <p>{m.texto}</p>

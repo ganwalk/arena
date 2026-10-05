@@ -12,8 +12,17 @@ import App from "../../plataforma/App";
     <title>Plataforma Arena</title>
     <meta name="description" content="Protótipo da plataforma do Colégio Arena: aluno, professor, família, gestão e captação. Dados fictícios." />
     <meta name="robots" content="noindex" />
-    <meta name="theme-color" content="#1c2529" />
+    <meta name="theme-color" content="#1c2529" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0b1012" media="(prefers-color-scheme: dark)" />
     <link rel="icon" href="/brand/simbolo.svg" type="image/svg+xml" />
+    <meta name="color-scheme" content="light dark" />
+    <script is:inline>
+      // aplica o tema escolhido antes da primeira pintura, sem piscar
+      try {
+        const t = localStorage.getItem("arena-plataforma:tema");
+        if (t === "claro" || t === "escuro") document.documentElement.setAttribute("data-tema", t);
+      } catch {}
+    </script>
   </head>
   <body class="plataforma">
     <App client:only="preact" />
