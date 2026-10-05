@@ -128,12 +128,7 @@ const telas = fluxo.filter((e) => e.id !== "matricula");
               fluxo.map((e) => (
                 <li class={`trilho__etapa trilho__etapa--${e.id}`}>
                   <a class="trilho__link" href={e.href}>
-                    <span class="trilho__marco">
-                      <span class="trilho__modulo">
-                        <Modulo forma={e.forma} cor="currentColor" />
-                      </span>
-                      <span class="trilho__n">{e.numero}</span>
-                    </span>
+                    <span class="trilho__marco" aria-hidden="true">{e.numero}</span>
                     <span class="trilho__titulo">{e.titulo}</span>
                     <span class="trilho__quem">{e.quem}</span>
                     <span class="trilho__acontece">{e.acontece}</span>
@@ -705,51 +700,25 @@ const telas = fluxo.filter((e) => e.id !== "matricula");
   }
   .trilho__marco {
     position: relative;
-    display: block;
+    display: grid;
+    place-items: center;
     width: 56px;
     height: 56px;
     margin-bottom: 0.9rem;
-  }
-  .trilho__modulo {
-    display: block;
-    width: 56px;
-    height: 56px;
-    padding: 12px;
     border-radius: 50%;
     background: var(--sup);
     box-shadow: 0 0 0 1px var(--linha-forte);
     color: var(--texto);
+    font-size: var(--t-20);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
     transition: background-color 200ms var(--ease), color 200ms var(--ease);
   }
-  .hub-secao--contraste .trilho__modulo {
+  .hub-secao--contraste .trilho__marco {
     background: var(--fundo);
   }
-  .trilho__modulo .modulo {
-    border-radius: 3px;
-  }
-  .trilho__modulo .modulo__forma circle + circle {
-    fill: var(--sup);
-    transition: fill 200ms var(--ease);
-  }
-  .trilho__link:hover .trilho__modulo .modulo__forma circle + circle {
-    fill: var(--forte);
-  }
-  .trilho__n {
-    position: absolute;
-    right: -4px;
-    bottom: -4px;
-    display: grid;
-    place-items: center;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: var(--forte);
-    color: var(--sobre-forte);
-    font-size: 11px;
-    font-weight: 800;
-  }
-  .trilho__link:hover .trilho__modulo,
-  .trilho__link:focus-visible .trilho__modulo {
+  .trilho__link:hover .trilho__marco,
+  .trilho__link:focus-visible .trilho__marco {
     background: var(--forte);
     color: var(--sobre-forte);
   }
@@ -1058,7 +1027,8 @@ const telas = fluxo.filter((e) => e.id !== "matricula");
     }
     .trilho__marco {
       grid-row: 1 / span 5;
-      margin: 0;
+      align-self: start;
+      margin: -0.6rem 0 0;
     }
     .hub-evento {
       display: none;

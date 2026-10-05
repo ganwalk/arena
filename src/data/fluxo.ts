@@ -15,7 +15,6 @@ export interface Etapa {
   acao: string;
   tela: string;
   celular?: string;
-  forma: "quarto" | "triangulo" | "listras" | "anel" | "folha" | "ponto";
 }
 
 const como = (id: string, rota: string) => `/plataforma/?como=${id}#${rota}`;
@@ -32,7 +31,6 @@ export const fluxo: Etapa[] = [
     href: "/site/#visita",
     acao: "Abrir o site",
     tela: "site",
-    forma: "quarto",
   },
   {
     id: "captacao",
@@ -46,7 +44,6 @@ export const fluxo: Etapa[] = [
     href: como("u-marcos", "/crm"),
     acao: "Entrar como Marcos",
     tela: "crm",
-    forma: "triangulo",
   },
   {
     id: "matricula",
@@ -60,7 +57,6 @@ export const fluxo: Etapa[] = [
     href: como("u-juliana", "/crm"),
     acao: "Entrar como Juliana",
     tela: "crm",
-    forma: "anel",
   },
   {
     id: "familia",
@@ -75,7 +71,6 @@ export const fluxo: Etapa[] = [
     acao: "Entrar como Cláudia",
     tela: "familia",
     celular: "familia-celular",
-    forma: "folha",
   },
   {
     id: "aluno",
@@ -90,7 +85,6 @@ export const fluxo: Etapa[] = [
     acao: "Entrar como Marina",
     tela: "aluno",
     celular: "aluno-celular",
-    forma: "ponto",
   },
   {
     id: "professor",
@@ -104,7 +98,6 @@ export const fluxo: Etapa[] = [
     href: como("u-beatriz", "/professor/plantao"),
     acao: "Entrar como Beatriz",
     tela: "professor",
-    forma: "listras",
   },
   {
     id: "gestao",
@@ -118,7 +111,6 @@ export const fluxo: Etapa[] = [
     href: como("u-fernanda", "/gestao"),
     acao: "Entrar como Fernanda",
     tela: "gestao",
-    forma: "quarto",
   },
 ];
 
