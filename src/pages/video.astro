@@ -22,7 +22,7 @@ const vertical = "/video/plataforma-arena-9x16.mp4";
   <body class="plataforma video-pagina">
     <main class="video-palco">
       <!-- tela em pé recebe o vídeo vertical (ver o script); o resto, o horizontal -->
-      <video class="video-filme" src={horizontal} controls autoplay muted playsinline preload="metadata" poster="/video/plataforma-arena-16x9.jpg" data-filme></video>
+      <video class="video-filme" src={horizontal} controls playsinline preload="metadata" poster="/video/plataforma-arena-16x9.jpg" data-filme></video>
       <nav class="video-acoes" aria-label="Outros formatos">
         <a class="btn btn--secundario video-btn" href="/">Voltar ao início</a>
         <a class="btn btn--secundario video-btn" href={horizontal} download>Baixar 16:9</a>

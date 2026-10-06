@@ -15,7 +15,7 @@ import { join, relative } from "node:path";
 
 const RAIZ = new URL("..", import.meta.url).pathname;
 const PASTAS = ["src", "docs", "video"];
-const ARQUIVOS = ["README.md", "scripts/video.mjs"];
+const ARQUIVOS = ["README.md", "scripts/video.mjs", "scripts/trilha.py"];
 const EXTENSOES = [".astro", ".ts", ".tsx", ".md", ".mjs", ".html"];
 const IGNORAR = [
   "colegio-arena-conteudo.md", // transcrição do site atual, com a grafia original

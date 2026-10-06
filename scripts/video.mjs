@@ -1,15 +1,16 @@
 #!/usr/bin/env node
 /*
   Grava o vídeo da Plataforma Arena a partir de video/cenas.html.
-  Abre a página no Chromium, desenha cada quadro com VIDEO.render(t) e manda as imagens para o ffmpeg.
+  Abre a página no Chromium, desenha cada quadro com VIDEO.render(t) e manda as imagens para o ffmpeg,
+  que junta a trilha gerada por scripts/trilha.py.
 
   Uso: npm run video                 grava 16:9 e 9:16 em public/video/
        npm run video -- 169          só um formato
        npm run video -- quadros 12.5 salva só o quadro do segundo 12,5 (para conferir), nos dois formatos
 
-  Precisa de ffmpeg no PATH. O Chromium vem de PLAYWRIGHT_BROWSERS_PATH ou de CHROMIUM.
+  Precisa de ffmpeg no PATH e de python3 com numpy. O Chromium vem de PLAYWRIGHT_BROWSERS_PATH ou de CHROMIUM.
 */
-import { spawn } from "node:child_process";
+import { spawn, execFileSync } from "node:child_process";
 import { mkdirSync, existsSync } from "node:fs";
 import { chromium } from "playwright-core";
 
@@ -24,6 +25,8 @@ const candidatos = [process.env.CHROMIUM, "/opt/pw-browsers/chromium-1194/chrome
 const executablePath = candidatos.find((c) => existsSync(c));
 
 mkdirSync(SAIDA, { recursive: true });
+const TRILHA = `${RAIZ}video/trilha.wav`;
+if (!soQuadros) execFileSync("python3", [`${RAIZ}scripts/trilha.py`, TRILHA], { stdio: "inherit" });
 const navegador = await chromium.launch({ executablePath, args: ["--allow-file-access-from-files", "--disable-web-security"] });
 
 for (const f of alvo) {
@@ -47,7 +50,7 @@ for (const f of alvo) {
 
   const total = Math.round(duracao * fps);
   const arquivo = `${SAIDA}plataforma-arena-${f === "169" ? "16x9" : "9x16"}.mp4`;
-  const ff = spawn("ffmpeg", ["-y", "-loglevel", "error", "-f", "image2pipe", "-framerate", String(fps), "-i", "-", "-c:v", "libx264", "-preset", "slow", "-crf", "20", "-pix_fmt", "yuv420p", "-movflags", "+faststart", arquivo], { stdio: ["pipe", "inherit", "inherit"] });
+  const ff = spawn("ffmpeg", ["-y", "-loglevel", "error", "-f", "image2pipe", "-framerate", String(fps), "-i", "-", "-i", TRILHA, "-map", "0:v", "-map", "1:a", "-c:a", "aac", "-b:a", "160k", "-shortest", "-c:v", "libx264", "-preset", "slow", "-crf", "20", "-pix_fmt", "yuv420p", "-movflags", "+faststart", arquivo], { stdio: ["pipe", "inherit", "inherit"] });
   const fim = new Promise((ok, falha) => ff.on("close", (c) => (c === 0 ? ok() : falha(new Error(`ffmpeg saiu com ${c}`)))));
   for (let i = 0; i < total; i++) {
     await pagina.evaluate((t) => window.VIDEO.render(t), i / fps);

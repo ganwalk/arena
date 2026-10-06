@@ -6,7 +6,7 @@ O deploy tem três endereços que formam um fluxo só:
 
 - `/`: página inicial da **Plataforma Arena**, que explica o caminho completo (site → captação → matrícula → família → aluno → professor → gestão) e abre cada etapa já como a pessoa certa.
 - `/site/`: a landing de captação do colégio (etapa 1). O formulário “Agende uma visita” cria o contato no funil do CRM.
-- `/video/`: o vídeo de apresentação da plataforma (68 s, sem áudio), em 16:9 ou 9:16 conforme a tela. O botão “Ver vídeo prévia” da página inicial leva até ele.
+- `/video/`: o vídeo de apresentação da plataforma (68 s, com trilha), em 16:9 ou 9:16 conforme a tela. O botão “Ver vídeo prévia” da página inicial leva até ele.
 - `/plataforma/`: o protótipo de alta fidelidade da **Plataforma Arena**: portais do aluno, do professor, da família, da gestão e da captação (CRM), alternáveis na mesma conta, com dados fictícios. O site carrega só o módulo de dados da plataforma, para gravar o pedido de visita. Detalhes, personas, mapa de telas e o caminho para produção em [`docs/plataforma.md`](docs/plataforma.md).
 
 ## Rodar
@@ -24,7 +24,9 @@ Regras de texto e de contribuição: [`CLAUDE.md`](CLAUDE.md).
 
 ## Vídeo
 
-`video/cenas.html` anima as sete etapas da plataforma quadro a quadro: cada quadro é uma função do tempo, sem transição de CSS. `npm run video` abre a página no Chromium, grava 30 quadros por segundo e passa as imagens ao ffmpeg, que gera `public/video/plataforma-arena-16x9.mp4`, `plataforma-arena-9x16.mp4` e as capas em JPG. Precisa de ffmpeg no PATH.
+`video/cenas.html` anima as sete etapas da plataforma quadro a quadro: cada quadro é uma função do tempo, sem transição de CSS. `npm run video` abre a página no Chromium, grava 30 quadros por segundo e passa as imagens ao ffmpeg, que junta a trilha e gera `public/video/plataforma-arena-16x9.mp4`, `plataforma-arena-9x16.mp4` e as capas em JPG. Precisa de ffmpeg no PATH e de python3 com numpy.
+
+A trilha (`scripts/trilha.py`) é sintetizada no próprio script, sem amostras de terceiros: pad, piano de feltro em arpejo e baixo longo, em ré maior, sem bateria nem efeitos de transição. O compasso 17 abre a cena do fluxo e o 19 cai na assinatura.
 
 - Para ver no navegador sem gravar: abra `video/cenas.html?tocar` (ou `?f=916&tocar` para o vertical).
 - Para conferir quadros soltos: `npm run video -- quadros 12.5 30`, que salva PNGs em `video/quadros/`.
