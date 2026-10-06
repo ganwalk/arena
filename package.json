@@ -10,7 +10,8 @@
     "grid": "node scripts/build_grid.mjs /tmp/land.geojson && python3 scripts/build_grid.py /tmp/land.geojson",
     "dados": "python3 scripts/build_data.py",
     "test": "vitest run",
-    "textos": "node scripts/textos.mjs --todos"
+    "textos": "node scripts/textos.mjs --todos",
+    "video": "node scripts/video.mjs"
   },
   "dependencies": {
     "@astrojs/preact": "^4.1.3",
@@ -20,6 +21,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
+    "playwright-core": "^1.56.1",
     "topojson-client": "^3.1.0",
     "typescript": "^5.9.3",
     "vitest": "^3.2.7",

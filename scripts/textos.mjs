@@ -14,9 +14,9 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 
 const RAIZ = new URL("..", import.meta.url).pathname;
-const PASTAS = ["src", "docs"];
-const ARQUIVOS = ["README.md"];
-const EXTENSOES = [".astro", ".ts", ".tsx", ".md", ".mjs"];
+const PASTAS = ["src", "docs", "video"];
+const ARQUIVOS = ["README.md", "scripts/video.mjs"];
+const EXTENSOES = [".astro", ".ts", ".tsx", ".md", ".mjs", ".html"];
 const IGNORAR = [
   "colegio-arena-conteudo.md", // transcrição do site atual, com a grafia original
   "src/data/conquistas.json",

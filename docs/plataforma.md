@@ -11,6 +11,7 @@ Todas as telas funcionam com dados fictícios. As ações (publicar, entregar, e
 | `/` | Página inicial da Plataforma Arena: o fluxo em sete etapas, o que uma ação muda nas outras telas, os módulos com telas reais e o antes e depois. Cada etapa abre o protótipo já como a pessoa certa (`/plataforma/?como=u-marcos#/crm`). |
 | `/site/` | Site de captação do colégio (a landing). É a etapa 1: o formulário “Agende uma visita” chama `pedirVisitaPeloSite`, que cria família, contato, criança, oportunidade e tarefa de retorno no funil do relacionamento. Depois do envio, um link leva ao contato no CRM. |
 | `/plataforma/` | Os cinco portais. |
+| `/video/` | Vídeo de apresentação, em 16:9 ou 9:16. Fonte em `video/cenas.html`, gravação com `npm run video`. |
 
 As imagens de produto da página inicial (`public/plataforma/telas/`) são capturas do próprio protótipo, nos dois temas. Para regenerar depois de mudar as telas, capture de novo com o servidor rodando (1280 × 800 para computador, 390 × 780 para celular).
 

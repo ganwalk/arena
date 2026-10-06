@@ -6,6 +6,7 @@ O deploy tem três endereços que formam um fluxo só:
 
 - `/`: página inicial da **Plataforma Arena**, que explica o caminho completo (site → captação → matrícula → família → aluno → professor → gestão) e abre cada etapa já como a pessoa certa.
 - `/site/`: a landing de captação do colégio (etapa 1). O formulário “Agende uma visita” cria o contato no funil do CRM.
+- `/video/`: o vídeo de apresentação da plataforma (68 s, sem áudio), em 16:9 ou 9:16 conforme a tela. O botão “Ver vídeo prévia” da página inicial leva até ele.
 - `/plataforma/`: o protótipo de alta fidelidade da **Plataforma Arena**: portais do aluno, do professor, da família, da gestão e da captação (CRM), alternáveis na mesma conta, com dados fictícios. O site carrega só o módulo de dados da plataforma, para gravar o pedido de visita. Detalhes, personas, mapa de telas e o caminho para produção em [`docs/plataforma.md`](docs/plataforma.md).
 
 ## Rodar
@@ -20,6 +21,15 @@ npm run textos   # só a verificação de texto, com avisos
 ```
 
 Regras de texto e de contribuição: [`CLAUDE.md`](CLAUDE.md).
+
+## Vídeo
+
+`video/cenas.html` anima as sete etapas da plataforma quadro a quadro: cada quadro é uma função do tempo, sem transição de CSS. `npm run video` abre a página no Chromium, grava 30 quadros por segundo e passa as imagens ao ffmpeg, que gera `public/video/plataforma-arena-16x9.mp4`, `plataforma-arena-9x16.mp4` e as capas em JPG. Precisa de ffmpeg no PATH.
+
+- Para ver no navegador sem gravar: abra `video/cenas.html?tocar` (ou `?f=916&tocar` para o vertical).
+- Para conferir quadros soltos: `npm run video -- quadros 12.5 30`, que salva PNGs em `video/quadros/`.
+- Cada legenda tem até 12 palavras e fica pelo menos 4,5 s na tela. Os textos passam por `npm run textos`.
+- As telas do vídeo mostram a plataforma pronta, com as mesmas pessoas fictícias do protótipo.
 
 ## Publicar na Vercel
 

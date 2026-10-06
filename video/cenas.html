@@ -1,0 +1,981 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <title>Plataforma Arena: vídeo</title>
+    <!--
+      Vídeo de apresentação da Plataforma Arena, animado quadro a quadro.
+      Tudo é função do tempo: render(t) desenha o quadro do segundo t, sem transições de CSS.
+      Formato pela busca: ?f=169 (1920 x 1080) ou ?f=916 (1080 x 1920).
+      Gravação: npm run video (scripts/video.mjs). Para ver no navegador, abra com ?tocar.
+    -->
+    <style>
+      @font-face {
+        font-family: "Schibsted";
+        font-weight: 400 900;
+        src: url("../node_modules/@fontsource-variable/schibsted-grotesk/files/schibsted-grotesk-latin-wght-normal.woff2") format("woff2");
+      }
+      @font-face {
+        font-family: "Schibsted";
+        font-weight: 400 900;
+        src: url("../node_modules/@fontsource-variable/schibsted-grotesk/files/schibsted-grotesk-latin-ext-wght-normal.woff2") format("woff2");
+        unicode-range: U+0100-024F, U+1E00-1EFF;
+      }
+      :root {
+        --noite: #0e1416;
+        --grafite: #1c2529;
+        --grafite-2: #243035;
+        --petroleo: #209ba0;
+        --acao: #0b7377;
+        --acao-claro: #5fc9cd;
+        --nevoa: #eef3f3;
+        --gelo: #d9e3e4;
+        --tinta: #1f2a2f;
+        --tinta-2: #56656c;
+        --linha: #e0e6e8;
+        --sup-2: #f0f3f4;
+        --ok: #1f7a4d;
+        --perigo: #b3261e;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body { background: #000; overflow: hidden; }
+      body { font-family: "Schibsted", system-ui, sans-serif; color: #fff; -webkit-font-smoothing: antialiased; }
+
+      #palco { position: relative; overflow: hidden; background: var(--noite); }
+      .f169 { width: 1920px; height: 1080px; }
+      .f916 { width: 1080px; height: 1920px; }
+
+      .fundo { position: absolute; inset: 0; background: radial-gradient(1200px 900px at 85% 10%, rgb(32 155 160 / 0.14), transparent 60%), radial-gradient(900px 900px at 0% 100%, rgb(32 155 160 / 0.08), transparent 60%); }
+      .fundo svg { position: absolute; width: 420px; height: 420px; opacity: 0.05; }
+
+      .cena { position: absolute; inset: 0; opacity: 0; }
+
+      /* legenda: olho e título */
+      .legenda { position: absolute; }
+      .f169 .legenda { left: 130px; top: 50%; width: 680px; transform: translateY(-50%); }
+      .f916 .legenda { left: 80px; top: 200px; width: 920px; }
+      .olho { font-size: 26px; font-weight: 700; letter-spacing: 0.02em; color: var(--acao-claro); margin-bottom: 22px; display: flex; align-items: center; gap: 14px; }
+      .f916 .olho { font-size: 34px; }
+      .olho::before { content: ""; width: 44px; height: 4px; background: var(--acao-claro); border-radius: 2px; }
+      .titulo { font-size: 66px; line-height: 1.08; font-weight: 800; letter-spacing: -0.02em; }
+      .f916 .titulo { font-size: 76px; }
+      .titulo .m { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.08em; margin-bottom: -0.08em; }
+      .titulo .m > span { display: inline-block; }
+
+      /* caixa de 900 x 800 onde a interface acontece; o formato só muda a escala */
+      .caixa { position: absolute; width: 900px; height: 800px; transform-origin: 0 0; }
+      .f169 .caixa { left: 900px; top: 140px; }
+      .f916 .caixa { left: 40px; top: 680px; scale: 1.111; }
+
+      .abs { position: absolute; }
+
+      /* janela da plataforma */
+      .jan { position: absolute; background: #f5f7f7; color: var(--tinta); border-radius: 22px; overflow: hidden; box-shadow: 0 40px 90px rgb(0 0 0 / 0.45), 0 0 0 1px rgb(255 255 255 / 0.06); }
+      .jan-barra { height: 64px; background: var(--grafite); color: #fff; display: flex; align-items: center; gap: 14px; padding: 0 22px; font-size: 21px; }
+      .jan-barra .simb { width: 30px; height: 30px; }
+      .jan-barra .marca b { font-weight: 800; }
+      .jan-portal { margin-left: 18px; background: #fff; color: var(--tinta); border-radius: 999px; padding: 7px 18px; font-weight: 700; font-size: 19px; }
+      .jan-pessoa { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+      .jan-pessoa img { width: 40px; height: 40px; border-radius: 50%; }
+      .jan-pessoa span { display: flex; flex-direction: column; line-height: 1.15; font-size: 18px; }
+      .jan-pessoa small { color: #b9c6c9; font-size: 15px; }
+      .jan-corpo { padding: 26px 28px; }
+      .jan-h { font-size: 36px; font-weight: 800; letter-spacing: -0.01em; }
+      .jan-sub { font-size: 20px; color: var(--tinta-2); margin-top: 4px; }
+
+      .jan.escura { background: #101618; color: #e6ebec; }
+      .jan.escura .jan-barra { background: #0b1012; }
+      .jan.escura .jan-sub { color: #9fadb2; }
+
+      /* celular */
+      .cel { position: absolute; width: 380px; height: 780px; border-radius: 54px; background: #0b1012; padding: 12px; box-shadow: 0 40px 90px rgb(0 0 0 / 0.5), 0 0 0 2px #2a353a; }
+      .cel-tela { position: relative; width: 100%; height: 100%; border-radius: 43px; overflow: hidden; background: #f5f7f7; color: var(--tinta); }
+      .cel-barra { height: 92px; padding: 36px 22px 0; background: var(--grafite); display: flex; align-items: center; justify-content: space-between; }
+      .cel-barra .simb { width: 34px; height: 34px; }
+      .cel-barra .av { width: 40px; height: 40px; border-radius: 50%; }
+      .cel-corpo { position: absolute; left: 0; right: 0; top: 92px; padding: 22px; }
+      .cel-h { font-size: 30px; font-weight: 800; line-height: 1.1; letter-spacing: -0.01em; }
+      .cel-sub { font-size: 18px; color: var(--tinta-2); margin-top: 8px; line-height: 1.3; }
+
+
+      /* peças comuns */
+      .cartao { background: #fff; border: 1px solid var(--linha); border-radius: 16px; padding: 18px 20px; color: var(--tinta); box-shadow: 0 2px 0 rgb(28 37 41 / 0.04); }
+      .cartao b { font-weight: 800; }
+      .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; height: 58px; padding: 0 26px; border-radius: 12px; background: var(--acao); color: #fff; font-weight: 700; font-size: 22px; white-space: nowrap; }
+      .btn.sec { background: #fff; color: var(--tinta); border: 2px solid var(--linha); }
+      .btn.ok { background: var(--ok); }
+      .selo { display: inline-flex; align-items: center; gap: 8px; border: 1.5px solid var(--linha); border-radius: 999px; padding: 4px 14px; font-size: 17px; font-weight: 600; background: #fff; color: var(--tinta); white-space: nowrap; }
+      .selo i { width: 9px; height: 9px; border-radius: 50%; background: var(--acao); display: inline-block; }
+      .campo { margin-top: 16px; }
+      .campo label { display: block; font-size: 17px; font-weight: 600; color: var(--tinta-2); margin-bottom: 6px; }
+      .campo .valor { height: 54px; border: 2px solid #c3ced1; border-radius: 10px; background: #fff; display: flex; align-items: center; padding: 0 16px; font-size: 21px; gap: 2px; }
+      .cursor-texto { width: 2px; height: 26px; background: var(--acao); display: inline-block; }
+      .av { border-radius: 50%; object-fit: cover; }
+      .ic { width: 1em; height: 1em; flex: none; }
+
+      /* toque */
+      .toque { position: absolute; left: 0; top: 0; width: 64px; height: 64px; margin: -32px 0 0 -32px; z-index: 50; opacity: 0; pointer-events: none; }
+      .toque .p { position: absolute; inset: 0; border-radius: 50%; background: rgb(11 115 119 / 0.28); border: 3px solid #0b7377; box-shadow: 0 0 0 3px rgb(255 255 255 / 0.85), 0 8px 20px rgb(0 0 0 / 0.25); }
+      .toque .o { position: absolute; inset: 0; border-radius: 50%; border: 3px solid #0b7377; opacity: 0; }
+
+      /* aviso que desce */
+      .aviso { position: absolute; display: flex; gap: 16px; align-items: center; background: #fff; color: var(--tinta); border-radius: 18px; padding: 16px 20px; box-shadow: 0 24px 50px rgb(0 0 0 / 0.35); font-size: 19px; line-height: 1.3; }
+      .aviso b { display: block; font-size: 21px; font-weight: 800; }
+      .aviso img { width: 52px; height: 52px; }
+      .aviso .marcador { width: 52px; height: 52px; border-radius: 50%; background: var(--acao); color: #fff; display: grid; place-items: center; font-size: 28px; flex: none; }
+
+      /* trilho das sete etapas */
+      .trilho { position: absolute; display: flex; gap: 14px; opacity: 0; }
+      .f169 .trilho { left: 50%; bottom: 44px; translate: -50% 0; }
+      .f916 .trilho { left: 50%; bottom: 72px; translate: -50% 0; gap: 18px; }
+      .trilho span { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 19px; border: 2px solid #3a474d; color: #93a2a7; }
+      .f916 .trilho span { width: 52px; height: 52px; font-size: 24px; }
+      .trilho span.feito { background: #243035; border-color: #243035; color: #c9d4d6; }
+      .trilho span.agora { background: var(--acao-claro); border-color: var(--acao-claro); color: #072022; }
+
+      /* cortina de módulos */
+      .cortina { position: absolute; inset: 0; pointer-events: none; z-index: 80; }
+      .cortina svg, .grade svg { position: absolute; display: block; }
+
+      /* abertura e fecho */
+      .grade { position: absolute; inset: 0; }
+      .assinatura { position: absolute; left: 0; right: 0; top: 50%; translate: 0 -50%; display: flex; flex-direction: column; align-items: center; text-align: center; }
+      .assinatura .simb { width: 150px; height: 150px; }
+      .assinatura .nome { font-size: 112px; font-weight: 800; letter-spacing: -0.03em; margin-top: 34px; line-height: 1; }
+      .assinatura .nome b { font-weight: 800; color: var(--acao-claro); }
+      .f916 .assinatura .nome { font-size: 104px; }
+      .assinatura .onde { font-size: 38px; color: #b9c6c9; margin-top: 26px; font-weight: 500; }
+      .ressalva { position: absolute; left: 0; right: 0; bottom: 56px; text-align: center; font-size: 22px; color: #6f7f85; }
+      .f916 .ressalva { bottom: 90px; font-size: 28px; }
+
+      /* fluxo */
+      .fluxo-legenda { position: absolute; text-align: center; left: 50%; translate: -50% 0; }
+      .f169 .fluxo-legenda { top: 170px; width: 1500px; }
+      .f916 .fluxo-legenda { top: 200px; width: 940px; text-align: left; left: 80px; translate: 0 0; }
+      .f169 .fluxo-legenda .olho { justify-content: center; }
+      .fluxo-legenda .titulo { font-size: 76px; }
+      .f916 .fluxo-legenda .titulo { font-size: 76px; }
+      .no { position: absolute; width: 0; height: 0; }
+      .no .c { position: absolute; width: 104px; height: 104px; left: -52px; top: -52px; border-radius: 50%; background: var(--grafite-2); border: 4px solid var(--acao-claro); display: grid; place-items: center; font-size: 44px; font-weight: 800; color: #fff; }
+      .no .r { position: absolute; font-size: 32px; font-weight: 700; white-space: nowrap; color: #e6ebec; }
+      .f169 .no .r { top: 72px; left: 0; translate: -50% 0; }
+      .f916 .no .r { left: 84px; top: -22px; font-size: 40px; }
+      .no img { position: absolute; width: 56px; height: 56px; border-radius: 50%; border: 3px solid var(--noite); }
+      .f169 .no img { left: 22px; top: -86px; }
+      .f916 .no img { left: 22px; top: -86px; }
+      .volta { position: absolute; font-size: 30px; font-weight: 700; color: var(--acao-claro); white-space: nowrap; }
+    </style>
+  </head>
+  <body>
+    <div id="palco"></div>
+
+    <script>
+      /* ---------- formato ---------- */
+      const busca = new URLSearchParams(location.search);
+      const FORMATO = busca.get("f") === "916" ? "916" : "169";
+      const L = FORMATO === "169" ? 1920 : 1080;
+      const A = FORMATO === "169" ? 1080 : 1920;
+      const palco = document.getElementById("palco");
+      palco.className = "f" + FORMATO;
+
+      /* ---------- tempo e curvas ---------- */
+      const cl = (x) => Math.max(0, Math.min(1, x));
+      const pr = (t, a, b) => cl((t - a) / (b - a));
+      const lerp = (a, b, x) => a + (b - a) * x;
+      const eo = (x) => 1 - Math.pow(1 - x, 3);
+      const ei = (x) => x * x * x;
+      const eio = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+      const ex = (x) => (x >= 1 ? 1 : 1 - Math.pow(2, -10 * x));
+      const eb = (x) => { const c1 = 1.5, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+      const k = (t, a, b, e = eo) => e(pr(t, a, b));
+
+      function pos(el, { x = 0, y = 0, s = 1, r = 0, o } = {}) {
+        el.style.transform = `translate(${x.toFixed(2)}px, ${y.toFixed(2)}px) scale(${s.toFixed(4)}) rotate(${r.toFixed(2)}deg)`;
+        if (o !== undefined) el.style.opacity = cl(o).toFixed(3);
+      }
+      const $ = (sel, raiz = document) => raiz.querySelector(sel);
+      const $$ = (sel, raiz = document) => [...raiz.querySelectorAll(sel)];
+
+      /* ---------- recursos ---------- */
+      const RAIZ = "../public";
+      const SIMB = `${RAIZ}/brand/simbolo.svg`;
+      const foto = (n) => `${RAIZ}/plataforma/pessoas/${n}.jpg`;
+      const simb = (cls = "") => `<img class="simb ${cls}" src="simbolo-branco.svg" alt="" />`;
+
+      const ICONES = {
+        ok: '<path d="M5 12l5 5L20 7"/>',
+        relogio: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+        camera: '<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
+        envio: '<path d="M12 16V4M7 9l5-5 5 5M5 20h14"/>',
+        arquivo: '<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/>',
+        sino: '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/>',
+        balao: '<path d="M4 5h16v11H9l-5 4z"/>',
+        pessoas: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6"/>',
+        lista: '<path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/>',
+        seta: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+        cadeado: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+        funil: '<path d="M3 4h18l-7 9v6l-4 2v-8z"/>',
+      };
+      const ic = (n, est = "") => `<svg class="ic" style="${est}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONES[n]}</svg>`;
+
+      /* módulos do painel da marca, 100 x 100 */
+      const FORMAS = {
+        quarto: (c) => `<path d="M0 100V0a100 100 0 0 1 100 100Z" fill="${c}"/>`,
+        triangulo: (c) => `<path d="M0 0h100L0 100Z" fill="${c}"/>`,
+        folha: (c) => `<path d="M0 0h50a50 50 0 0 1 50 50v50H0Z" fill="${c}"/>`,
+        ponto: (c) => `<circle cx="50" cy="50" r="24" fill="${c}"/>`,
+        anel: (c, f) => `<circle cx="50" cy="50" r="34" fill="${c}"/><circle cx="50" cy="50" r="17" fill="${f}"/>`,
+        listras: (c) => [-80, -50, -20, 10, 40, 70, 100, 130, 160].map((o) => `<line x1="${o}" y1="100" x2="${o + 100}" y2="0" stroke="${c}" stroke-width="9"/>`).join(""),
+      };
+      const NOMES_FORMAS = Object.keys(FORMAS);
+      let semente = 7;
+      const sorte = () => ((semente = (semente * 16807) % 2147483647) / 2147483647);
+      const modulo = (forma, cor, fundo, giro) =>
+        `<svg viewBox="0 0 100 100" overflow="hidden"><rect width="100" height="100" fill="${fundo}"/><g transform="rotate(${giro} 50 50)">${FORMAS[forma](cor, fundo)}</g></svg>`;
+
+      /* legenda com palavras que sobem uma a uma */
+      const legenda = (olho, titulo, cls = "legenda") =>
+        `<div class="${cls}"><p class="olho">${olho}</p><h2 class="titulo">${titulo
+          .split(" ")
+          .map((p) => `<span class="m"><span>${p}</span></span>`)
+          .join(" ")}</h2></div>`;
+
+      function animarLegenda(raiz, lt, dur, inicio = 0.25) {
+        const olho = $(".olho", raiz);
+        pos(olho, { x: lerp(-30, 0, k(lt, inicio, inicio + 0.5)), o: k(lt, inicio, inicio + 0.4) });
+        $$(".m > span", raiz).forEach((s, i) => {
+          const a = inicio + 0.15 + i * 0.045;
+          pos(s, { y: lerp(110, 0, k(lt, a, a + 0.55, ex)) });
+        });
+        const saida = k(lt, dur - 0.45, dur - 0.1, ei);
+        const leg = raiz.querySelector(".legenda, .fluxo-legenda");
+        leg.style.opacity = 1 - saida;
+      }
+
+      /* toque na tela: chaves [t, x, y] e cliques em t */
+      function toque(el, lt, chaves, cliques = []) {
+        if (lt < chaves[0][0] - 0.3 || lt > chaves[chaves.length - 1][0] + 0.6) { el.style.opacity = 0; return; }
+        let x = chaves[0][1], y = chaves[0][2];
+        for (let i = 1; i < chaves.length; i++) {
+          const [t0, x0, y0] = chaves[i - 1], [t1, x1, y1] = chaves[i];
+          if (lt >= t0) { const e = eio(pr(lt, t0, t1)); x = lerp(x0, x1, e); y = lerp(y0, y1, e); }
+        }
+        let s = 1, onda = 0, ondaO = 0;
+        for (const c of cliques) {
+          const d = lt - c;
+          if (d > -0.12 && d < 0.3) s = Math.min(s, d < 0 ? lerp(1, 0.78, (d + 0.12) / 0.12) : lerp(0.78, 1, eo(d / 0.3)));
+          if (d >= 0 && d < 0.5) { onda = lerp(1, 2.4, eo(d / 0.5)); ondaO = 1 - d / 0.5; }
+        }
+        const o = Math.min(k(lt, chaves[0][0] - 0.3, chaves[0][0]), 1 - k(lt, chaves[chaves.length - 1][0] + 0.2, chaves[chaves.length - 1][0] + 0.6));
+        el.style.opacity = o;
+        el.style.transform = `translate(${x}px, ${y}px)`;
+        $(".p", el).style.transform = `scale(${s})`;
+        const anel = $(".o", el);
+        anel.style.transform = `scale(${onda})`;
+        anel.style.opacity = ondaO;
+      }
+      const TOQUE = `<div class="toque"><div class="o"></div><div class="p"></div></div>`;
+
+      const digitar = (el, texto, lt, a, b, cursor = true) => {
+        const n = Math.round(texto.length * pr(lt, a, b));
+        const piscando = cursor && lt > a - 0.4 && (lt < b + 0.2 || false);
+        el.innerHTML = texto.slice(0, n) + (piscando ? '<span class="cursor-texto"></span>' : "");
+      };
+
+      /* ---------- roteiro ---------- */
+      const CENAS = [
+        { id: "abertura", dur: 4.6 },
+        { id: "login", dur: 6.2 },
+        { id: "captacao", dur: 6.8, etapa: 2 },
+        { id: "matricula", dur: 6.4, etapa: 3 },
+        { id: "familia", dur: 6.8, etapa: 4 },
+        { id: "entrega", dur: 6.6, etapa: 5 },
+        { id: "plantao", dur: 6.2, etapa: 5 },
+        { id: "professor", dur: 6.4, etapa: 6 },
+        { id: "gestao", dur: 6.2, etapa: 7 },
+        { id: "fluxo", dur: 6.6 },
+        { id: "fim", dur: 5.0 },
+      ];
+      let acc = 0;
+      for (const c of CENAS) { c.ini = acc; acc += c.dur; c.fim = acc; }
+      const DURACAO = acc;
+      /* cortinas de módulos nas viradas de capítulo */
+      const CORTINAS = [CENAS[1].ini, CENAS[9].ini, CENAS[10].ini];
+
+      /* ---------- montagem ---------- */
+      const html = [];
+      html.push(`<div class="fundo">${[0, 1, 2]
+        .map((i) => `<svg viewBox="0 0 100 100" data-fundo="${i}">${FORMAS[["quarto", "anel", "listras"][i]]("#5fc9cd", "#0e1416")}</svg>`)
+        .join("")}</div>`);
+
+      /* abertura */
+      html.push(`<section class="cena" id="abertura"><div class="grade"></div>
+        <div class="assinatura">${simb()}<p class="nome"><span class="w">Plataforma</span> <b class="w">Arena</b></p><p class="onde">Colégio Arena · Goiânia</p></div></section>`);
+
+      /* 1. um login */
+      const apps = [
+        ["HD Virtual", "H", 20, 60],
+        ["EduConnect", "E", 590, 30],
+        ["Plantões Arena", "P", 0, 560],
+        ["WhatsApp", "W", 610, 600],
+      ];
+      html.push(`<section class="cena" id="login">${legenda("Um acesso", "Um login para aluno, família, professor e gestão.")}
+        <div class="caixa">
+          ${apps
+            .map(([n, l, x, y]) => `<div class="abs app" style="left:${x}px;top:${y}px;width:290px;height:92px;border-radius:18px;background:#1e272b;border:1.5px solid #3a474d;display:flex;align-items:center;gap:16px;padding:0 20px;color:#c9d4d6;font-size:26px;font-weight:600"><span style="width:50px;height:50px;border-radius:12px;background:#29343a;display:grid;place-items:center;font-weight:800;color:#93a2a7">${l}</span>${n}</div>`)
+            .join("")}
+          <div class="abs entrar cartao" style="left:220px;top:110px;width:460px;padding:40px 40px 36px;border-radius:26px;box-shadow:0 40px 90px rgb(0 0 0 / .5)">
+            <img src="${SIMB}" style="width:62px;height:62px" alt="" />
+            <p style="font-size:38px;font-weight:800;margin-top:16px;letter-spacing:-.01em">Plataforma Arena</p>
+            <div class="campo"><label>Usuário</label><div class="valor"><span class="digita-usuario"></span></div></div>
+            <div class="campo"><label>Senha</label><div class="valor" style="letter-spacing:4px"><span class="digita-senha"></span></div></div>
+            <div class="btn" style="width:100%;margin-top:24px">Entrar</div>
+          </div>
+          <div class="abs pilulas" style="left:0;top:690px;width:900px;display:flex;justify-content:center;gap:12px">
+            ${["Aluno", "Família", "Professor", "Gestão", "Captação"].map((p) => `<span class="pil" style="background:#fff;color:#1f2a2f;border-radius:999px;padding:12px 22px;font-size:23px;font-weight:700;display:inline-flex;gap:10px;align-items:center"><i style="width:11px;height:11px;border-radius:50%;background:#0b7377;display:inline-block"></i>${p}</span>`).join("")}
+          </div>
+          ${TOQUE}
+        </div></section>`);
+
+      /* 2. site e captação */
+      const cartaoFamilia = (nome, quem, origem, tarefa, av, extra = "") =>
+        `<div class="cartao kc ${extra}" style="padding:16px 18px;border-radius:14px"><p style="font-size:22px;font-weight:800">${nome}</p><p style="font-size:17px;color:#56656c;margin-top:4px">${quem}</p><p style="margin-top:10px;display:flex;gap:8px;align-items:center"><span class="selo">${origem}</span></p><p style="font-size:16px;color:#56656c;margin-top:10px;display:flex;gap:8px;align-items:center">${ic("relogio")}${tarefa}<img class="av" src="${foto(av)}" style="width:30px;height:30px;margin-left:auto" alt=""/></p></div>`;
+      html.push(`<section class="cena" id="captacao">${legenda("Etapas 1 e 2 · Site e captação", "A família pede visita no site e o contato chega ao funil.")}
+        <div class="caixa">
+          <div class="jan kanban" style="left:250px;top:20px;width:650px;height:760px">
+            <div class="jan-barra">${simb()}<span class="jan-portal">${ic("funil", "margin-right:6px")}Captação</span><span class="jan-pessoa"><img src="${foto("marcos")}" alt=""/><span><b>Marcos Teixeira</b><small>Relacionamento</small></span></span></div>
+            <div class="jan-corpo"><p class="jan-h">Captação 2027</p>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:22px">
+                <div style="background:#edf1f2;border-radius:16px;padding:14px;height:600px;position:relative">
+                  <p style="font-size:20px;font-weight:800;display:flex;justify-content:space-between;margin-bottom:12px">Novo contato <span class="conta" style="background:#fff;border-radius:999px;padding:0 12px;font-size:18px">2</span></p>
+                  <div class="col1" style="position:relative">
+                    <div class="novo" style="position:absolute;left:0;right:0;top:0">${cartaoFamilia("Família Lopes", "Davi, 1ª série", "Site", "Ligar amanhã, 9:00", "marcos")}</div>
+                    <div class="velhos" style="display:flex;flex-direction:column;gap:12px">${cartaoFamilia("Família Carvalho", "Pedro, 7º ano", "Site", "Ligar hoje, 17:00", "marcos")}${cartaoFamilia("Família Queiroz", "Lia, Infantil 4", "Instagram", "Responder hoje", "marcos")}</div>
+                  </div>
+                </div>
+                <div style="background:#edf1f2;border-radius:16px;padding:14px;height:600px">
+                  <p style="font-size:20px;font-weight:800;display:flex;justify-content:space-between;margin-bottom:12px">Visita agendada <span style="background:#fff;border-radius:999px;padding:0 12px;font-size:18px">2</span></p>
+                  <div style="display:flex;flex-direction:column;gap:12px">${cartaoFamilia("Família Teles", "Gustavo, 9º ano", "Site", "Visita 7 out, 15:00", "marcos")}${cartaoFamilia("Família Arantes", "Clara, 3ª série", "Evento", "Visita 8 out, 15:00", "paula")}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="abs form cartao" style="left:0;top:170px;width:380px;padding:30px 30px 32px;border-radius:22px;box-shadow:0 40px 90px rgb(0 0 0 / .5);transform-origin:0 0">
+            <p style="font-size:16px;font-weight:700;color:#0b7377;letter-spacing:.04em">COLEGIOARENA.COM.BR</p>
+            <p style="font-size:32px;font-weight:800;margin-top:8px">Agende uma visita</p>
+            <div class="campo"><label>Nome do responsável</label><div class="valor"><span class="d-nome"></span></div></div>
+            <div class="campo"><label>Etapa de interesse</label><div class="valor" style="justify-content:space-between"><span class="d-etapa" style="color:#56656c">Escolha</span><span style="color:#56656c">▾</span></div></div>
+            <div class="btn b-visita" style="width:100%;margin-top:24px">Pedir visita</div>
+          </div>
+          <div class="aviso toast" style="left:330px;top:84px;width:540px"><img class="av" src="${foto("mulher-3")}" alt=""/><span><b>Pedido de visita pelo site</b>Família Lopes · Ensino Médio</span></div>
+          ${TOQUE}
+        </div></section>`);
+
+      /* 3. matrícula */
+      const contaCriada = (titulo, linha, av, icone) =>
+        `<div class="cartao res" style="width:280px;padding:20px;border-radius:18px;box-shadow:0 24px 50px rgb(0 0 0 / .35)"><div style="display:flex;align-items:center;gap:12px">${av ? `<img class="av" src="${foto(av)}" style="width:52px;height:52px" alt=""/>` : `<span style="width:52px;height:52px;border-radius:50%;background:#e5f2f2;color:#0b7377;display:grid;place-items:center;font-size:26px">${ic(icone)}</span>`}<span style="margin-left:auto;width:34px;height:34px;border-radius:50%;background:#1f7a4d;color:#fff;display:grid;place-items:center;font-size:20px">${ic("ok")}</span></div><p style="font-size:23px;font-weight:800;margin-top:14px">${titulo}</p><p style="font-size:18px;color:#56656c;margin-top:4px">${linha}</p></div>`;
+      html.push(`<section class="cena" id="matricula">${legenda("Etapa 3 · Matrícula", "A secretaria matricula e cria os acessos do aluno e da família.")}
+        <div class="caixa">
+          <svg class="abs ligacoes" width="900" height="800" style="left:0;top:0;overflow:visible" fill="none" stroke="#5fc9cd" stroke-width="3" stroke-linecap="round"><path d="M770 440 C770 510 140 480 140 560"/><path d="M770 440 C770 510 450 490 450 560"/><path d="M770 440 C770 510 760 510 760 560"/></svg>
+          <div class="jan ficha" style="left:0;top:20px;width:900px;height:420px">
+            <div class="jan-barra">${simb()}<span class="jan-portal">Captação</span><span class="jan-pessoa"><img src="${foto("juliana")}" alt=""/><span><b>Juliana Reis</b><small>Secretaria</small></span></span></div>
+            <div class="jan-corpo">
+              <div style="display:flex;gap:18px;align-items:center"><img class="av" src="${foto("mulher-3")}" style="width:72px;height:72px" alt=""/><div><p class="jan-h">Família Lopes</p><p class="jan-sub">Renata Lopes · veio pelo site · visitou em 2 out</p></div></div>
+              <div style="margin-top:24px;border:1.5px solid #e0e6e8;background:#fff;border-radius:18px;padding:22px 24px">
+                <p style="font-size:24px;font-weight:800">Matrícula de Davi Lopes</p>
+                <div style="display:flex;gap:18px;align-items:flex-end;margin-top:4px">
+                  <div class="campo" style="flex:1"><label>Turma</label><div class="valor s-turma" style="justify-content:space-between"><span class="v-turma" style="color:#56656c">Escolha a turma</span><span style="color:#56656c">▾</span></div></div>
+                  <div class="campo" style="width:170px"><label>Ano letivo</label><div class="valor">2027</div></div>
+                  <div class="btn b-matricular" style="width:230px">Matricular</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="abs r1" style="left:0;top:560px">${contaCriada("Conta do aluno", "Davi Lopes · 1ª série B", "davi-mendes")}</div>
+          <div class="abs r2" style="left:310px;top:560px">${contaCriada("Conta da família", "Renata Lopes · responsável", "mulher-3")}</div>
+          <div class="abs r3" style="left:620px;top:560px">${contaCriada("Lista da turma", "Davi entrou na 1ª série B", null, "lista")}</div>
+          ${TOQUE}
+        </div></section>`);
+
+      /* 4. família */
+      html.push(`<section class="cena" id="familia">${legenda("Etapa 4 · Família", "A família confirma avisos e faz pedidos com prazo de resposta.")}
+        <div class="caixa">
+          <div class="cel" style="left:30px;top:10px"><div class="cel-tela">
+            <div class="cel-barra">${simb()}<img class="av" src="${foto("claudia")}" alt=""/></div>
+            <div class="cel-corpo rolo">
+              <div style="display:flex;gap:8px"><span class="selo" style="background:#1c2529;color:#fff;border-color:#1c2529;font-size:18px;padding:6px 16px">Marina</span><span class="selo" style="font-size:18px;padding:6px 16px">Theo</span></div>
+              <p style="font-size:17px;font-weight:700;color:#0b7377;margin-top:22px;display:flex;gap:8px;align-items:center">${ic("sino")}Aviso novo</p>
+              <div class="cartao" style="margin-top:10px;border-radius:18px">
+                <p style="font-size:24px;font-weight:800;line-height:1.15">Reunião de pais da 1ª série</p>
+                <p style="font-size:17px;color:#56656c;margin-top:8px">Coordenação do Médio · qui, 15 out, 19:00</p>
+                <div class="btn b-ciencia" style="width:100%;margin-top:18px;font-size:21px">Confirmar ciência</div>
+              </div>
+              <p style="font-size:17px;font-weight:700;color:#0b7377;margin-top:26px;display:flex;gap:8px;align-items:center">${ic("balao")}Fale com a escola</p>
+              <div class="cartao pedido" style="margin-top:10px;border-radius:18px">
+                <p style="font-size:23px;font-weight:800;line-height:1.15">Segunda via do boletim</p>
+                <p style="font-size:16px;color:#56656c;margin-top:6px">Secretaria · ATD-20261006-412908</p>
+                <div style="margin-top:16px;display:flex;flex-direction:column;gap:12px;font-size:18px">
+                  <span style="display:flex;gap:10px;align-items:center"><span style="width:28px;height:28px;border-radius:50%;background:#1f7a4d;color:#fff;display:grid;place-items:center;font-size:16px">${ic("ok")}</span>Pedido enviado</span>
+                  <span class="passo2" style="display:flex;gap:10px;align-items:center"><span class="pt2" style="width:28px;height:28px;border-radius:50%;border:3px solid #0b7377"></span>Secretaria respondendo</span>
+                  <span style="display:flex;gap:10px;align-items:center;color:#56656c"><span style="width:28px;height:28px;border-radius:50%;border:2px solid #c3ced1;display:grid;place-items:center">${ic("relogio", "font-size:16px")}</span>Resposta até qui, 8 out</span>
+                </div>
+              </div>
+            </div>
+          </div></div>
+          <p class="abs na-gestao" style="left:470px;top:150px;font-size:20px;font-weight:700;color:#93a2a7">NA TELA DA COORDENAÇÃO</p>
+          <div class="abs g1 cartao" style="left:470px;top:190px;width:420px;border-radius:18px;padding:22px">
+            <p style="font-size:18px;color:#56656c;font-weight:600">Ciência dos avisos</p>
+            <p style="font-size:23px;font-weight:800;margin-top:6px">Reunião de pais da 1ª série</p>
+            <div style="height:12px;background:#e3e9ea;border-radius:6px;margin-top:16px;overflow:hidden"><div class="barra-ciencia" style="height:100%;background:#0b7377;border-radius:6px;width:66%"></div></div>
+            <p style="font-size:19px;margin-top:10px"><b class="n-ciencia">4</b> de 6 famílias</p>
+          </div>
+          <div class="abs g2 cartao" style="left:470px;top:410px;width:420px;border-radius:18px;padding:22px">
+            <p style="font-size:18px;color:#56656c;font-weight:600">Atendimento · Secretaria</p>
+            <p style="font-size:23px;font-weight:800;margin-top:6px">Novo pedido de Cláudia Martins</p>
+            <p style="font-size:18px;color:#56656c;margin-top:8px;display:flex;gap:8px;align-items:center">${ic("relogio")}Responder até qui, 8 out</p>
+          </div>
+          ${TOQUE}
+        </div></section>`);
+
+      /* 5. entrega de tarefa */
+      const miniatura = (i) =>
+        `<div class="mini" style="display:flex;gap:12px;align-items:center;margin-top:12px"><div style="width:58px;height:58px;border-radius:10px;background:repeating-linear-gradient(0deg,#fff 0 9px,#d9e3e4 9px 10px);border:1px solid #c3ced1"></div><div style="flex:1"><p style="font-size:17px;font-weight:600">foto-${i}.jpg</p><div style="height:8px;background:#e3e9ea;border-radius:4px;margin-top:8px;overflow:hidden"><div class="prog" style="height:100%;width:0;background:#0b7377"></div></div></div><span class="pronto" style="width:28px;height:28px;border-radius:50%;background:#1f7a4d;color:#fff;display:grid;place-items:center;font-size:16px;opacity:0">${ic("ok")}</span></div>`;
+      html.push(`<section class="cena" id="entrega">${legenda("Etapa 5 · Aluno", "O aluno entrega a tarefa pelo celular, com foto e protocolo.")}
+        <div class="caixa">
+          <div class="cel" style="left:30px;top:10px"><div class="cel-tela">
+            <div class="cel-barra">${simb()}<img class="av" src="${foto("marina")}" alt=""/></div>
+            <div class="cel-corpo tela-a">
+              <p style="font-size:18px;color:#0b7377;font-weight:700">‹ Tarefas</p>
+              <p class="cel-h" style="margin-top:10px">Exercícios 1 a 3 da página 112</p>
+              <p class="cel-sub">História · Rafael Nunes · vence qua, 7 out</p>
+              <p style="margin-top:14px"><span class="selo"><i></i>Para entregar</span></p>
+              <p style="font-size:20px;font-weight:800;margin-top:26px;padding-bottom:10px;border-bottom:2px solid #1f2a2f">Sua entrega</p>
+              <div class="fotos" style="margin-top:6px">${miniatura(1)}${miniatura(2)}${miniatura(3)}</div>
+              <div class="btn b-foto" style="margin-top:18px">${ic("camera")}Tirar foto</div>
+              <div class="btn b-enviar" style="width:100%;margin-top:16px;opacity:.45">${ic("envio")}Enviar entrega</div>
+            </div>
+            <div class="flash abs" style="inset:0;background:#fff;opacity:0"></div>
+            <div class="cel-corpo tela-b" style="opacity:0;text-align:center;padding-top:110px">
+              <span class="selo-ok" style="width:120px;height:120px;border-radius:50%;background:#1f7a4d;color:#fff;display:inline-grid;place-items:center;font-size:64px">${ic("ok")}</span>
+              <p class="cel-h" style="margin-top:28px">Entrega recebida</p>
+              <p class="cel-sub">3 fotos · ter, 6 out, 21:14</p>
+              <div style="margin-top:26px;background:#fff;border:1.5px solid #e0e6e8;border-radius:14px;padding:16px">
+                <p style="font-size:16px;color:#56656c">Protocolo</p>
+                <p style="font-size:22px;font-weight:800;margin-top:4px;letter-spacing:.01em">ENT-20261006-803727</p>
+              </div>
+            </div>
+          </div></div>
+          <div class="aviso n1" style="left:460px;top:240px;width:440px"><img class="av" src="${foto("rafael")}" alt=""/><span><b>Rafael Nunes · professor</b>Nova entrega de Marina para conferir</span></div>
+          <div class="aviso n2" style="left:460px;top:390px;width:440px"><img class="av" src="${foto("claudia")}" alt=""/><span><b>Cláudia Martins · família</b>Marina entregou a tarefa de História</span></div>
+          ${TOQUE}
+        </div></section>`);
+
+      /* 6. plantão */
+      const linhaFila = (av, nome, nota, cls = "") =>
+        `<div class="lf ${cls}" style="display:flex;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid #e0e6e8;background:#f5f7f7"><img class="av" src="${foto(av)}" style="width:48px;height:48px" alt=""/><div style="flex:1"><p style="font-size:21px;font-weight:700">${nome}</p><p style="font-size:16px;color:#56656c">${nota}</p></div></div>`;
+      html.push(`<section class="cena" id="plantao">${legenda("Etapa 5 · Aluno", "No plantão, o aluno acompanha a posição na fila ao vivo.")}
+        <div class="caixa">
+          <div class="jan fila" style="left:440px;top:120px;width:460px;height:560px">
+            <div class="jan-barra">${simb()}<span class="jan-pessoa"><img src="${foto("beatriz")}" alt=""/><span><b>Beatriz Lima</b><small>Biologia</small></span></span></div>
+            <div class="jan-corpo" style="padding:22px 24px">
+              <p style="font-size:28px;font-weight:800">Fila do plantão</p>
+              <div class="btn b-chamar" style="width:100%;margin-top:14px">Chamar próximo</div>
+              <div class="lista-fila" style="margin-top:10px;position:relative;height:390px;overflow:hidden">
+                ${linhaFila("helena-duarte", "Helena Duarte", "Dúvida: mitose", "lf1")}
+                ${linhaFila("caio-fernandes", "Caio Fernandes", "Sem dúvida escrita", "lf2")}
+                ${linhaFila("lucas", "Lucas Andrade + 2", "Em grupo · genética", "lf3")}
+                ${linhaFila("sofia-ribeiro", "Sofia Ribeiro", "Dúvida: meiose", "lf4")}
+                ${linhaFila("enzo-barbosa", "Enzo Barbosa", "Sem dúvida escrita", "lf5")}
+              </div>
+            </div>
+          </div>
+          <div class="cel" style="left:20px;top:10px"><div class="cel-tela">
+            <div class="cel-barra">${simb()}<img class="av" src="${foto("lucas")}" alt=""/></div>
+            <div class="cel-corpo">
+              <p class="cel-h">Plantão de Biologia</p>
+              <p class="cel-sub">Beatriz Lima · hoje, 14:00 às 15:30</p>
+              <div style="display:flex;align-items:center;gap:10px;margin-top:16px"><span style="display:flex">${["lucas", "ana-clara-souza", "joao-pedro-silva"].map((a, i) => `<img class="av" src="${foto(a)}" style="width:38px;height:38px;border:2px solid #f5f7f7;margin-left:${i ? -10 : 0}px" alt=""/>`).join("")}</span><span style="font-size:17px;color:#56656c">Em grupo com Ana Clara e João Pedro</span></div>
+              <div class="painel-pos" style="margin-top:28px;background:#fff;border:1.5px solid #e0e6e8;border-radius:22px;height:300px;position:relative;overflow:hidden;text-align:center">
+                <p class="rot-pos" style="font-size:20px;color:#56656c;font-weight:600;margin-top:28px">Sua posição na fila</p>
+                <div class="nums" style="position:absolute;left:0;right:0;top:70px;height:170px;overflow:hidden">
+                  ${["3º", "2º", "1º"].map((n, i) => `<p class="num n${i}" style="position:absolute;left:0;right:0;font-size:150px;font-weight:800;line-height:170px;letter-spacing:-.04em">${n}</p>`).join("")}
+                </div>
+                <div class="vez" style="position:absolute;inset:0;background:#0b7377;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0">
+                  <span style="font-size:60px">${ic("sino")}</span>
+                  <p style="font-size:38px;font-weight:800;margin-top:12px">É a sua vez</p>
+                  <p style="font-size:19px;margin-top:6px;color:#d9f0f0">Beatriz chamou o seu grupo</p>
+                </div>
+              </div>
+            </div>
+          </div></div>
+          ${TOQUE}
+        </div></section>`);
+
+      /* 7. professor publica */
+      const turmas = ["1ª série B", "3ª série A", "3ª série B", "9º ano A"];
+      const celPequeno = (turma, i) =>
+        `<div class="abs cp cp${i}" style="left:${30 + i * 300}px;top:530px;width:240px">
+          <p style="text-align:center;font-size:20px;font-weight:700;color:#c9d4d6;margin-bottom:12px">${turma}</p>
+          <div style="height:250px;border-radius:34px 34px 0 0;background:#0b1012;padding:9px 9px 0;box-shadow:0 0 0 2px #2a353a"><div style="height:100%;border-radius:26px 26px 0 0;background:#f5f7f7;overflow:hidden;position:relative">
+            <div style="height:58px;background:#1c2529;padding:20px 14px 0">${simb("").replace('class="', 'style="width:24px;height:24px" class="')}</div>
+            <div class="np" style="margin:12px;background:#fff;border:1.5px solid #e0e6e8;border-radius:14px;padding:12px 14px;box-shadow:0 10px 20px rgb(0 0 0 / .12)"><p style="font-size:14px;color:#0b7377;font-weight:700">BIOLOGIA · AGORA</p><p style="font-size:18px;font-weight:800;margin-top:4px;line-height:1.15">Membrana plasmática</p><p style="font-size:14px;color:#56656c;margin-top:4px">Beatriz Lima · PDF</p></div>
+          </div></div></div>`;
+      html.push(`<section class="cena" id="professor">${legenda("Etapa 6 · Professor", "O professor publica uma vez para as turmas que escolher.")}
+        <div class="caixa">
+          <svg class="abs voos" width="900" height="800" style="left:0;top:0;overflow:visible" fill="none" stroke="#5fc9cd" stroke-width="3" stroke-linecap="round" stroke-dasharray="2 10">${[0, 1, 2].map((i) => `<path d="M690 400 C690 470 ${150 + i * 300} 450 ${150 + i * 300} 560"/>`).join("")}</svg>
+          <div class="jan pub" style="left:0;top:0;width:900px;height:460px">
+            <div class="jan-barra">${simb()}<span class="jan-portal">Professor</span><span class="jan-pessoa"><img src="${foto("beatriz")}" alt=""/><span><b>Beatriz Lima</b><small>Biologia</small></span></span></div>
+            <div class="jan-corpo">
+              <p class="jan-h">Novo material</p>
+              <div style="display:flex;gap:18px">
+                <div class="campo" style="flex:1"><label>Título</label><div class="valor"><span class="d-titulo"></span></div></div>
+                <div class="campo" style="width:300px"><label>Arquivo</label><div class="valor" style="gap:10px;font-size:18px;color:#1f2a2f"><span style="color:#b3261e;font-size:24px">${ic("arquivo")}</span>aula-12.pdf · 2,4 MB</div></div>
+              </div>
+              <p style="font-size:17px;font-weight:600;color:#56656c;margin-top:18px">Para quais turmas</p>
+              <div style="display:flex;gap:12px;margin-top:8px">${turmas.map((t, i) => `<span class="tchip tc${i}" style="display:inline-flex;align-items:center;gap:8px;border:2px solid #c3ced1;background:#fff;border-radius:999px;padding:10px 18px;font-size:20px;font-weight:700"><span class="tcx" style="width:24px;height:24px;border-radius:6px;border:2px solid #93a2a7;display:grid;place-items:center;color:#fff;font-size:15px">${ic("ok")}</span>${t}</span>`).join("")}</div>
+              <div style="display:flex;justify-content:flex-end;margin-top:20px"><div class="btn b-publicar" style="width:340px"><span class="rot-publicar">Publicar para 0 turmas</span></div></div>
+            </div>
+          </div>
+          ${[0, 1, 2].map((i) => celPequeno(turmas[i], i)).join("")}
+          ${TOQUE}
+        </div></section>`);
+
+      /* 8. gestão */
+      const kpi = (n, rot, cls, cor = "#e6ebec") =>
+        `<div class="kpi ${cls}" style="padding:18px 20px 0 0;border-top:2px solid #3a474d"><p class="kn" data-n="${n}" style="font-size:58px;font-weight:800;color:${cor};line-height:1">0</p><p style="font-size:19px;color:#c9d4d6;margin-top:8px;line-height:1.25">${rot}</p></div>`;
+      const barra = (titulo, n, cls) =>
+        `<div style="padding:16px 0;border-bottom:1px solid #273135"><p style="font-size:20px;font-weight:700">${titulo}</p><div style="display:flex;align-items:center;gap:14px;margin-top:10px"><div style="flex:1;height:10px;background:#29343a;border-radius:5px;overflow:hidden"><div class="${cls}" data-n="${n}" style="height:100%;width:0;background:#5fc9cd"></div></div><span style="font-size:17px;color:#9fadb2;width:130px">${n} de 6 famílias</span></div></div>`;
+      html.push(`<section class="cena" id="gestao">${legenda("Etapa 7 · Gestão", "A coordenação vê entregas, plantão e atendimento atrasado num painel.")}
+        <div class="caixa">
+          <div class="jan escura painel" style="left:0;top:70px;width:900px;height:640px">
+            <div class="jan-barra">${simb()}<span class="jan-portal" style="background:#29343a;color:#e6ebec">Gestão</span><span class="jan-pessoa"><img src="${foto("fernanda")}" alt=""/><span><b>Fernanda Alves</b><small>Coordenação do Médio</small></span></span></div>
+            <div class="jan-corpo">
+              <p class="jan-h">Painel da escola</p>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:22px">
+                ${kpi(6, "materiais publicados na semana", "k0")}${kpi(9, "entregas de tarefa hoje", "k1")}${kpi(4, "alunos no plantão agora", "k2")}${kpi(1, "pedido com prazo vencido", "k3", "#f08b81")}
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:30px">
+                <div><p style="font-size:22px;font-weight:800;padding-bottom:8px;border-bottom:2px solid #3a474d">Ciência dos avisos</p>${barra("Reunião de pais da 1ª série", 5, "b0")}${barra("Visita ao AgroLab", 2, "b1")}</div>
+                <div><p style="font-size:22px;font-weight:800;padding-bottom:8px;border-bottom:2px solid #3a474d">Alunos para acompanhar</p>
+                  ${[["miguel-cardoso", "Miguel Cardoso", "9º ano A · História 5,4"], ["lara-monteiro", "Lara Monteiro", "1ª série B · Física 5,1"]].map(([a, n, d], i) => `<div class="al al${i}" style="display:flex;gap:14px;align-items:center;padding:16px 0;border-bottom:1px solid #273135"><img class="av" src="${foto(a)}" style="width:48px;height:48px" alt=""/><div><p style="font-size:20px;font-weight:700">${n}</p><p style="font-size:17px;color:#9fadb2">${d}</p></div></div>`).join("")}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div></section>`);
+
+      /* 9. o fluxo */
+      const etapas = [
+        ["Site", "mulher-3"],
+        ["Captação", "marcos"],
+        ["Matrícula", "juliana"],
+        ["Família", "claudia"],
+        ["Aluno", "marina"],
+        ["Professor", "beatriz"],
+        ["Gestão", "fernanda"],
+      ];
+      const NOS = etapas.map((_, i) => (FORMATO === "169" ? [210 + i * 250, 640] : [180, 760 + i * 158]));
+      html.push(`<section class="cena" id="fluxo">${legenda("O fluxo", "Do pedido de visita à sala de aula, numa plataforma só.", "fluxo-legenda")}
+        <svg class="abs" width="${L}" height="${A}" style="left:0;top:0" fill="none" stroke-linecap="round">
+          <path class="linha" d="M${NOS.map((p) => p.join(" ")).join(" L")}" stroke="#5fc9cd" stroke-width="4"/>
+          <path class="laco" d="${FORMATO === "169" ? `M${NOS[6][0]} 712 C${NOS[6][0]} 900 ${NOS[1][0]} 900 ${NOS[1][0]} 760` : `M510 ${NOS[6][1]} C660 ${NOS[6][1]} 660 ${NOS[1][1]} 510 ${NOS[1][1]}`}" stroke="#5fc9cd" stroke-width="3" stroke-dasharray="10 12"/>
+        </svg>
+        ${etapas.map(([n, a], i) => `<div class="no" style="left:${NOS[i][0]}px;top:${NOS[i][1]}px"><img class="av" src="${foto(a)}" alt=""/><div class="c">${i + 1}</div><p class="r">${n}</p></div>`).join("")}
+        <p class="volta" style="${FORMATO === "169" ? `left:${(NOS[1][0] + NOS[6][0]) / 2}px;top:850px;translate:-50% 0;background:#0e1416;padding:0 18px` : `left:660px;top:${(NOS[3][1] + NOS[4][1]) / 2 - 20}px;font-size:36px`}">↺ Rematrícula</p>
+      </section>`);
+
+      /* 10. assinatura */
+      html.push(`<section class="cena" id="fim"><div class="assinatura">${simb()}<p class="nome"><span class="w">Plataforma</span> <b class="w">Arena</b></p><p class="onde">Colégio Arena · Goiânia</p></div><p class="ressalva">Pessoas e dados fictícios.</p></section>`);
+
+      html.push(`<div class="trilho">${[1, 2, 3, 4, 5, 6, 7].map((n) => `<span>${n}</span>`).join("")}</div>`);
+      html.push(`<div class="cortina"></div>`);
+      palco.innerHTML = html.join("");
+
+      /* grades de módulos (abertura e cortina) */
+      const CEL = FORMATO === "169" ? 192 : 180;
+      const COLS = Math.ceil(L / CEL), LINS = Math.ceil(A / CEL);
+      const CORES = ["#0b7377", "#209ba0", "#5fc9cd", "#d9e3e4", "#3b4a52"];
+      const FUNDOS = ["#1c2529", "#1c2529", "#243035", "#0b7377"];
+      function grade(raiz, cheia) {
+        const cel = [];
+        for (let lin = 0; lin < LINS; lin++)
+          for (let col = 0; col < COLS; col++) {
+            const forma = NOMES_FORMAS[Math.floor(sorte() * NOMES_FORMAS.length)];
+            const cor = CORES[Math.floor(sorte() * CORES.length)];
+            let fundo = cheia ? FUNDOS[Math.floor(sorte() * FUNDOS.length)] : "transparent";
+            if (fundo === cor) fundo = "#1c2529";
+            const giro = [0, 90, 180, 270][Math.floor(sorte() * 4)];
+            const div = document.createElement("div");
+            div.innerHTML = modulo(forma, cor, fundo === "transparent" ? "#0e1416" : fundo, giro);
+            const svg = div.firstChild;
+            Object.assign(svg.style, { left: col * CEL + "px", top: lin * CEL + "px", width: CEL + 1 + "px", height: CEL + 1 + "px" });
+            raiz.appendChild(svg);
+            const cx = (col + 0.5) / COLS - 0.5, cy = (lin + 0.5) / LINS - 0.5;
+            cel.push({ svg, d: Math.hypot(cx * (L / A), cy), diag: (col / COLS + lin / LINS) / 2, sorte: sorte() });
+          }
+        return cel;
+      }
+      const gradeAbertura = grade($("#abertura .grade"), false);
+      const gradeCortina = grade($(".cortina"), true);
+
+      /* posições medidas uma vez, em unidades da caixa */
+      function centro(cena, sel) {
+        const caixa = $(`#${cena} .caixa`);
+        const el = $(sel, caixa);
+        let x = 0, y = 0, n = el;
+        while (n && n !== caixa) { x += n.offsetLeft; y += n.offsetTop; n = n.offsetParent; }
+        return [x + el.offsetWidth / 2, y + el.offsetHeight / 2];
+      }
+
+      /* ---------- cenas ---------- */
+      const C = Object.fromEntries(CENAS.map((c) => [c.id, $("#" + c.id)]));
+      const toques = Object.fromEntries(CENAS.map((c) => [c.id, $(`#${c.id} .toque`)]));
+      let P = null;
+      function medir() {
+        P = {
+          usuario: centro("login", ".entrar .btn"),
+          visita: centro("captacao", ".b-visita"),
+          etapa: centro("captacao", ".d-etapa"),
+          turma: centro("matricula", ".s-turma"),
+          matricular: centro("matricula", ".b-matricular"),
+          ciencia: centro("familia", ".b-ciencia"),
+          foto: centro("entrega", ".b-foto"),
+          enviar: (() => {
+            // na hora do envio o botão "Tirar foto" já saiu da tela
+            const b = $("#entrega .b-foto");
+            b.style.display = "none";
+            const c = centro("entrega", ".b-enviar");
+            b.style.display = "";
+            return c;
+          })(),
+          chamar: centro("plantao", ".b-chamar"),
+          chips: turmas.map((_, i) => centro("professor", ".tc" + i)),
+          publicar: centro("professor", ".b-publicar"),
+        };
+      }
+
+      function entradaCaixa(raiz, lt, dur) {
+        const caixa = $(".caixa", raiz);
+        if (!caixa) return;
+        const e = k(lt, 0.1, 0.9, ex);
+        const s = k(lt, dur - 0.45, dur - 0.05, ei);
+        pos(caixa, { y: lerp(70, 0, e) + lerp(0, -50, s), o: Math.min(k(lt, 0.1, 0.5), 1 - s) });
+      }
+
+      const R = {
+        abertura(lt, dur) {
+          for (const c of gradeAbertura) {
+            const a = 0.05 + c.d * 0.9, b = 1.25 + (0.7 - c.d) * 0.6;
+            const entra = k(lt, a, a + 0.55, eb), sai = k(lt, b, b + 0.45, ei);
+            const s = entra * (1 - sai);
+            c.svg.style.transform = `scale(${(s * 0.94).toFixed(3)}) rotate(${lerp(-90, 0, entra) + sai * 90}deg)`;
+            c.svg.style.opacity = s > 0.001 ? 1 : 0;
+          }
+          const r = C.abertura;
+          pos($(".simb", r), { s: lerp(0.4, 1, k(lt, 1.55, 2.25, eb)), r: lerp(-30, 0, k(lt, 1.55, 2.2)), o: k(lt, 1.55, 1.85) });
+          $$(".nome .w", r).forEach((w, i) => pos(w, { y: lerp(50, 0, k(lt, 1.9 + i * 0.12, 2.5 + i * 0.12, ex)), o: k(lt, 1.9 + i * 0.12, 2.2 + i * 0.12) }));
+          pos($(".onde", r), { y: lerp(20, 0, k(lt, 2.5, 3.1)), o: k(lt, 2.5, 2.9) });
+        },
+
+        login(lt, dur) {
+          const r = C.login;
+          $$(".app", r).forEach((el, i) => {
+            const [, , x, y] = apps[i];
+            const a = 0.35 + i * 0.12;
+            const ida = k(lt, 1.9 + i * 0.08, 2.6 + i * 0.08, eio);
+            const dx = (450 - (x + 145)) * ida, dy = (380 - (y + 46)) * ida;
+            const boia = Math.sin(lt * 1.6 + i * 1.7) * 6;
+            pos(el, { x: dx, y: dy + boia + lerp(30, 0, k(lt, a, a + 0.6)), s: lerp(1, 0.3, ida), o: k(lt, a, a + 0.4) * (1 - k(lt, 2.3 + i * 0.08, 2.6 + i * 0.08)) });
+          });
+          const cartao = $(".entrar", r);
+          pos(cartao, { s: lerp(0.7, 1, k(lt, 2.35, 3.0, eb)), o: k(lt, 2.35, 2.65) });
+          digitar($(".digita-usuario", r), "marina.martins", lt, 3.0, 3.5);
+          digitar($(".digita-senha", r), "••••••••", lt, 3.55, 3.85, false);
+          const [bx, by] = P.usuario;
+          toque(toques.login, lt, [[3.6, bx + 80, by + 60], [3.95, bx, by], [4.4, bx, by]], [4.05]);
+          $$(".pil", r).forEach((p, i) => {
+            const a = 4.25 + i * 0.12;
+            pos(p, { y: lerp(40, 0, k(lt, a, a + 0.5, eb)), s: lerp(0.6, 1, k(lt, a, a + 0.5, eb)), o: k(lt, a, a + 0.25) });
+          });
+        },
+
+        captacao(lt, dur) {
+          const r = C.captacao;
+          pos($(".kanban", r), { x: lerp(120, 0, k(lt, 0.3, 1.1, ex)), o: k(lt, 0.3, 0.7) });
+          digitar($(".d-nome", r), "Renata Lopes", lt, 1.0, 1.7);
+          const [ex_, ey] = P.etapa, [vx, vy] = P.visita;
+          const etapaEscolhida = lt > 2.05;
+          const de = $(".d-etapa", r);
+          de.textContent = etapaEscolhida ? "Ensino Médio" : "Escolha";
+          de.style.color = etapaEscolhida ? "#1f2a2f" : "#56656c";
+          toque(toques.captacao, lt, [[1.6, ex_ + 60, ey + 40], [1.9, ex_, ey], [2.15, ex_, ey], [2.45, vx, vy], [2.7, vx, vy]], [1.95, 2.55]);
+          // o formulário vira o cartão no funil
+          const voo = k(lt, 2.8, 3.5, eio);
+          const form = $(".form", r);
+          pos(form, { x: lerp(0, 290, voo), y: lerp(0, 66, voo) + lerp(40, 0, k(lt, 0.15, 0.9, ex)), s: lerp(1, 0.75, voo), o: k(lt, 0.15, 0.5) * (1 - k(lt, 3.3, 3.55)) });
+          pos($(".velhos", r), { y: lerp(0, 178, k(lt, 3.0, 3.5, eio)) });
+          const novo = $(".novo .kc", r);
+          pos(novo, { s: lerp(0.92, 1, k(lt, 3.35, 3.8, eb)), o: k(lt, 3.3, 3.5) });
+          novo.style.boxShadow = `0 0 0 ${lerp(0, 4, k(lt, 3.4, 3.7)) * (1 - k(lt, 5.4, 6.0))}px #5fc9cd`;
+          $(".conta", r).textContent = lt > 3.45 ? "3" : "2";
+          pos($(".toast", r), { y: lerp(-40, 0, k(lt, 3.7, 4.2, eb)), o: k(lt, 3.7, 3.95) });
+        },
+
+        matricula(lt, dur) {
+          const r = C.matricula;
+          const [tx, ty] = P.turma, [mx, my] = P.matricular;
+          toque(toques.matricula, lt, [[1.0, tx + 80, ty + 70], [1.35, tx, ty], [1.6, tx, ty], [2.05, mx, my], [2.4, mx, my]], [1.4, 2.15]);
+          const v = $(".v-turma", r);
+          v.textContent = lt > 1.5 ? "1ª série B" : "Escolha a turma";
+          v.style.color = lt > 1.5 ? "#1f2a2f" : "#56656c";
+          const b = $(".b-matricular", r);
+          const feito = lt > 2.25;
+          b.innerHTML = feito ? `${ic("ok")}Matriculado` : "Matricular";
+          b.classList.toggle("ok", feito);
+          $$(".ligacoes path", r).forEach((p, i) => {
+            const L_ = p.getTotalLength();
+            p.style.strokeDasharray = L_;
+            p.style.strokeDashoffset = L_ * (1 - k(lt, 2.35 + i * 0.12, 2.9 + i * 0.12, eio));
+          });
+          ["r1", "r2", "r3"].forEach((c, i) => {
+            const a = 2.75 + i * 0.18;
+            pos($("." + c, r), { y: lerp(50, 0, k(lt, a, a + 0.6, eb)), s: lerp(0.85, 1, k(lt, a, a + 0.6, eb)), o: k(lt, a, a + 0.3) });
+          });
+        },
+
+        familia(lt, dur) {
+          const r = C.familia;
+          const [cx, cy] = P.ciencia;
+          toque(toques.familia, lt, [[1.0, cx + 70, cy + 80], [1.4, cx, cy], [1.8, cx, cy]], [1.55]);
+          const b = $(".b-ciencia", r);
+          const feito = lt > 1.65;
+          b.innerHTML = feito ? `${ic("ok")}Ciência confirmada` : "Confirmar ciência";
+          b.classList.toggle("ok", feito);
+          pos($(".rolo", r), { y: lerp(0, -170, k(lt, 3.0, 3.8, eio)) });
+          const pulso = 0.5 + 0.5 * Math.sin(lt * 6);
+          $(".pt2", r).style.background = `rgb(11 115 119 / ${(0.15 + pulso * 0.5).toFixed(2)})`;
+          pos($(".na-gestao", r), { o: k(lt, 0.9, 1.3) });
+          pos($(".g1", r), { x: lerp(40, 0, k(lt, 0.9, 1.5, ex)), o: k(lt, 0.9, 1.3) });
+          const sobe = k(lt, 1.85, 2.4, eio);
+          $(".barra-ciencia", r).style.width = lerp(66.6, 83.3, sobe) + "%";
+          $(".n-ciencia", r).textContent = sobe > 0.5 ? "5" : "4";
+          $(".g1", r).style.boxShadow = `0 0 0 ${(4 * k(lt, 1.85, 2.1) * (1 - k(lt, 3.0, 3.5))).toFixed(2)}px #5fc9cd`;
+          pos($(".g2", r), { x: lerp(40, 0, k(lt, 3.7, 4.3, ex)), o: k(lt, 3.7, 4.0) });
+        },
+
+        entrega(lt, dur) {
+          const r = C.entrega;
+          const [fx, fy] = P.foto, [sx, sy] = P.enviar;
+          toque(toques.entrega, lt, [[0.9, fx + 60, fy + 70], [1.2, fx, fy], [1.45, fx, fy], [3.25, sx, sy], [3.55, sx, sy]], [1.3, 3.35]);
+          pos($(".flash", r), { o: k(lt, 1.38, 1.45) * (1 - k(lt, 1.5, 1.85)) });
+          $$(".mini", r).forEach((m, i) => {
+            const a = 1.55 + i * 0.22;
+            m.style.display = lt > a ? "flex" : "none";
+            pos(m, { x: lerp(-20, 0, k(lt, a, a + 0.3)), o: k(lt, a, a + 0.25) });
+            const p = k(lt, a + 0.1, a + 1.0, eio);
+            $(".prog", m).style.width = p * 100 + "%";
+            pos($(".pronto", m), { s: lerp(0.4, 1, k(lt, a + 1.0, a + 1.3, eb)), o: k(lt, a + 1.0, a + 1.15) });
+          });
+          $(".b-foto", r).style.display = lt > 1.55 ? "none" : "inline-flex";
+          $(".b-enviar", r).style.opacity = lt > 3.0 ? 1 : 0.45;
+          const troca = k(lt, 3.55, 3.85);
+          pos($(".tela-a", r), { o: 1 - troca, x: lerp(0, -40, troca) });
+          pos($(".tela-b", r), { o: troca, x: lerp(40, 0, troca) });
+          pos($(".selo-ok", r), { s: lerp(0.3, 1, k(lt, 3.65, 4.2, eb)) });
+          pos($(".n1", r), { x: lerp(60, 0, k(lt, 4.15, 4.75, ex)), o: k(lt, 4.15, 4.45) });
+          pos($(".n2", r), { x: lerp(60, 0, k(lt, 4.5, 5.1, ex)), o: k(lt, 4.5, 4.8) });
+        },
+
+        plantao(lt, dur) {
+          const r = C.plantao;
+          const [cx, cy] = P.chamar;
+          const cliques = [1.3, 2.6, 3.9];
+          toque(toques.plantao, lt, [[0.9, cx + 50, cy + 80], [1.2, cx, cy], [4.2, cx, cy]], cliques);
+          pos($(".fila", r), { x: lerp(80, 0, k(lt, 0.3, 1.0, ex)), o: k(lt, 0.3, 0.6) });
+          // cada chamada tira a primeira linha e sobe a lista
+          const h = 77;
+          const saida = cliques.slice(0, 2).map((c) => k(lt, c + 0.1, c + 0.5, eio));
+          $$(".lf", r).forEach((el, i) => {
+            const sobe = (saida[0] + saida[1]) * h;
+            const sai = i < 2 ? saida[i] : 0;
+            pos(el, { x: sai * 120, y: -sobe + sai * 0, o: 1 - sai });
+          });
+          const lucas = $(".lf3", r);
+          const chamado = k(lt, 4.0, 4.3);
+          lucas.style.background = `rgb(229 242 242 / ${chamado})`;
+          lucas.style.boxShadow = `inset 4px 0 0 rgb(11 115 119 / ${chamado})`;
+          // números da posição
+          const nums = $$(".num", r);
+          const passo1 = k(lt, 1.55, 1.95, eio), passo2 = k(lt, 2.85, 3.25, eio);
+          nums.forEach((n, i) => {
+            const y = (i - passo1 - passo2) * 170;
+            pos(n, { y });
+          });
+          const vez = k(lt, 4.15, 4.45);
+          pos($(".vez", r), { o: vez, s: lerp(0.94, 1, k(lt, 4.15, 4.6, eb)) });
+        },
+
+        professor(lt, dur) {
+          const r = C.professor;
+          digitar($(".d-titulo", r), "Membrana plasmática", lt, 0.8, 1.5);
+          const cliques = [1.85, 2.2, 2.55, 3.15];
+          const ch = P.chips, [px, py] = P.publicar;
+          toque(toques.professor, lt, [[1.4, ch[0][0] + 50, ch[0][1] + 60], [1.75, ...ch[0]], [1.95, ...ch[0]], [2.12, ...ch[1]], [2.3, ...ch[1]], [2.47, ...ch[2]], [2.7, ...ch[2]], [3.05, px, py], [3.4, px, py]], cliques);
+          let n = 0;
+          $$(".tchip", r).forEach((c, i) => {
+            const on = i < 3 && lt > cliques[i] + 0.05;
+            if (on) n++;
+            c.style.borderColor = on ? "#0b7377" : "#c3ced1";
+            c.style.background = on ? "#e5f2f2" : "#fff";
+            const x = $(".tcx", c);
+            x.style.background = on ? "#0b7377" : "transparent";
+            x.style.borderColor = on ? "#0b7377" : "#93a2a7";
+          });
+          $(".rot-publicar", r).textContent = `Publicar para ${n} ${n === 1 ? "turma" : "turmas"}`;
+          $$(".voos path", r).forEach((p, i) => {
+            const L_ = p.getTotalLength();
+            p.style.strokeDasharray = `${L_}`;
+            p.style.strokeDashoffset = L_ * (1 - k(lt, 3.25 + i * 0.08, 3.75 + i * 0.08, eio));
+            p.style.opacity = 1 - k(lt, 4.8, 5.3);
+          });
+          $$(".cp", r).forEach((c, i) => {
+            pos(c, { y: lerp(80, 0, k(lt, 0.6 + i * 0.1, 1.3 + i * 0.1, ex)), o: k(lt, 0.6 + i * 0.1, 1.0 + i * 0.1) });
+            const a = 3.65 + i * 0.12;
+            pos($(".np", c), { y: lerp(-40, 0, k(lt, a, a + 0.45, eb)), o: k(lt, a, a + 0.2) });
+          });
+        },
+
+        gestao(lt, dur) {
+          const r = C.gestao;
+          $$(".kn", r).forEach((el, i) => {
+            const a = 0.8 + i * 0.15;
+            const v = Math.round(+el.dataset.n * k(lt, a, a + 0.8));
+            el.textContent = v;
+            pos(el.parentElement, { y: lerp(20, 0, k(lt, a - 0.1, a + 0.4)), o: k(lt, a - 0.1, a + 0.2) });
+          });
+          ["b0", "b1"].forEach((c, i) => {
+            const el = $("." + c, r);
+            el.style.width = (+el.dataset.n / 6) * 100 * k(lt, 1.9 + i * 0.2, 2.8 + i * 0.2, eio) + "%";
+          });
+          $$(".al", r).forEach((el, i) => pos(el, { x: lerp(30, 0, k(lt, 2.4 + i * 0.15, 2.9 + i * 0.15)), o: k(lt, 2.4 + i * 0.15, 2.7 + i * 0.15) }));
+          const alerta = $(".k3", r);
+          alerta.style.borderTopColor = lt > 3.2 ? "#f08b81" : "#3a474d";
+        },
+
+        fluxo(lt, dur) {
+          const r = C.fluxo;
+          const linha = $(".linha", r);
+          const L_ = linha.getTotalLength();
+          const prog = k(lt, 0.9, 3.0, eio);
+          linha.style.strokeDasharray = L_;
+          linha.style.strokeDashoffset = L_ * (1 - prog);
+          $$(".no", r).forEach((no, i) => {
+            const a = 0.9 + (i / 6) * 2.1 - 0.1;
+            const e = k(lt, a, a + 0.5, eb);
+            pos($(".c", no), { s: lerp(0.2, 1, e), o: k(lt, a, a + 0.15) });
+            pos($(".r", no), { o: k(lt, a + 0.1, a + 0.4) });
+            pos($("img", no), { s: lerp(0.3, 1, k(lt, a + 0.15, a + 0.6, eb)), o: k(lt, a + 0.15, a + 0.3) });
+            $(".c", no).style.background = prog * 6 >= i - 0.01 ? "#0b7377" : "#243035";
+          });
+          const laco = $(".laco", r);
+          const pl = k(lt, 3.1, 3.9, eio);
+          laco.style.opacity = pl > 0 ? 1 : 0;
+          laco.style.strokeDasharray = dashParcial(laco.getTotalLength(), pl);
+          pos($(".volta", r), { o: k(lt, 3.7, 4.1) });
+        },
+
+        fim(lt, dur) {
+          const r = C.fim;
+          pos($(".simb", r), { s: lerp(0.5, 1, k(lt, 0.45, 1.1, eb)), o: k(lt, 0.45, 0.7) });
+          $$(".nome .w", r).forEach((w, i) => pos(w, { y: lerp(50, 0, k(lt, 0.7 + i * 0.12, 1.3 + i * 0.12, ex)), o: k(lt, 0.7 + i * 0.12, 1.0 + i * 0.12) }));
+          pos($(".onde", r), { y: lerp(20, 0, k(lt, 1.2, 1.8)), o: k(lt, 1.2, 1.6) });
+          pos($(".ressalva", r), { o: k(lt, 2.0, 2.4) });
+        },
+      };
+
+      /* tracejado que cresce: repete "10 12" até o comprimento visível e depois um vão */
+      function dashParcial(total, p) {
+        const vis = total * p, partes = [];
+        let usado = 0;
+        while (usado + 22 <= vis) { partes.push(10, 12); usado += 22; }
+        const resto = vis - usado;
+        partes.push(Math.min(10, resto), total + 30);
+        return partes.join(" ");
+      }
+
+      /* ---------- quadro ---------- */
+      function render(t) {
+        // fundo
+        $$(".fundo svg").forEach((s, i) => {
+          const base = [[-120, -120], [L - 300, A * 0.55], [L * 0.45, -260]][i];
+          s.style.left = base[0] + "px";
+          s.style.top = base[1] + "px";
+          s.style.transform = `rotate(${t * (i % 2 ? -4 : 3) + i * 40}deg)`;
+        });
+
+        for (const c of CENAS) {
+          const el = C[c.id];
+          const lt = t - c.ini;
+          const viva = lt >= -0.05 && lt <= c.dur + 0.05;
+          el.style.display = viva ? "block" : "none";
+          if (!viva) continue;
+          el.style.opacity = 1;
+          if ($(".legenda, .fluxo-legenda", el)) animarLegenda(el, lt, c.dur);
+          entradaCaixa(el, lt, c.dur);
+          R[c.id](lt, c.dur);
+        }
+
+        // trilho das etapas
+        const atual = CENAS.find((c) => t >= c.ini && t < c.fim) || CENAS[CENAS.length - 1];
+        const trilho = $(".trilho");
+        const tIni = CENAS[2].ini, tFim = CENAS[8].fim;
+        trilho.style.opacity = Math.min(k(t, tIni + 0.3, tIni + 0.8), 1 - k(t, tFim - 0.5, tFim - 0.1));
+        $$(".trilho span").forEach((s, i) => {
+          const n = i + 1;
+          const e = atual.etapa || 0;
+          s.className = n === e || (atual.id === "captacao" && n === 1) ? "agora" : n < e ? "feito" : "";
+        });
+
+        // cortinas
+        let cobertura = null;
+        for (const b of CORTINAS) if (t > b - 0.75 && t < b + 0.75) cobertura = b;
+        const cortina = $(".cortina");
+        cortina.style.display = cobertura === null ? "none" : "block";
+        if (cobertura !== null) {
+          for (const c of gradeCortina) {
+            const atraso = c.diag * 0.3 + c.sorte * 0.06;
+            const a = cobertura - 0.62 + atraso;
+            const entra = k(t, a, a + 0.28, eo);
+            const b2 = cobertura + 0.04 + atraso;
+            const sai = k(t, b2, b2 + 0.3, ei);
+            const s = entra * (1 - sai);
+            c.svg.style.transform = `scale(${s.toFixed(3)}) rotate(${(1 - entra) * -90 + sai * 90}deg)`;
+            c.svg.style.opacity = s > 0.001 ? 1 : 0;
+          }
+        }
+      }
+
+      /* ---------- interface para o gravador ---------- */
+      window.VIDEO = { duracao: DURACAO, fps: 30, largura: L, altura: A, render };
+      window.PRONTO = (async () => {
+        await document.fonts.load('800 40px "Schibsted"');
+        await document.fonts.load('400 40px "Schibsted"');
+        await document.fonts.ready;
+        await Promise.all([...document.images].map((i) => (i.complete ? 0 : new Promise((r) => { i.onload = i.onerror = r; }))));
+        for (const c of CENAS) C[c.id].style.display = "block";
+        medir();
+        render(0);
+        return true;
+      })();
+
+      if (busca.has("tocar")) {
+        window.PRONTO.then(() => {
+          const t0 = performance.now() - (+busca.get("tocar") || 0) * 1000;
+          const laco = () => { render(((performance.now() - t0) / 1000) % DURACAO); requestAnimationFrame(laco); };
+          laco();
+        });
+      }
+      if (busca.has("t")) window.PRONTO.then(() => render(+busca.get("t")));
+    </script>
+  </body>
+</html>
